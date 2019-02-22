@@ -1,0 +1,54 @@
+{
+    "name": "mobx-binder",
+    "version": "0.0.1",
+    "description": "A form handling / field binding library for MobX",
+    "main": "./lib/index.js",
+    "files": [
+        "lib/"
+    ],
+    "scripts": {
+        "test": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/metro-nom/mobx-binder.git"
+    },
+    "keywords": [
+        "mobx",
+        "react",
+        "forms"
+    ],
+    "author": "Carsten Rohrbach <carsten.rohrbach@codecentric.de>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/metro-nom/mobx-binder/issues"
+    },
+    "homepage": "https://github.com/metro-nom/mobx-binder#readme",
+    "dependencies": {
+        "mobx": "^4.0.0 || ^5.0.0"
+    },
+    "optionalDependencies": {
+        "email-validator": "^2.0.0",
+        "moment": ">=2.0.0"
+    },
+    "peerDependencies": {
+        "mobx": "^4.0.0 || ^5.0.0"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.1.5",
+        "@types/chai-as-promised": "^7.1.0",
+        "@types/data-driven": "0.0.30",
+        "@types/mocha": "^5.2.5",
+        "@types/sinon": "^5.0.2",
+        "@types/sinon-chai": "^3.2.0",
+        "chai": "^4.1.2",
+        "chai-as-promised": "^7.1.1",
+        "data-driven": "^1.4.0",
+        "mocha": "^6.0.1",
+        "sinon": "^6.3.4",
+        "sinon-chai": "^3.2.0",
+        "ts-node": "^7.0.1",
+        "tslint": "^5.11.0",
+        "typescript": "^3.0.3"
+    }
+}

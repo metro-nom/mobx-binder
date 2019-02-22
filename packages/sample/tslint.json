@@ -1,0 +1,3 @@
+{
+    "extends": "../mobx-binder/tslint.json"
+}

@@ -1,0 +1,8 @@
+.idea
+.vscode
+.autoenv.zsh
+*.iml
+node_modules
+build
+dist
+lib

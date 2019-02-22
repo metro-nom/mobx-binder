@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "bootstrap": "lerna bootstrap --hoist",
+    "test": "lerna run test:ci",
+    "clean": "lerna clean",
+    "release": "lerna publish",
+    "ls": "lerna ls"
+  },
+  "devDependencies": {
+    "lerna": "^3.13.0"
+  }
+}
