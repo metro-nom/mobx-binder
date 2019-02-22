@@ -7,6 +7,7 @@
         "lib/"
     ],
     "scripts": {
+        "build": "tsc",
         "test": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'"
     },
     "repository": {
