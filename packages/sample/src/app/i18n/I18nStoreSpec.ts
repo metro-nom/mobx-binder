@@ -6,9 +6,9 @@ describe('I18nStore', () => {
     let store: I18nStore
     const locales: Locales = {
         en: {
-            'prefix.validations.email': 'Please enter a valid e-mail address.'
+            'prefix.validations.email': 'Please enter a valid e-mail address.',
         },
-        keys: {}
+        keys: {},
     }
 
     beforeEach(() => {

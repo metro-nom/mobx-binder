@@ -5,6 +5,8 @@
     "description": "A frontend boilerplate with React, MobX and Typescript",
     "main": "index.js",
     "scripts": {
+        "lint": "tslint 'src/**/*.ts' 'src/**/*.tsx'",
+        "lint:fix": "npm run lint -- --fix",
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "webpack-dev-server --mode development --hot --progress --colors --port 3000 --open",
         "build": "webpack -p --progress --colors",

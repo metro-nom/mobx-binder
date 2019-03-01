@@ -340,7 +340,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     private presentationNode() {
         return {
             value: this.field.value,
-            valid: true
+            valid: true,
         }
     }
 
@@ -356,14 +356,14 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
         return this.traverseList(node, this.modifiers, [
             ...handlers,
             this.validationHandler,
-            this.conversionHandlerFactory(true)
+            this.conversionHandlerFactory(true),
         ], options)
     }
 
     private traverseBackwards(node: Node<ValidationResult>, handlers: Array<Handler<ValidationResult>> = [], options?: TraversalOptions) {
         return this.traverseList(node, this.reverseModifiers, [
             ...handlers,
-            this.conversionHandlerFactory(false)
+            this.conversionHandlerFactory(false),
         ], options)
     }
 
@@ -396,13 +396,13 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
                     return {
                         ...node,
-                        value
+                        value,
                     }
                 } catch (e) {
                     return {
                         ...node,
                         valid: this.context.valid(e.result),
-                        validationResult: e.result
+                        validationResult: e.result,
                     }
                 }
             }
@@ -419,20 +419,20 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
                 return {
                     ...node,
                     valid: this.context.valid(validationResult),
-                    validationResult
+                    validationResult,
                 }
             } else if (modifier.asyncValidator) {
                 if (modifier.lastValidation && modifier.lastValidation.validatedValue === node.value && modifier.lastValidation.result) {
                     return {
                         ...node,
                         valid: this.context.valid(modifier.lastValidation.result),
-                        validationResult: modifier.lastValidation.result
+                        validationResult: modifier.lastValidation.result,
                     }
                 } else {
                     return {
                         ...node,
                         valid: undefined,
-                        validationResult: undefined
+                        validationResult: undefined,
                     }
                 }
             }
@@ -461,7 +461,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
                     return {
                         ...node,
                         valid: this.context.valid(modifier.lastValidation.result),
-                        validationResult: modifier.lastValidation.result
+                        validationResult: modifier.lastValidation.result,
                     }
                 }
             }
@@ -478,21 +478,21 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
                 if (modifier.lastValidation && modifier.lastValidation.validatedValue === node.value) {
                     modifier.lastValidation = {
                         validatedValue: node.value,
-                        result: validationResult
+                        result: validationResult,
                     }
                     this.exposeValidationResults({
                         ...node,
                         valid: this.context.valid(validationResult),
-                        validationResult
+                        validationResult,
                     })
                     this.field.validating = false
                     return validationResult
                 }
-            }))
+            })),
         }
         return {
             ...node,
-            validationPromise: modifier.lastValidation.promise
+            validationPromise: modifier.lastValidation.promise,
         }
     }
 

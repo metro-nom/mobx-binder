@@ -23,8 +23,8 @@ const i18n = new I18nStore('en', {
         'form.fields.email': 'E-mail',
         'profilePage.saveButton.label': 'Save',
         'validations.required': 'Please enter something',
-        'validations.email': 'Please enter a valid email address'
-    }
+        'validations.email': 'Please enter a valid email address',
+    },
 })
 
 // Binder context

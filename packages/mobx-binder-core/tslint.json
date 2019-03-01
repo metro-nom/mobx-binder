@@ -1,5 +1,11 @@
 {
     "extends": "tslint:latest",
+    "linterOptions": {
+        "exclude": [
+            "lib/**/*.d.ts",
+            "lib/**/*.js"
+        ]
+    },
     "rules": {
         "quotemark": [
             true,
@@ -23,8 +29,13 @@
         "trailing-comma": [
             true,
             {
-                "multiline": "never",
-                "singleline": "never"
+                "multiline": {
+                    "objects": "always",
+                    "arrays": "always",
+                    "functions": "never",
+                    "typeLiterals": "ignore"
+                },
+                "esSpecCompliant": true
             }
         ],
         "object-literal-key-quotes": [
