@@ -7,9 +7,10 @@
     "scripts": {
         "lint": "tslint 'src/**/*.ts' 'src/**/*.tsx'",
         "lint:fix": "npm run lint -- --fix",
-        "test": "echo \"Error: no test specified\" && exit 1",
         "start": "webpack-dev-server --mode development --hot --progress --colors --port 3000 --open",
         "build": "webpack -p --progress --colors",
+        "create-stats": "NODE_ENV=production webpack --profile --json > webpack-stats.json",
+        "show-stats": "webpack-bundle-analyzer webpack-stats.json",
         "prettier": "prettier --write \"src/**/*.{ts,tsx,css}\""
     },
     "license": "MIT",
@@ -48,6 +49,7 @@
         "typescript": "^2.9.2",
         "url-loader": "^1.1.1",
         "webpack": "4.19.1",
+        "webpack-bundle-analyzer": "^3.0.4",
         "webpack-cleanup-plugin": "^0.5.1",
         "webpack-cli": "^3.2.3",
         "webpack-dev-server": "^3.2.0",

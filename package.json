@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
+    "reinitialize": "npm run clean && npm run bootstrap",
     "test": "lerna run test:ci",
     "clean": "lerna clean",
     "release": "lerna publish",

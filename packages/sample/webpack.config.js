@@ -74,7 +74,9 @@ module.exports = {
         runtimeChunk: true
     },
     plugins: [
-        new WebpackCleanupPlugin(),
+        new WebpackCleanupPlugin({
+            quiet: true
+        }),
         new HtmlWebpackPlugin({
             template: 'assets/index.html'
         })

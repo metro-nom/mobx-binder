@@ -1,5 +1,5 @@
 import * as mobx from 'mobx'
-import { DefaultBinder, DefaultContext, TextField } from 'mobx-binder'
+import { DefaultBinder, TextField } from 'mobx-binder'
 
 // tslint:disable no-submodule-imports
 
@@ -7,6 +7,7 @@ import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
 import { MomentConverter } from 'mobx-binder/lib/conversion/MomentConverter'
 import { EmailValidator } from 'mobx-binder/lib/validation/EmailValidator'
+import { TranslateFunction } from 'react-mobx-i18n'
 
 const { action } = mobx
 
@@ -19,8 +20,8 @@ export default class ProfileStore {
 
     public binder: DefaultBinder
 
-    constructor(private personStore: PersonStore, context: DefaultContext) {
-        this.binder = new DefaultBinder(context)
+    constructor(private personStore: PersonStore, t: TranslateFunction) {
+        this.binder = new DefaultBinder({ t })
         this.binder
             .forField(this.salutation).isRequired().bind()
             .forField(this.fullName).isRequired().bind()

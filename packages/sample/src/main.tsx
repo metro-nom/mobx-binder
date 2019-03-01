@@ -10,7 +10,6 @@ import I18nStore from './app/i18n/I18nStore'
 // tslint:disable no-submodule-imports
 
 import 'bootstrap/dist/css/bootstrap.css'
-import { DefaultContext } from 'mobx-binder'
 
 // enable MobX strict mode
 configure({ enforceActions: 'observed' })
@@ -27,12 +26,9 @@ const i18n = new I18nStore('en', {
     },
 })
 
-// Binder context
-const binderContext = new DefaultContext(i18n.translate)
-
 // prepare MobX stores
 const personStore = new PersonStore()
-const profileStore = new ProfileStore(personStore, binderContext)
+const profileStore = new ProfileStore(personStore, i18n.translate)
 const stores = { i18n, personStore, profileStore }
 
 // render react DOM

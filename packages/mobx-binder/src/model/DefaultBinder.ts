@@ -9,15 +9,22 @@ export interface BinderValidationResult {
     args?: { [ s: string ]: any }
 }
 
+export interface DefaultContextOptions {
+    t: TranslateFunction
+}
+
 export class DefaultContext implements Context<BinderValidationResult> {
     public readonly requiredValidator = StringValidators.required
     public readonly validResult = {}
 
-    constructor(private t: TranslateFunction) {}
+    constructor(private options: DefaultContextOptions) {}
 
-    public readonly translate = (result: BinderValidationResult) => this.t(result.messageKey!, result.args)
+    public readonly translate = (result: BinderValidationResult) => this.options.t(result.messageKey!, result.args)
     public readonly valid = (result: BinderValidationResult) => !result.messageKey
 }
 
 export class DefaultBinder extends Binder<BinderValidationResult> {
+    constructor(options: DefaultContextOptions) {
+        super(new DefaultContext(options))
+    }
 }
