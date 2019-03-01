@@ -1,4 +1,4 @@
-import { Binder, Context, Validator } from './binder/Binder'
+import { Binder, Context, Validator } from 'mobx-binder-core'
 import { StringValidators } from '../validation/StringValidators'
 
 export type TranslateFunction = (translationKey: string, args?: any) => string

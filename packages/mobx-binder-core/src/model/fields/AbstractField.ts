@@ -1,7 +1,7 @@
 import { action, observable } from 'mobx'
 import { FieldStore } from './FieldStore'
 
-export default abstract class AbstractField<ValueType> implements FieldStore<ValueType> {
+export abstract class AbstractField<ValueType> implements FieldStore<ValueType> {
 
     @observable
     public readOnly: boolean

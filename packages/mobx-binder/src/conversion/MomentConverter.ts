@@ -1,7 +1,6 @@
-import { Converter } from './Converter'
 import * as moment from 'moment'
-import ValidationError from './ValidationError'
 import { BinderValidationResult } from '../model/DefaultBinder'
+import { Converter, ValidationError } from 'mobx-binder-core'
 
 export class MomentConverter implements Converter<BinderValidationResult, string, moment.Moment> {
 

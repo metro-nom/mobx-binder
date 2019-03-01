@@ -1,6 +1,5 @@
 import { expect } from 'chai'
-import { TextField }
-from './TextField'
+import { TextField } from './TextField'
 import * as sinon from 'sinon'
 import { observe } from 'mobx'
 

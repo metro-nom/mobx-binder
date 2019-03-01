@@ -1,6 +1,6 @@
 import { action, observable } from 'mobx'
 import { FieldStore } from './FieldStore'
-import AbstractField from './AbstractField'
+import { AbstractField } from './AbstractField'
 
 /*
     `name`: the immutable field name

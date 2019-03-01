@@ -1,9 +1,7 @@
 import { expect } from 'chai'
 import { StringConverter } from './StringConverter'
-import BinderSamples from '../test/BinderSamples'
 
 describe('StringConverter', () => {
-    const context = BinderSamples.context()
     const converter = new StringConverter()
 
     describe('conversion to model', () => {

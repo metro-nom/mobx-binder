@@ -1,0 +1,256 @@
+= mobx-binder
+:toc:
+:toc-placement!:
+
+This library provides a convenient way of handling form state in a react+mobx web app.
+
+As there was no satisfying solution for low level form handling with _mobx_ at the time we needed one, we implemented our own. The API roughly reflects the great https://vaadin.com/docs/v10/flow/binding-data/tutorial-flow-components-binder.html[Binder API of the Vaadin Framework], while strongly relying on mobx features.
+
+toc::[]
+
+== Concept
+
+A link:packages/mobx-binder/src/model/binder/Binder.ts[Binder] manages form state for a set of fields represented by "dumb" observable field instances implementing the link:packages/mobx-binder/src/model/fields/FieldStore.d.ts[FieldStore] interface. It is configured via a fluent api like this:
+
+[source,js]
+----
+import { Binder, DefaultBinder, TextField, MomentConverter, EmailValidator } from 'mobx-binder'
+
+export default class ProfileStore {
+    public salutation = new TextField('salutation') // <1>
+    public fullName = new TextField('fullName')
+    public dateOfBirth = new TextField('dateOfBirth')
+    public email = new TextField('email')
+    public phoneNumber = new TextField('phoneNumber')
+
+    public binder: Binder // <2>
+
+    constructor(private personStore: PersonStore,
+                i18nStore: I18nStore) {
+
+        this.binder = new DefaultBinder(i18nStore.translate)
+        this.binder
+            .forField(this.salutation).isRequired().bind() <3>
+            .forField(this.fullName).isRequired().bind()
+
+            .forField(this.dateOfBirth).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
+
+            .forField(this.email)
+                .isRequired()
+                .withAsyncValidator(
+                    (value) => sleep(1000).then(() => EmailValidator.validate()(value)),
+                    { onBlur: true })
+                .onChange(() => {
+                    console.info('Email changed')
+                })
+                .bind()
+
+            .forField(this.phoneNumber).bind()
+
+    }
+}
+----
+<1> These fields store all state needed to render the corresponding field view.
+<2> The Binder needs a translation function. We are using https://github.com/jverhoelen/react-mobx-i18n[react-mobx-i18n] which provides a compatible implementation.
+<3> Each field get's registered with the Binder, configuring the validator and converter chain as neccessary.
+
+== Binder setup
+
+To instantiate a Binder, we need a `BinderContext` containing a translation function. This is needed for conversion and validation error messages. The translation function has to conform to the API of `react-mobx-i18n`.
+
+[source,js]
+....
+import { default as Binder, Context } from 'self-service-server/lib/main/frontend/form/model/Binder'
+...
+const context: Context = { t: i18nStore.translate }
+const binder = new Binder(context)
+....
+
+To add fields to the binder, we just use the fluent API to "bind" fields:
+
+[source,js]
+....
+public fullName = new TextField('fullName')
+...
+binder.forField(fullName).bind()
+....
+
+After a `bind` or `bind2` call, more fields can be added:
+
+[source,js]
+....
+public fullName = new TextField('fullName')
+public email = new TextField('email')
+...
+binder
+    .forField(fullName).bind()
+    .forField(email).bind()
+....
+
+== Loading and storing field values
+
+=== ...using bind()
+
+The 'bind()` method binds the value of a form field to a property named like the field name:
+
+[source,js]
+....
+public fullName = new TextField('fullName')
+...
+binder.forField(fullName).bind()
+
+// loading from object
+binder.load({ fullName: 'Max Mustermann' }) // => fullName.value === 'Max Mustermann'
+
+// storing to object
+const values = binder.store() // values === { fullName: 'Max Mustermann' }
+
+// storing to existing object
+const values = { foo: 'bar' }
+binder.store(values) // =>  values == { foo: 'bar', fullName: 'Max Mustermann' }
+....
+
+=== ...using bind2()
+
+The `bind()` command is a shorthand for a call to `bind2`, which just stores a (converted and validated) field value to a backing object using a property named like the field. But it's also possible to bind using more complex read and write callbacks:
+
+[source,js]
+....
+public fullName = new TextField('fullName')
+...
+binder.forField(fullName).bind2(
+    source => source.businessRelation.person.fullName,
+    (target, newValue) => target.businessRelation.person.fullName = newValue)
+)
+
+const account = {
+    businessRelation: {
+        person: { fullName: 'Max Mustermann' }
+    }
+}
+
+// loading account data into fields
+binder.load(account) // => fullName.value === 'Max Mustermann'
+
+// updating account data
+binder.store(account) // =>  account.businessRelation.person.fullName === 'Max Mustermann'
+....
+
+
+== Validation
+
+For every field, we can specify validations to be done:
+
+[source,js]
+....
+binder.forField(fullName).isRequired().withValidator(Validators.email()).bind()
+....
+
+Validations are processed in order of method calls - so in this example, it is first checked if the `required` validation fails, and if it does, no further validation will happen.
+
+To see the list of possible validations, look at `Validators.ts`. You can also define your own custom validator, as long as it implements the `Validator` type.
+
+The `isRequired()` validation has the special side effect that the `required` property is set on the field, so that the rendering component can highlight it.
+
+Only valid field values are written to an object via `binder.store()`.
+
+== Asynchronous validation
+
+If validation incurs expensive calculations or a backend request, it's possible to do it asynchronously:
+
+[source,js]
+....
+binder
+    .forField(fullName)
+    .withAsyncValidator((context, value) => sleep(1000).then(() => Validators.email()(context, value)))
+    .bind()
+....
+
+In contrast to synchronous validation, the async validation expects to get back a `Promise` of the validation result. As this is a more expensive validation, it does not happen on every change of the field value, but only on submission. If you want an additional check on blur, you can configure this like so:
+
+Only field values where asynchronous validation has been successfully finished are written to an object via `binder.store()`.
+
+[source,js]
+....
+.withAsyncValidator(myAsyncValidator, { onBlur: true })
+....
+
+== Conditional validation
+
+Sometimes, the validation of one field depends on the value of another field. In this case, we can trigger the validation via an `onChange`
+ event handler of that other field.
+
+[source,js]
+....
+public salutation = new TextField('salutation') // <1>
+public fullName = new TextField('fullName')
+
+binder
+    .forField(salutation)
+        .onChange(() => binder.getBinding(fullName).validate()
+    .forField(fullName)
+        .withValidator(someValidatorDependingOnValueOf(salutation))
+    .bind()
+....
+
+`onChange` events will only be fired if all validators specified before have been succeeding.
+
+== Conversion
+
+As with validators, converters can also be added to the binding chain:
+
+[source,js]
+....
+import * as moment from 'moment'
+...
+binder.forField(fullName)
+    .isRequired()
+    .withConverter(new MomentConverter('DD.MM.YYYY'))
+    .withValidator(Validators.dayInPast())
+    .bind()
+....
+
+A conversion is only tried if previous validations succeeded. A converter may fail if the value is not convertible, which means that Converters also act as validators.
+
+Validators that are added after a converter will act on the already converted value. The API of Binder makes use of TypeScript generics to make sure that a Validator can only be applied to a matching data type.
+
+Converters are bidirectional - that means that on loading values into the form, they are converted back into a string representation.
+
+For every string based field, one default `StringConverter` is added automatically at the beginning of the chain, which converts empty strings to `undefined` and vice versa.
+
+== Conditional visibility
+
+If a field should be hidden as part of a value change of a different field, it may become necessary to remove that field from the Binder completely, especially if it's value is currently invalid and would prevent a form submission:
+
+[source,js]
+....
+binder.removeBinding(fullName)
+....
+
+This updates the global validation status based on the fields that are left.
+
+== Submission
+
+If the submit button of a form is clicked, this may trigger a `binder.submit()` call. Just like `binder.store()`, it stores the form field values into an object, but it also waits for asynchronous validations to be finished and maintains submission state.
+
+[source,js]
+....
+public handleSubmit() {
+    return this.binder.submit()
+        .then(() => /* success */)
+        .catch(() => /* validation error */)
+}
+....
+
+The submit() methods maintains a `binder.submitting` property, indicating that submission of the form is still in progress. To make use of it, asynchronous follow actions have to be specified as parameter, so that the binder can still indicate submission as long as the server request is still ongoing.
+
+[source,js]
+....
+public handleSubmit() {
+    return this.binder.submit({}, results => this.sendResultsToServer(results))
+        .catch(() => /* validation or other submission error */)
+}
+....
+
+If a field related validation error occurs, the `err.message` is empty, es it may contain some "global" error message.
+

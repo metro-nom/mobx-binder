@@ -1,6 +1,6 @@
-import { Converter } from '../../converter/Converter'
+import { Converter } from '../../conversion/Converter'
 import { action, computed, observable, observe } from 'mobx'
-import { StringConverter } from '../../converter/StringConverter'
+import { StringConverter } from '../../conversion/StringConverter'
 import { FieldStore } from '../fields/FieldStore'
 
 // tslint:disable max-classes-per-file

@@ -1,8 +1,10 @@
 import * as mobx from 'mobx'
-import { Binder, DefaultBinder, DefaultContext, TextField, EmailValidator, MomentConverter } from 'mobx-binder'
+import { Binder, DefaultBinder, DefaultContext, TextField } from 'mobx-binder'
 
 import PersonStore from '../../domain/PersonStore'
-import sleep from 'mobx-binder/lib/test/sleep' // tslint:disable-line
+import sleep from 'mobx-binder/lib/test/sleep'
+import { MomentConverter } from 'mobx-binder/lib/conversion/MomentConverter'
+import { EmailValidator } from 'mobx-binder/lib/validation/EmailValidator' // tslint:disable-line
 
 const { action } = mobx
 

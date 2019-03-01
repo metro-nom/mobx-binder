@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import AbstractField from './AbstractField'
+import { AbstractField } from './AbstractField'
 
 export class TextField extends AbstractField<string> {
     @observable
