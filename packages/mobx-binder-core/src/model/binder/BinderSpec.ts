@@ -94,7 +94,7 @@ describe('Binder', () => {
 
                 expect(target).to.deep.equal({
                     previous: 'value',
-                    myField: 'changedValue'
+                    myField: 'changedValue',
                 })
                 expect(returnedTarget).to.equal(target)
             })
@@ -554,7 +554,7 @@ describe('Binder', () => {
 
         it('should resolve with stored values in passed target object if all fields are valid', () => {
             const target = {
-                other: 'value'
+                other: 'value',
             }
             myField.value = '12345'
 
@@ -562,7 +562,7 @@ describe('Binder', () => {
                 expect(results).to.equal(target)
                 expect(results).to.deep.equal({
                     myField: '12345',
-                    other: 'value'
+                    other: 'value',
                 })
             })
         })

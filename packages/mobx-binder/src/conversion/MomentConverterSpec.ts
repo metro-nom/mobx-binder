@@ -21,7 +21,7 @@ describe('MomentConverter', () => {
                     .with.property('result').deep.equals(
                     {
                         messageKey: 'conversions.error.moment',
-                        args: { value: 'abcde' }
+                        args: { value: 'abcde' },
                     })
             })
             it('should fail with configured message if conversion fails', () => {
@@ -32,7 +32,7 @@ describe('MomentConverter', () => {
                     .with.property('result').deep.equals(
                     {
                         messageKey: 'other.key',
-                        args: { value: 'abcde' }
+                        args: { value: 'abcde' },
                     })
             })
         })

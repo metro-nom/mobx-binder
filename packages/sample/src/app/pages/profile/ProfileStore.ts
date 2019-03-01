@@ -1,5 +1,7 @@
 import * as mobx from 'mobx'
-import { Binder, DefaultBinder, DefaultContext, TextField } from 'mobx-binder'
+import { DefaultBinder, DefaultContext, TextField } from 'mobx-binder'
+
+// tslint:disable no-submodule-imports
 
 import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
@@ -18,7 +20,7 @@ export default class ProfileStore {
     public binder: DefaultBinder
 
     constructor(private personStore: PersonStore, context: DefaultContext) {
-        this.binder = new Binder(context)
+        this.binder = new DefaultBinder(context)
         this.binder
             .forField(this.salutation).isRequired().bind()
             .forField(this.fullName).isRequired().bind()

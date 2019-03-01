@@ -11,7 +11,7 @@ describe('Validators', () => {
     it('should reject an invalid email', () => {
         expect(EmailValidator.validate()('max.mustermann metro.de')).to.deep.equal({
             messageKey: 'validations.email',
-            args: { value: 'max.mustermann metro.de' }
+            args: { value: 'max.mustermann metro.de' },
         })
     })
 })

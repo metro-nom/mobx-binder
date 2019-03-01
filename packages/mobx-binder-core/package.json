@@ -8,6 +8,8 @@
     ],
     "scripts": {
         "build": "tsc",
+        "lint": "tslint 'src/**/*.ts' 'src/**/*.tsx'",
+        "lint:fix": "npm run lint -- --fix",
         "test": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'"
     },
     "repository": {

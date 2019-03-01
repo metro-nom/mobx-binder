@@ -12,7 +12,7 @@ describe('Validators', () => {
         { method: 'todayOrInFuture', args: [], value: moment() },
         { method: 'dayInPast', args: [], value: moment('01.01.2018', 'DD.MM.YYYY') },
         { method: 'todayOrInPast', args: [], value: moment('01.01.2018', 'DD.MM.YYYY') },
-        { method: 'todayOrInPast', args: [], value: moment() }
+        { method: 'todayOrInPast', args: [], value: moment() },
     ], () => {
         it('{value} should be correct for {method}({args})', (ctx: any) => {
             const rule = (MomentValidators as any)[ ctx.method ](...ctx.args)
