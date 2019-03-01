@@ -6,23 +6,46 @@ import { FieldStore } from '../fields/FieldStore'
 // tslint:disable max-classes-per-file
 
 export interface Context<ValidationResult> {
+    /**
+     * The function used to translate validation results.
+     */
     readonly translate: (result: ValidationResult) => string
+    /**
+     * A function used to check if a validation result means that validation was successful, or not.
+     */
     readonly valid: (result: ValidationResult) => boolean
+
+    /**
+     * The return value of _validate()_ / _validateAsync_ in case there is no validator configured.
+     */
     readonly validResult: ValidationResult
+
+    /**
+     * A function that returns a Validator which is added to the validator chain on `.isRequired()`.
+     */
     readonly requiredValidator: (messageKey?: string) => Validator<ValidationResult, any>
 }
 
+/**
+ * Interface to be fulfulled by any validator for use with `withValidator`
+ */
 export type Validator<ValidationResult, T> = (value?: T) => ValidationResult
 
+/**
+ * Interface to be fulfulled by any asynchronous validator for use with `withAsyncValidator`
+ */
 export type AsyncValidator<ValidationResult, T> = (value?: T) => Promise<ValidationResult>
 
+/**
+ * API for single field binding
+ */
 export interface Binding<ValidationResult> {
     changed: boolean
     readonly field: FieldStore<any>
 
     load(source: any): void
     store(target: any): void
-    validate(): void
+    validate(): ValidationResult
     validateAsync(onBlur?: boolean): Promise<ValidationResult>
     setUnchanged(): void
 }
@@ -300,9 +323,10 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     }
 
     @action
-    public validate(): void {
+    public validate(): ValidationResult {
         const result = this.traverse()
         this.exposeValidationResults(result)
+        return result.validationResult || this.context.validResult
     }
 
     @action
@@ -312,7 +336,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     }
 
     @action
-    public load(source: any) {
+    public load(source: any): void {
         const value = this.read(source)
         const node: Node<ValidationResult> = { value, valid: true }
         const result = this.traverseBackwards(node)

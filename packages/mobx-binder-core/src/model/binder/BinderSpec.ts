@@ -187,11 +187,20 @@ describe('Binder', () => {
             expect(myField.errorMessage).to.equal('Please enter a value')
         })
 
+        it('should return negative validation results on validate()', () => {
+            expect(binder.binding(myField).validate()).to.equal('Please enter a value')
+        })
+
+        it('should return positive validation results on validate()', () => {
+            myField.value = '12345'
+            expect(binder.binding(myField).validate()).to.be.undefined
+        })
+
         it('should mark field as required on isRequired()', () => {
             expect(myField.required).to.be.true
         })
 
-        it('should expose second validation if first is failing', () => {
+        it('should expose second validation if first is succeeding', () => {
             myField.value = '123'
             expect(myField.errorMessage).to.equal('Wrong length')
         })

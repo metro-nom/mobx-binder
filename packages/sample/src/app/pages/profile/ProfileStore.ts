@@ -6,7 +6,7 @@ import { DefaultBinder, DefaultContext, TextField } from 'mobx-binder'
 import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
 import { MomentConverter } from 'mobx-binder/lib/conversion/MomentConverter'
-import { EmailValidator } from 'mobx-binder/lib/validation/EmailValidator' // tslint:disable-line
+import { EmailValidator } from 'mobx-binder/lib/validation/EmailValidator'
 
 const { action } = mobx
 
