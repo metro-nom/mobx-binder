@@ -43,10 +43,35 @@ export interface Binding<ValidationResult> {
     changed: boolean
     readonly field: FieldStore<any>
 
+    /**
+     * Load the field value from the source object, treating it as "unchanged" value.
+     *
+     * @param source
+     */
     load(source: any): void
+
+    /**
+     * Store the valid field value to the target object
+     *
+     * @param target
+     */
     store(target: any): void
+
+    /**
+     * Perform synchronous validation
+     */
     validate(): ValidationResult
+
+    /**
+     * Trigger asynchronous validation. onBlur indicates the current event - the binding then decides if a validation takes place or not
+     *
+     * @param onBlur
+     */
     validateAsync(onBlur?: boolean): Promise<ValidationResult>
+
+    /**
+     * Sets the current field value to be handled as not changed.
+     */
     setUnchanged(): void
 }
 
@@ -112,7 +137,8 @@ export class Binder<ValidationResult> {
     }
 
     /**
-     * Loads the values from the given backend object.
+     * Loads the values from the given backend object, treating them as "unchanged" values.
+     *
      * @param source
      */
     @action
