@@ -74,6 +74,20 @@ DefaultBinder::
 
 To illustrate the power of the framework, most examples in this documentation are using the _DefaultBinder_.
 
+== API
+
+=== FieldStore
+
+The properties and functions provided for each field are typically used by the React frontend components to render their state and make updates.
+
+They are described on the link:packages/mobx-binder/src/model/fields/FieldStore.ts[FieldStore] interface.
+
+=== Binder
+
+The Binder API is typically used from inside MobX stores.
+
+The properties and functions provided are described on the link:packages/mobx-binder-core/src/model/binder/Binder.ts[Binder] class.
+
 == Binder setup
 
 To instantiate a Binder, we need a `BinderContext` containing a translation function. This is needed for conversion and validation error messages. The translation function has to conform to the API of `react-mobx-i18n`.

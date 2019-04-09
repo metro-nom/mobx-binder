@@ -51,6 +51,9 @@ export interface Binding<ValidationResult> {
 }
 
 export class Binder<ValidationResult> {
+    /**
+     * Indicates if a #submit() operation is currently in progress. This covers async validations happening on submit and also the `onSuccess` operation.
+     */
     @observable
     public submitting: boolean = false
 
@@ -59,20 +62,39 @@ export class Binder<ValidationResult> {
     constructor(public readonly context: Context<ValidationResult>) {
     }
 
+    /**
+     * `BindingBuilder` creation for adding a new field binding.
+     *
+     * @param field
+     */
     public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<ValidationResult, ValueType> {
         return new BindingBuilder(this, field)
     }
 
+    /**
+     * Used by the `BindingBuilder` after preparing a new field.
+     * @param binding
+     */
     public addBinding(binding: Binding<ValidationResult>) {
         this.bindings.push(binding)
     }
 
+    /**
+     * Here you can remove existing bindings. This re-evaluates the global form validation status.
+     * This way you can conditionally add/remove "hidden" fields that are only visible under certain conditions.
+     *
+     * @param field
+     */
     @action
     public removeBinding(field: FieldStore<any>): void {
         const index = this.bindings.findIndex(binding => binding.field === field)
         this.bindings.splice(index, 1)
     }
 
+    /**
+     * Provides access to a single field `Binding`.
+     * @param field
+     */
     public binding(field: FieldStore<any>): Binding<ValidationResult> {
         const result = this.bindings.find(binding => binding.field === field)
 
@@ -82,10 +104,17 @@ export class Binder<ValidationResult> {
         return result
     }
 
+    /**
+     * Same as `load({})`
+     */
     public clear(): void {
         this.load({})
     }
 
+    /**
+     * Loads the values from the given backend object.
+     * @param source
+     */
     @action
     public load(source: any): void {
         this.bindings.forEach(binding => {
@@ -93,6 +122,11 @@ export class Binder<ValidationResult> {
         })
     }
 
+    /**
+     * Stores converted valid field values to to the given backend object.
+     *
+     * @param target
+     */
     public store<TargetType = any>(target: TargetType = {} as any): TargetType {
         this.bindings.forEach(binding => {
             binding.store(target)
@@ -100,6 +134,12 @@ export class Binder<ValidationResult> {
         return target
     }
 
+    /**
+     * The global form validation status.
+     * - `true`: all async validations are done and all fields are valid
+     * - `false`: any sync or async validation failed
+     * - `undefined`: all sync validations are successfull, async validations are not yet performed
+     */
     @computed
     public get valid(): boolean | undefined {
         const validities = this.bindings.map(binding => binding.field.valid)
@@ -111,6 +151,9 @@ export class Binder<ValidationResult> {
         return undefined
     }
 
+    /**
+     * Indicates whether any async validation is currently in progress.
+     */
     @computed
     public get validating(): boolean {
         return this.bindings
@@ -118,6 +161,9 @@ export class Binder<ValidationResult> {
             .every(validating => validating)
     }
 
+    /**
+     * Indicates if any field has a changed value.
+     */
     @computed
     public get changed(): boolean {
         return this.bindings
@@ -125,6 +171,9 @@ export class Binder<ValidationResult> {
             .some(changed => changed)
     }
 
+    /**
+     * Sets all fields with current values to be not changed.
+     */
     @action
     public setUnchanged(): void {
         this.bindings.forEach(binding => {
@@ -132,6 +181,10 @@ export class Binder<ValidationResult> {
         })
     }
 
+    /**
+     * Actively trigger async validation / wait for still ongoing validations.
+     * Please note that async validation results for a value might be cached.
+     */
     public validateAsync(): Promise<void> {
         return Promise.all(this.bindings.map(binding => binding.validateAsync()))
             .then(results => {
@@ -143,6 +196,16 @@ export class Binder<ValidationResult> {
             })
     }
 
+    /**
+     * "Submit" the form. Performs an async validation and if successful,
+     * executes the `onSuccess` callback with the field values stored into the `target` object.
+     * During validation/onSuccess, the `submitting` property is set to true.
+     * If validation failed, `showValidationResults()` is called and the function rejects with an "empty" Error (without a message).
+     * In case of another error, like `onSubmit()` rejection, the error is propagated as is.
+     *
+     * @param target
+     * @param onSuccess
+     */
     @action
     public submit<TargetType = any>(target: TargetType = {} as any,
                                     onSuccess?: (target: TargetType) => Promise<TargetType> | void | undefined): Promise<TargetType> {
@@ -183,6 +246,9 @@ export class Binder<ValidationResult> {
             }))
     }
 
+    /**
+     * Shows validation results on all fields.
+     */
     @action
     public showValidationResults(): void {
         this.bindings.forEach(binding => {

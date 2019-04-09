@@ -1,0 +1,3 @@
+# mobx-binder
+
+For documentation, please refer to the main link:../../README.adoc[README].
