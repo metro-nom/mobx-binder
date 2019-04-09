@@ -193,7 +193,7 @@ export class Binder<ValidationResult> {
     @computed
     public get changed(): boolean {
         return this.bindings
-            .map(binding => !!binding.changed)
+            .map(binding => binding.changed)
             .some(changed => changed)
     }
 
@@ -380,7 +380,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     private ignoreChange = false
 
-    private reverseModifiers: Array<Modifier<ValidationResult>>
+    private readonly reverseModifiers: Array<Modifier<ValidationResult>>
 
     constructor(private readonly context: Context<ValidationResult>,
                 public readonly field: FieldStore<any>,
@@ -572,7 +572,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
         return (context: Context<ValidationResult>, modifier: Modifier<ValidationResult>, node: Node<ValidationResult>): Node<ValidationResult> => {
             if (node.valid !== false && modifier.asyncValidator && (!onBlur || modifier.asyncValidateOnBlur)) {
                 if (!modifier.lastValidation || (modifier.lastValidation.validatedValue !== node.value)) {
-                    return this.startAsyncValidation(context, modifier, node)
+                    return this.startAsyncValidation(modifier, node)
                 } else if (modifier.lastValidation && modifier.lastValidation.result) {
                     return {
                         ...node,
@@ -586,7 +586,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     }
 
     @action
-    private startAsyncValidation(context: Context<ValidationResult>, modifier: Modifier<ValidationResult>, node: Node<ValidationResult>) {
+    private startAsyncValidation(modifier: Modifier<ValidationResult>, node: Node<ValidationResult>) {
         this.field.validating = true
         modifier.lastValidation = {
             validatedValue: node.value,
