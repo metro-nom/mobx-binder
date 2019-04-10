@@ -310,37 +310,66 @@ export class BindingBuilder<ValidationResult, ValueType> {
         }
     }
 
+    /**
+     * Add a Converter to the binding chain. Validations added after a conversion have to match with the converted type.
+     *
+     * @param converter
+     */
     public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType> {
         this.modifiers.push({ converter })
         return this as any
     }
 
+    /**
+     * Add a synchronous Validator to the binding chain. Sync validations happen on every value update.
+     * @param validator
+     */
     public withValidator(validator: Validator<ValidationResult, ValueType>): BindingBuilder<ValidationResult, ValueType> {
         this.modifiers.push({ validator })
         return this
     }
 
+    /**
+     * Add an asynchronous validator to the binding chain. Async validations happen on submit and - if configured via the options parameter - also on blur.
+     * @param asyncValidator
+     * @param options
+     */
     public withAsyncValidator(asyncValidator: AsyncValidator<ValidationResult, ValueType>,
                               options: { onBlur: boolean } = { onBlur: false }): BindingBuilder<ValidationResult, ValueType> {
         this.modifiers.push({ asyncValidator, asyncValidateOnBlur: options.onBlur })
         return this
     }
 
+    /**
+     * Mark the field as read-only.
+     */
     public isReadOnly(): BindingBuilder<ValidationResult, ValueType> {
         this.readOnly = true
         return this
     }
 
+    /**
+     * Add a "required" validator and mark the field as required.
+     * @param messageKey
+     */
     public isRequired(messageKey?: string): BindingBuilder<ValidationResult, ValueType> {
         this.required = true
         return this.withValidator(this.binder.context.requiredValidator(messageKey))
     }
 
+    /**
+     * Add a value change event handler to the chain - it's only called if previous validations succeed.
+     * @param onChange
+     */
     public onChange(onChange: (value: ValueType) => any): BindingBuilder<ValidationResult, ValueType> {
         this.modifiers.push({ onChange })
         return this
     }
 
+    /**
+     * Finally bind/map the field to a backend object via a simple property named like the field name.
+     * @param name
+     */
     @action
     public bind(name?: string) {
         const propertyName = name || this.field.name
@@ -350,6 +379,13 @@ export class BindingBuilder<ValidationResult, ValueType> {
             (target: any, value?: ValueType) => target[ propertyName ] = value)
     }
 
+    /**
+     * Finally bind the field to a backend object, using the given read/write functions for loading and storing. If the write method is omitted, the field is
+     * marked as read-only.
+     *
+     * @param read
+     * @param write
+     */
     public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void) {
         this.field.readOnly = this.readOnly || !write
         this.field.required = this.required
