@@ -3,10 +3,8 @@
     "version": "0.0.3",
     "description": "Moment conversion and validation support for mobx-binder",
     "main": "./lib/index.js",
-    "files": [
-        "lib/"
-    ],
     "scripts": {
+        "clean": "rm -Rf lib",
         "build": "tsc",
         "lint": "tslint 'src/**/*.ts' 'src/**/*.tsx'",
         "lint:fix": "npm run lint -- --fix",
