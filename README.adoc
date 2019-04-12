@@ -27,12 +27,12 @@ export default class ProfileStore {
     public email = new TextField('email')
     public phoneNumber = new TextField('phoneNumber')
 
-    public binder: DefaultBinder // <2>
+    public binder: DefaultBinder
 
     constructor(private personStore: PersonStore,
                 t: TranslateFunction) {
 
-        this.binder = new DefaultBinder({ t })
+        this.binder = new DefaultBinder({ t }) // <2>
         this.binder
             .forField(this.salutation).isRequired().bind() <3>
             .forField(this.fullName).isRequired().bind()
