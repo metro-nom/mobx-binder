@@ -88,7 +88,7 @@ The Binder API is typically used from inside MobX stores.
 
 The properties and functions provided are described on the link:packages/mobx-binder-core/src/model/binder/Binder.ts[Binder] class.
 
-== Binder setup
+== Binder configuration
 
 To instantiate a Binder, we need a `BinderContext` containing a translation function. This is needed for conversion and validation error messages. The translation function has to conform to the API of `react-mobx-i18n`.
 
@@ -122,9 +122,9 @@ binder
     .forField(email).bind()
 ....
 
-== Loading and storing field values
+=== Loading and storing field values
 
-=== ...using bind()
+==== ...using bind()
 
 The 'bind()` method binds the value of a form field to a property named like the field name:
 
@@ -145,7 +145,7 @@ const values = { foo: 'bar' }
 binder.store(values) // =>  values == { foo: 'bar', fullName: 'Max Mustermann' }
 ....
 
-=== ...using bind2()
+==== ...using bind2()
 
 The `bind()` command is a shorthand for a call to `bind2`, which just stores a (converted and validated) field value to a backing object using a property named like the field. But it's also possible to bind using more complex read and write callbacks:
 
@@ -172,7 +172,7 @@ binder.store(account) // =>  account.businessRelation.person.fullName === 'Max M
 ....
 
 
-== Validation
+=== Validation
 
 For every field, we can specify validations to be done:
 
@@ -189,7 +189,7 @@ The `isRequired()` validation has the special side effect that the `required` pr
 
 Only valid field values are written to an object via `binder.store()`.
 
-== Asynchronous validation
+=== Asynchronous validation
 
 If validation incurs expensive calculations or a backend request, it's possible to do it asynchronously:
 
@@ -210,7 +210,7 @@ Only field values where asynchronous validation has been successfully finished a
 .withAsyncValidator(myAsyncValidator, { onBlur: true })
 ....
 
-== Conditional validation
+=== Conditional validation
 
 Sometimes, the validation of one field depends on the value of another field. In this case, we can trigger the validation via an `onChange` event handler of that other field.
 
@@ -229,7 +229,7 @@ binder
 
 `onChange` events will only be fired if all validators specified before have been succeeding.
 
-== Conversion
+=== Conversion
 
 As with validators, converters can also be added to the binding chain:
 
@@ -287,6 +287,16 @@ public handleSubmit() {
 ....
 
 If a field related validation error occurs, the `err.message` is empty, es it may contain some "global" error message.
+
+== Rendering a form
+
+For rendering a form, best practice is to create form field wrapper components.
+
+Please also see the link:packages/sample/src/app/forms/FormField.tsx[example implementation] which integrates with https://reactstrap.github.io/[reactstrap].
+
+== Development
+
+The node modules are built using
 
 == TODOs
 
