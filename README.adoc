@@ -295,7 +295,24 @@ Please also see the link:packages/sample/src/app/forms/FormField.tsx[example imp
 
 == Development
 
-The node modules are built using
+The project is using https://github.com/lerna/lerna[lerna] for multipackage repository support.
+
+.Initial setup
+----
+npm install
+npm run bootstrap
+----
+
+.Build
+----
+lerna run build
+----
+
+.Start sample application
+----
+cd packages/sample
+npm start
+----
 
 == TODOs
 
