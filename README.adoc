@@ -12,7 +12,7 @@ toc::[]
 
 == Concept
 
-A link:packages/mobx-binder/src/model/binder/Binder.ts[Binder] manages form state for a set of fields represented by "dumb" observable field instances implementing the link:packages/mobx-binder-core/src/model/fields/FieldStore.ts[FieldStore] interface. It is configured via a fluent api like this:
+A link:packages/mobx-binder-core/src/model/binder/Binder.ts[Binder] manages form state for a set of fields represented by "dumb" observable field instances implementing the link:packages/mobx-binder-core/src/model/fields/FieldStore.ts[FieldStore] interface. It is configured via a fluent api like this:
 
 [source,js]
 ----
@@ -79,7 +79,7 @@ To illustrate the power of the framework, most examples in this documentation ar
 
 The properties and functions provided for each field are typically used by the React frontend components to render their state and make updates.
 
-They are described on the link:packages/mobx-binder/src/model/fields/FieldStore.ts[FieldStore] interface.
+They are described on the link:packages/mobx-binder-core/src/model/fields/FieldStore.ts[FieldStore] interface.
 
 === Binder
 
