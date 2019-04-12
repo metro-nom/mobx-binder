@@ -19,6 +19,7 @@
         "classnames": "^2.2.6",
         "mobx": "^4.0.0 || ^5.0.0",
         "mobx-binder": "^0.0.3",
+        "mobx-binder-moment": "^0.0.3",
         "mobx-react": "^5.0.0",
         "moment": ">=2.0.0",
         "react": "^16.5.2",

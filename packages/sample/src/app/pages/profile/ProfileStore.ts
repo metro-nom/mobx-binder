@@ -1,12 +1,11 @@
 import * as mobx from 'mobx'
-import { DefaultBinder, TextField } from 'mobx-binder'
+import { DefaultBinder, TextField, EmailValidator } from 'mobx-binder'
+import { MomentConverter } from 'mobx-binder-moment'
 
 // tslint:disable no-submodule-imports
 
 import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
-import { MomentConverter } from 'mobx-binder/lib/conversion/MomentConverter'
-import { EmailValidator } from 'mobx-binder/lib/validation/EmailValidator'
 import { TranslateFunction } from 'react-mobx-i18n'
 
 const { action } = mobx

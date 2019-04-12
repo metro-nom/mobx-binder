@@ -23,6 +23,7 @@ const i18n = new I18nStore('en', {
         'profilePage.saveButton.label': 'Save',
         'validations.required': 'Please enter something',
         'validations.email': 'Please enter a valid email address',
+        'conversions.error.moment': 'Please enter a valid date',
     },
 })
 
