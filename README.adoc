@@ -16,9 +16,8 @@ A link:packages/mobx-binder/src/model/binder/Binder.ts[Binder] manages form stat
 
 [source,js]
 ----
-import { DefaultBinder, TextField } from 'mobx-binder'
-import { MomentConverter } from 'mobx-binder/lib/conversion/MomentConverter'
-import { EmailValidator } from 'mobx-binder/lib/validation/EmailValidator'
+import { DefaultBinder, TextField, EmailValidator } from 'mobx-binder'
+import { MomentConverter } from 'mobx-binder-moment'
 import { TranslateFunction } from 'react-mobx-i18n'
 
 export default class ProfileStore {
