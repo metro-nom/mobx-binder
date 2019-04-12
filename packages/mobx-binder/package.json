@@ -1,6 +1,6 @@
 {
     "name": "mobx-binder",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "A form handling / field binding library for MobX",
     "main": "./lib/index.js",
     "files": [
@@ -28,9 +28,9 @@
     },
     "homepage": "https://github.com/metro-nom/mobx-binder#readme",
     "dependencies": {
+        "email-validator": "^2.0.0",
         "mobx": "^4.0.0 || ^5.0.0",
-        "mobx-binder-core": "^0.0.2",
-        "email-validator": "^2.0.0"
+        "mobx-binder-core": "^0.0.3"
     },
     "peerDependencies": {
         "mobx": "^4.0.0 || ^5.0.0"
