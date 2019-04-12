@@ -1,6 +1,17 @@
 {
+  "version": "0.0.2",
+  "npmClient": "npm",
+  "command": {
+    "publish": {
+      "ignoreChanges": [
+        "*.adoc"
+      ]
+    },
+    "bootstrap": {
+      "npmClientArgs": ["--no-package-lock"]
+    }
+  },
   "packages": [
     "packages/*"
-  ],
-  "version": "0.0.2"
+  ]
 }
