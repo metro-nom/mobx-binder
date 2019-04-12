@@ -1,0 +1,27 @@
+= mobx-binder-moment
+
+Converters and validators for https://momentjs.com/[Moment.js] to integrate with the DefaultBinder of link:../..[mobx-binder].
+
+== Conversion
+
+The moment converter takes a https://momentjs.com/docs/#/parsing/string-format/[format string] and converts displayed strings to moment instances and vice versa.
+
+If parsing fails, the validation fails with `conversions.error.moment` message key.
+
+== Validation
+
+Validators for moment values have to be added to the binding chain after the converter.
+
+.Example
+[source,js]
+----
+import { MomentConverter, MomentValidators } from 'mobx-binder-moment'
+...
+binder.forField(fullName)
+    .isRequired()
+    .withConverter(new MomentConverter('DD.MM.YYYY'))
+    .withValidator(Validators.dayInPast())
+    .bind()
+----
+
+Please check for supported validators and default error message keys link:src/validation/MomentValidators.ts[here].

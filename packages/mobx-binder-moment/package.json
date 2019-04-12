@@ -1,7 +1,7 @@
 {
-    "name": "mobx-binder",
+    "name": "mobx-binder-moment",
     "version": "0.0.2",
-    "description": "A form handling / field binding library for MobX",
+    "description": "Moment conversion and validation support for mobx-binder",
     "main": "./lib/index.js",
     "files": [
         "lib/"
@@ -28,12 +28,8 @@
     },
     "homepage": "https://github.com/metro-nom/mobx-binder#readme",
     "dependencies": {
-        "mobx": "^4.0.0 || ^5.0.0",
-        "mobx-binder-core": "^0.0.2",
-        "email-validator": "^2.0.0"
-    },
-    "peerDependencies": {
-        "mobx": "^4.0.0 || ^5.0.0"
+        "mobx-binder": "^0.0.2",
+        "moment": "^2.0.0"
     },
     "devDependencies": {
         "@types/chai": "^4.1.7",

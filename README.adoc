@@ -93,34 +93,34 @@ The properties and functions provided are described on the link:packages/mobx-bi
 To instantiate a Binder, we need a `BinderContext` containing a translation function. This is needed for conversion and validation error messages. The translation function has to conform to the API of `react-mobx-i18n`.
 
 [source,js]
-....
+----
 import { DefaultBinder } from 'mobx-binder'
 ...
 const binder = new DefaultBinder({ t: i18nStore.translate })
-....
+----
 
 To add fields to the binder, we just use the fluent API to "bind" fields:
 
 [source,js]
-....
+----
 import { DefaultBinder, TextField } from 'mobx-binder'
 ...
 public fullName = new TextField('fullName')
 ...
 binder.forField(fullName).bind()
-....
+----
 
 After a `bind` or `bind2` call, more fields can be added:
 
 [source,js]
-....
+----
 public fullName = new TextField('fullName')
 public email = new TextField('email')
 ...
 binder
     .forField(fullName).bind()
     .forField(email).bind()
-....
+----
 
 === Loading and storing field values
 
@@ -129,7 +129,7 @@ binder
 The 'bind()` method binds the value of a form field to a property named like the field name:
 
 [source,js]
-....
+----
 public fullName = new TextField('fullName')
 ...
 binder.forField(fullName).bind()
@@ -143,14 +143,14 @@ const values = binder.store() // values === { fullName: 'Max Mustermann' }
 // storing to existing object
 const values = { foo: 'bar' }
 binder.store(values) // =>  values == { foo: 'bar', fullName: 'Max Mustermann' }
-....
+----
 
 ==== ...using bind2()
 
 The `bind()` command is a shorthand for a call to `bind2`, which just stores a (converted and validated) field value to a backing object using a property named like the field. But it's also possible to bind using more complex read and write callbacks:
 
 [source,js]
-....
+----
 public fullName = new TextField('fullName')
 ...
 binder.forField(fullName).bind2(
@@ -169,7 +169,7 @@ binder.load(account) // => fullName.value === 'Max Mustermann'
 
 // updating account data
 binder.store(account) // =>  account.businessRelation.person.fullName === 'Max Mustermann'
-....
+----
 
 
 === Validation
@@ -177,9 +177,9 @@ binder.store(account) // =>  account.businessRelation.person.fullName === 'Max M
 For every field, we can specify validations to be done:
 
 [source,js]
-....
+----
 binder.forField(fullName).isRequired().withValidator(EmailValidator.validate()).bind()
-....
+----
 
 Validations are processed in order of method calls - so in this example, it is first checked if the `required` validation fails, and if it does, no further validation will happen.
 
@@ -194,28 +194,28 @@ Only valid field values are written to an object via `binder.store()`.
 If validation incurs expensive calculations or a backend request, it's possible to do it asynchronously:
 
 [source,js]
-....
+----
 binder
     .forField(fullName)
     .withAsyncValidator((value) => sleep(1000).then(() => EmailValidator.validate()(value)))
     .bind()
-....
+----
 
 In contrast to synchronous validation, the async validation expects to get back a `Promise` of the validation result. As this is a more expensive validation, it does not happen on every change of the field value, but only on submission. If you want an additional check on blur, you can configure this like so:
 
 Only field values where asynchronous validation has been successfully finished are written to an object via `binder.store()`.
 
 [source,js]
-....
+----
 .withAsyncValidator(myAsyncValidator, { onBlur: true })
-....
+----
 
 === Conditional validation
 
 Sometimes, the validation of one field depends on the value of another field. In this case, we can trigger the validation via an `onChange` event handler of that other field.
 
 [source,js]
-....
+----
 public salutation = new TextField('salutation') // <1>
 public fullName = new TextField('fullName')
 
@@ -225,7 +225,7 @@ binder
     .forField(fullName)
         .withValidator(someValidatorDependingOnValueOf(salutation))
     .bind()
-....
+----
 
 `onChange` events will only be fired if all validators specified before have been succeeding.
 
@@ -234,15 +234,15 @@ binder
 As with validators, converters can also be added to the binding chain:
 
 [source,js]
-....
-import * as moment from 'moment'
+----
+import { MomentConverter, MomentValidators } from 'mobx-binder-moment'
 ...
 binder.forField(fullName)
     .isRequired()
     .withConverter(new MomentConverter('DD.MM.YYYY'))
     .withValidator(Validators.dayInPast())
     .bind()
-....
+----
 
 A conversion is only tried if previous validations succeeded. A converter may fail if the value is not convertible, which means that Converters also act as validators.
 
@@ -257,9 +257,9 @@ For every string based field, one default `StringConverter` is added automatical
 If a field should be hidden as part of a value change of a different field, it may become necessary to remove that field from the Binder completely, especially if it's value is currently invalid and would prevent a form submission:
 
 [source,js]
-....
+----
 binder.removeBinding(fullName)
-....
+----
 
 This updates the global validation status based on the fields that are left.
 
@@ -268,23 +268,23 @@ This updates the global validation status based on the fields that are left.
 If the submit button of a form is clicked, this may trigger a `binder.submit()` call. Just like `binder.store()`, it stores the form field values into an object, but it also waits for asynchronous validations to be finished and maintains submission state.
 
 [source,js]
-....
+----
 public handleSubmit() {
     return this.binder.submit()
         .then(() => /* success */)
         .catch(() => /* validation error */)
 }
-....
+----
 
 The submit() methods maintains a `binder.submitting` property, indicating that submission of the form is still in progress. To make use of it, asynchronous follow actions have to be specified as parameter, so that the binder can still indicate submission as long as the server request is still ongoing.
 
 [source,js]
-....
+----
 public handleSubmit() {
     return this.binder.submit({}, results => this.sendResultsToServer(results))
         .catch(() => /* validation or other submission error */)
 }
-....
+----
 
 If a field related validation error occurs, the `err.message` is empty, es it may contain some "global" error message.
 
@@ -300,7 +300,5 @@ The node modules are built using
 
 == TODOs
 
-* Think about extracting moment support into mobx-binder-moment
-** Allows re-exports per module without introducing risk of bundling full moment library by accident
 * Create more re-usable validators
 * Create integration components vor various open source React component libraries (contributions are welcome ;-)

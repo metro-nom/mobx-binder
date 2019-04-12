@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { MomentConverter } from './MomentConverter'
 import * as moment from 'moment'
-import { Converter, ValidationError } from 'mobx-binder-core'
+import { ValidationError } from 'mobx-binder-core'
 
 describe('MomentConverter', () => {
     let converter = new MomentConverter('DD.MM.YYYY')
