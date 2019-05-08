@@ -10,4 +10,4 @@ chai.use(chaiAsPromised)
 chai.use(sinonChai)
 
 // enable MobX strict mode
-configure({ enforceActions: true })
+configure({ enforceActions: 'observed' })
