@@ -7,6 +7,7 @@ import { MomentConverter } from 'mobx-binder-moment'
 import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
 import { TranslateFunction } from 'react-mobx-i18n'
+import { ToggleField } from '../../../../../mobx-binder-core/src'
 
 const { action } = mobx
 
@@ -16,6 +17,7 @@ export default class ProfileStore {
     public dateOfBirth = new TextField('dateOfBirth')
     public email = new TextField('email')
     public phoneNumber = new TextField('phoneNumber')
+    public toggle = new ToggleField('toggle')
 
     public binder: DefaultBinder
 
@@ -38,6 +40,7 @@ export default class ProfileStore {
             .bind()
 
             .forField(this.phoneNumber).bind()
+            .forField(this.toggle).bind()
     }
 
     @action

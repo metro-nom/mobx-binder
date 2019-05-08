@@ -3,7 +3,7 @@ import * as React from 'react'
 import { observer } from 'mobx-react'
 
 export interface FieldInfoProps {
-    field: FieldStore<string>
+    field: FieldStore<any>
 }
 
 @observer
@@ -22,7 +22,7 @@ export default class FieldInfo extends React.Component<FieldInfoProps, any> {
                 <strong>valueType</strong>: { valueType }<br/>
                 <strong>readOnly</strong>: { bool(readOnly) }<br/>
                 <strong>required</strong>: { bool(required) }<br/>
-                <strong>value</strong>: { value }<br/>
+                <strong>value</strong>: { valueType === 'boolean' ? bool(value) : value }<br/>
                 <strong>visited</strong>: { bool(visited) }<br/>
                 <strong>changed</strong>: { bool(changed) }<br/>
                 <strong>validating</strong>: { bool(validating) }<br/>

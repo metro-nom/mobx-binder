@@ -1,4 +1,4 @@
-import { action, observable, autorun } from 'mobx'
+import { action, observable, autorun, runInAction } from 'mobx'
 import { FieldStore } from './FieldStore'
 
 export abstract class AbstractField<ValueType> implements FieldStore<ValueType> {
@@ -51,8 +51,8 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     @action
     public handleBlur(): void {
         autorun(() => {
-            this.showValidationResults = true
-        }, { delay: 100 })
+            runInAction('showValidationResults', () => this.showValidationResults = true)
+        }, { name: 'handleBlur', delay: 100 })
     }
 
     @action

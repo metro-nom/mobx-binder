@@ -65,6 +65,14 @@ export default class ProfilePage extends React.Component<ProfilePageContentProps
                     </Row>
                     <Row>
                         <Col>
+                            <FormField field={ profile.toggle }/>
+                        </Col>
+                        <Col>
+                            <FieldInfo field={ profile.toggle } />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
                             <Button
                                 name='save'
                                 kind='primary'
@@ -90,6 +98,7 @@ export default class ProfilePage extends React.Component<ProfilePageContentProps
                         <strong>dateOfBirth</strong>: { person.dateOfBirth.format() }<br/>
                         <strong>email</strong>: { person.email }<br/>
                         <strong>phoneNumber</strong>: { person.phoneNumber }<br/>
+                        <strong>toggle</strong>: { bool(person.toggle) }<br/>
                     </p>
             </Form>
             </div>

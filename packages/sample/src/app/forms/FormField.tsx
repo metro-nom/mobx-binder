@@ -4,7 +4,7 @@ import * as React from 'react'
 import { translatable } from 'react-mobx-i18n'
 
 export interface FormFieldProps {
-    field: FieldStore<string>
+    field: FieldStore<any>
 }
 
 @translatable
@@ -22,19 +22,39 @@ export default class FormField extends React.Component<FormFieldProps, any> {
 
         return (
             <FormGroup>
-                <Label for={ field.name }>{ this.t(`form.fields.${field.name}`) }</Label>
-                <Input
-                    id={ field.name }
-                    type='text'
-                    name={ field.name }
-                    value={ field.value }
-                    readOnly={ field.readOnly }
-                    valid={ valid }
-                    invalid={ invalid }
-                    onChange={ this.updateFieldValue }
-                    onFocus={ this.handleFocus }
-                    onBlur={ this.handleBlur }
-                />
+                { field.valueType === 'string' ? (
+                    <>
+                        <Label for={ field.name }>{ this.t(`form.fields.${field.name}`) }</Label>
+                        <Input
+                            id={ field.name }
+                            type='text'
+                            name={ field.name }
+                            value={ field.value }
+                            readOnly={ field.readOnly }
+                            valid={ valid }
+                            invalid={ invalid }
+                            onChange={ this.updateTextFieldValue }
+                            onFocus={ this.handleFocus }
+                            onBlur={ this.handleBlur }
+                        />
+                    </>
+                ) : (
+                    <Label for={ field.name }>
+                        <Input
+                            id={ field.name }
+                            type='checkbox'
+                            name={ field.name }
+                            checked={ field.value }
+                            readOnly={ field.readOnly }
+                            valid={ valid }
+                            invalid={ invalid }
+                            onChange={ this.updateCheckboxFieldValue }
+                            onFocus={ this.handleFocus }
+                            onBlur={ this.handleBlur }
+                        />
+                        { this.t(`form.fields.${field.name}`) }
+                    </Label>
+                )}
                 <FormFeedback>{ errorMessage }</FormFeedback>
             </FormGroup>
         )
@@ -48,7 +68,10 @@ export default class FormField extends React.Component<FormFieldProps, any> {
         this.props.field.handleFocus()
     }
 
-    private updateFieldValue = (event: any) => {
+    private updateTextFieldValue = (event: any) => {
         this.props.field.updateValue(event.target.value)
+    }
+    private updateCheckboxFieldValue = (event: any) => {
+        this.props.field.updateValue(event.target.checked)
     }
 }

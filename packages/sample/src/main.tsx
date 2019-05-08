@@ -20,6 +20,7 @@ const i18n = new I18nStore('en', {
         'form.fields.dateOfBirth': 'Date of birth',
         'form.fields.phoneNumber': 'Phone number',
         'form.fields.email': 'E-mail',
+        'form.fields.toggle': 'Please toggle',
         'profilePage.saveButton.label': 'Save',
         'validations.required': 'Please enter something',
         'validations.email': 'Please enter a valid email address',
