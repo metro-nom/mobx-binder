@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx'
+import { action, observable, autorun } from 'mobx'
 import { FieldStore } from './FieldStore'
 
 export abstract class AbstractField<ValueType> implements FieldStore<ValueType> {
@@ -30,7 +30,7 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     @observable
     public errorMessage?: string = undefined
 
-    public constructor(
+    protected constructor(
         public readonly valueType: string,
         public readonly name: string) {
 
@@ -50,7 +50,9 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
 
     @action
     public handleBlur(): void {
-        this.showValidationResults = true
+        autorun(() => {
+            this.showValidationResults = true
+        }, { delay: 100 })
     }
 
     @action

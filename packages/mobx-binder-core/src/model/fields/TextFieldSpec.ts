@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { TextField } from './TextField'
 import * as sinon from 'sinon'
-import { observe } from 'mobx'
+import * as mobx from 'mobx'
 
 describe('TextField', () => {
     const sandbox = sinon.createSandbox()
@@ -12,6 +12,10 @@ describe('TextField', () => {
     beforeEach(() => {
         textField = new TextField('fullName')
         textObserver = sandbox.stub()
+    })
+
+    afterEach(() => {
+        sandbox.restore()
     })
 
     describe('initial value', () => {
@@ -35,20 +39,26 @@ describe('TextField', () => {
         })
 
         it('should have an observable value', () => {
-            observe(textField, 'value', textObserver)
+            mobx.observe(textField, 'value', textObserver)
             textField.updateValue('newValue')
             expect(textObserver.firstCall.args[0].newValue).to.equal('newValue')
         })
     })
 
     describe('onBlur', () => {
-        it('should show validation results on blur', () => {
+        it('should not show validation results synchronously on blur', () => {
+            textField.handleBlur()
+            expect(textField.showValidationResults).to.be.false
+        })
+
+        it('should show validation results asynchronously on blur', () => {
+            sandbox.stub(mobx, 'autorun').yields() // make it sync for test
             textField.handleBlur()
             expect(textField.showValidationResults).to.be.true
         })
 
         it('should have an observable value', () => {
-            observe(textField, 'value', textObserver)
+            mobx.observe(textField, 'value', textObserver)
             textField.updateValue('newValue')
             expect(textObserver.firstCall.args[0].newValue).to.equal('newValue')
         })
