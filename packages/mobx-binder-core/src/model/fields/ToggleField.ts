@@ -1,5 +1,4 @@
 import { action, observable } from 'mobx'
-import { FieldStore } from './FieldStore'
 import { AbstractField } from './AbstractField'
 
 /*

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { ToggleField } from './ToggleField'
 import * as sinon from 'sinon'
-import { observe } from 'mobx'
+import * as mobx from 'mobx'
 
 describe('ToggleField', () => {
     const sandbox = sinon.createSandbox()
@@ -12,6 +12,10 @@ describe('ToggleField', () => {
     beforeEach(() => {
         toggleField = new ToggleField('emailPermission')
         toggleObserver = sandbox.stub()
+    })
+
+    afterEach(() => {
+        sandbox.restore()
     })
 
     describe('initial value', () => {
@@ -36,20 +40,26 @@ describe('ToggleField', () => {
         })
 
         it('should have an observable value', () => {
-            observe(toggleField, 'value', toggleObserver)
+            mobx.observe(toggleField, 'value', toggleObserver)
             toggleField.updateValue(true)
             expect(toggleObserver.firstCall.args[0].newValue).to.equal(true)
         })
     })
 
     describe('onBlur', () => {
-        it('should show validation results on blur', () => {
+        it('should not show validation results synchronously on blur', () => {
+            toggleField.handleBlur()
+            expect(toggleField.showValidationResults).to.be.false
+        })
+
+        it('should show validation results asynchronously on blur', () => {
+            sandbox.stub(mobx, 'autorun').yields() // make it sync for test
             toggleField.handleBlur()
             expect(toggleField.showValidationResults).to.be.true
         })
 
         it('should have an observable value', () => {
-            observe(toggleField, 'value', toggleObserver)
+            mobx.observe(toggleField, 'value', toggleObserver)
             toggleField.updateValue(true)
             expect(toggleObserver.firstCall.args[0].newValue).to.equal(true)
         })
