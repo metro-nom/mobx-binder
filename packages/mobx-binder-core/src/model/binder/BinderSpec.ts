@@ -7,6 +7,7 @@ import * as sinon from 'sinon'
 import sleep from '../../test/sleep'
 import { ErrorMessage, SimpleBinder } from './SimpleBinder'
 import { Converter, ValidationError } from '../..'
+import { action, observable } from 'mobx'
 
 const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string> =>
     (value?: string) => !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
@@ -33,12 +34,12 @@ describe('Binder', () => {
     let secondField: FieldStore<string>
     let clock: sinon.SinonFakeTimers
 
-    beforeEach(() => {
+    beforeEach(action(() => {
         myField = new TextField('myField')
         secondField = new TextField('secondField')
         clock = sandbox.useFakeTimers()
         clock.setSystemTime(moment('2018-01-25').toDate().getTime())
-    })
+    }))
 
     afterEach(() => {
         sandbox.restore()
@@ -498,6 +499,18 @@ describe('Binder', () => {
         it('field should be marked as unchanged after load', () => {
             binder.load({ myField: 'value' })
             expect(myField.changed).to.be.false
+        })
+
+        it('should be marked as changed after value change and both are observables', () => {
+            binder.load({ myField: observable.box('value') })
+            myField.updateValue(observable.box('other') as any)
+            expect(binder.changed).to.be.true
+        })
+
+        it('should not be marked as changed if updated with same value being an observables', () => {
+            binder.load({ myField: observable.box('value') })
+            myField.updateValue(observable.box('value') as any)
+            expect(binder.changed).to.be.false
         })
 
         it('field should be marked as changed after value change', () => {

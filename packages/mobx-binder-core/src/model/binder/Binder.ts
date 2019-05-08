@@ -1,5 +1,5 @@
 import { Converter } from '../../conversion/Converter'
-import { action, computed, observable, observe } from 'mobx'
+import { action, computed, isObservable, observable, observe, toJS } from 'mobx'
 import { StringConverter } from '../../conversion/StringConverter'
 import { FieldStore } from '../fields/FieldStore'
 
@@ -100,6 +100,7 @@ export class Binder<ValidationResult> {
      * Used by the `BindingBuilder` after preparing a new field.
      * @param binding
      */
+    @action
     public addBinding(binding: Binding<ValidationResult>) {
         this.bindings.push(binding)
     }
@@ -233,7 +234,7 @@ export class Binder<ValidationResult> {
      * @param onSuccess
      */
     @action
-    public submit<TargetType = any>(target: TargetType = {} as any,
+    public submit<TargetType = any>(target: Partial<TargetType> = {},
                                     onSuccess?: (target: TargetType) => Promise<TargetType> | void | undefined): Promise<TargetType> {
         let promise: Promise<any> = Promise.resolve()
 
@@ -248,7 +249,7 @@ export class Binder<ValidationResult> {
                 .then(action(() => {
                     const result = this.store(target)
                     if (onSuccess) {
-                        const newPromise = onSuccess(result)
+                        const newPromise = onSuccess(result as TargetType)
 
                         if (newPromise && newPromise.then) {
                             return newPromise.then(() => result)
@@ -432,6 +433,10 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @computed
     public get changed() {
+        if (isObservable(this.field.value) && isObservable(this.unchangedValue)) {
+            return JSON.stringify(toJS(this.field.value)) !== JSON.stringify(toJS(this.unchangedValue))
+        }
+
         return this.field.value !== this.unchangedValue
     }
 
