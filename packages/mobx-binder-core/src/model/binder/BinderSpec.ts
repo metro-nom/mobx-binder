@@ -478,6 +478,12 @@ describe('Binder', () => {
                 .forField(myField).isRequired().withValidator(lengthValidator(5, 10)).bind()
         })
 
+        it('should be marked as unchanged before load', () => {
+            expect(myField.changed).to.be.false
+            expect(binder.binding(myField).changed).to.be.false
+            expect(binder.changed).to.be.false
+        })
+
         it('should be marked as unchanged after load', () => {
             binder.load({ myField: 'value' })
             expect(binder.changed).to.be.false

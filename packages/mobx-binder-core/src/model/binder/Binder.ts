@@ -426,6 +426,8 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
                 private write?: (target: any, value: any) => void) {
 
         this.reverseModifiers = [ ...modifiers ].reverse()
+        this.unchangedValue = field.value
+        field.changed = this.changed
         this.validate()
         observe(field, 'value', this.handleChange.bind(this))
         this.addOnBlurValidationInterceptor()
