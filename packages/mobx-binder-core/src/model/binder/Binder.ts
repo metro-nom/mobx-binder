@@ -368,7 +368,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     constructor(private readonly context: Context<ValidationResult>,
                 public readonly field: FieldStore<any>,
-                private readonly last: Modifier<ValidationResult, any, any>,
+                private readonly chain: Modifier<ValidationResult, any, any>,
                 private read: (source: any) => any,
                 private write?: (target: any, value: any) => void) {
 
@@ -393,7 +393,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @computed
     get model() {
-        return this.last ? this.last.data : {
+        return this.chain ? this.chain.data : {
             value: this.field.value,
             pending: false,
         }
@@ -401,7 +401,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @computed
     get validity() {
-        const validity = this.last.validity
+        const validity = this.chain.validity
         return validity
     }
 
@@ -427,7 +427,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @action
     public async validateAsync(onBlur = false): Promise<ValidationResult> {
-        await this.last.validateAsync(onBlur)
+        await this.chain.validateAsync(onBlur)
         const validity = this.validity
         const result = validity.status !== 'validated' ? this.context.validResult : validity.result!
         return result
@@ -436,7 +436,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     @action
     public load(source: any): void {
         const value = this.read(source)
-        const viewValue = this.last.toView(value)
+        const viewValue = this.chain.toView(value)
         this.field.reset(viewValue)
         this.setUnchanged()
     }

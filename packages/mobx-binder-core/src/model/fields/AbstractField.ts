@@ -22,9 +22,6 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     public valid?: boolean = undefined
 
     @observable
-    public loading: boolean = false
-
-    @observable
     public validating: boolean = false
 
     @observable
