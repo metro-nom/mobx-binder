@@ -393,10 +393,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @computed
     get model() {
-        return this.chain ? this.chain.data : {
-            value: this.field.value,
-            pending: false,
-        }
+        return this.chain.data
     }
 
     @computed
