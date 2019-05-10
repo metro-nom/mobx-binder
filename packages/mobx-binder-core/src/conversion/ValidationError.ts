@@ -1,6 +1,6 @@
 
 export class ValidationError<ValidationResult> extends Error {
-    constructor(public readonly result: ValidationResult) {
+    constructor(public readonly validationResult: ValidationResult) {
         super('validation error')
     }
 }

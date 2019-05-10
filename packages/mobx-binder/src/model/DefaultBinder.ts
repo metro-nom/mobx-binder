@@ -1,13 +1,7 @@
-import { Binder, Context, Validator } from 'mobx-binder-core'
+import { Binder, Context } from 'mobx-binder-core'
 import { StringValidators } from '../validation/StringValidators'
-
-export type TranslateFunction = (translationKey: string, args?: any) => string
-export type BinderValidator<T> = Validator<BinderValidationResult, T>
-
-export interface BinderValidationResult {
-    messageKey?: string
-    args?: { [ s: string ]: any }
-}
+import { BinderValidationResult } from '../validation/Validation'
+import { TranslateFunction } from './Translation'
 
 export interface DefaultContextOptions {
     t: TranslateFunction

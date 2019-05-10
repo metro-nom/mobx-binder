@@ -36,9 +36,14 @@ export interface FieldStore<ValueType> {
     visited: boolean
 
     /**
+     * Set to `true` on first change. Fields are untouched initially, after load() or reset()
+     */
+    touched: boolean
+
+    /**
      * `true` when an async validation is in progress for the current field.
      */
-    validating?: boolean
+    validating: boolean
 
     /**
      * If `valid === false`, containing the validation message.

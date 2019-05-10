@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { MomentConverter } from './MomentConverter'
 import * as moment from 'moment'
-import { ValidationError } from 'mobx-binder'
 
 describe('MomentConverter', () => {
     let converter = new MomentConverter('DD.MM.YYYY')
@@ -17,8 +16,8 @@ describe('MomentConverter', () => {
         describe('errors', () => {
             it('should fail with standard message if conversion fails', () => {
                 expect(() => converter.convertToModel('abcde'))
-                    .to.throw(ValidationError)
-                    .with.property('result').deep.equals(
+                    .to.throw(Error)
+                    .with.property('validationResult').deep.equals(
                     {
                         messageKey: 'conversions.error.moment',
                         args: { value: 'abcde' },
@@ -28,8 +27,8 @@ describe('MomentConverter', () => {
                 converter = new MomentConverter('DD.MM.YYYY', 'other.key')
 
                 expect(() => converter.convertToModel('abcde'))
-                    .to.throw(ValidationError)
-                    .with.property('result').deep.equals(
+                    .to.throw(Error)
+                    .with.property('validationResult').deep.equals(
                     {
                         messageKey: 'other.key',
                         args: { value: 'abcde' },

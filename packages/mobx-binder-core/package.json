@@ -6,9 +6,10 @@
     "scripts": {
         "clean": "rm -Rf lib",
         "build": "tsc",
-        "lint": "tslint 'src/**/*.ts' 'src/**/*.tsx'",
+        "lint": "tslint -p tsconfig.json 'src/**/*.ts' 'src/**/*.tsx'",
         "lint:fix": "npm run lint -- --fix",
-        "test": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'"
+        "test": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'",
+        "verify": "npm run build && npm run lint && npm run test"
     },
     "repository": {
         "type": "git",
@@ -35,6 +36,7 @@
         "@types/chai": "^4.1.7",
         "@types/chai-as-promised": "^7.1.0",
         "@types/data-driven": "0.0.30",
+        "@types/debug": "^4.1.4",
         "@types/mocha": "^5.2.6",
         "@types/sinon": "^5.0.2",
         "@types/sinon-chai": "^3.2.0",
@@ -46,6 +48,7 @@
         "sinon-chai": "^3.2.0",
         "ts-node": "^7.0.1",
         "tslint": "^5.12.1",
+        "tslint-no-circular-imports": "^0.6.2",
         "typescript": "^3.0.3"
     }
 }

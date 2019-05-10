@@ -1,4 +1,4 @@
-import { BinderValidationResult, BinderValidator } from '../model/DefaultBinder'
+import { BinderValidationResult, BinderValidator } from './Validation'
 
 export class StringValidators {
     public static matchLength(match: number, messageKey = 'validations.matchLength'): BinderValidator<string> {

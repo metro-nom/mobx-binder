@@ -44,7 +44,7 @@ export default class FormField extends React.Component<FormFieldProps, any> {
                             id={ field.name }
                             type='checkbox'
                             name={ field.name }
-                            checked={ field.value }
+                            checked={ !!field.value }
                             readOnly={ field.readOnly }
                             valid={ valid }
                             invalid={ invalid }

@@ -1,5 +1,5 @@
 {
-    "extends": "tslint:latest",
+    "extends": [ "tslint:latest", "tslint-no-circular-imports" ],
     "linterOptions": {
         "exclude": [
             "lib/**/*.d.ts",

@@ -7,13 +7,12 @@ import sinon = require('sinon')
 
 describe('MomentValidators', () => {
     const sandbox = sinon.createSandbox()
-    let clock: sinon.SinonFakeTimers
 
     const date = (str: string) => moment(str, 'DD.MM.YYYY')
     const today = date('12.03.2019')
 
     beforeEach(() => {
-        clock = sandbox.useFakeTimers(new Date(2019, 3, 12).getTime())
+        sandbox.useFakeTimers(new Date(2019, 3, 12).getTime())
         sandbox.stub(MomentValidators as any, 'today').returns(today)
     })
 

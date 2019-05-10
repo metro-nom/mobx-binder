@@ -1,5 +1,5 @@
 import * as emailValidator from 'email-validator'
-import { BinderValidator } from '../model/DefaultBinder'
+import { BinderValidator } from './Validation'
 
 export class EmailValidator {
     public static validate(messageKey = 'validations.email'): BinderValidator<string> {

@@ -1,40 +1,17 @@
 import { Converter } from '../../conversion/Converter'
-import { action, computed, isObservable, observable, observe, toJS } from 'mobx'
+import { action, computed, isObservable, observable, toJS, runInAction } from 'mobx'
 import { StringConverter } from '../../conversion/StringConverter'
 import { FieldStore } from '../fields/FieldStore'
+import { Modifier } from './chain/Modifier'
+import { FieldView } from './chain/FieldView'
+import { ConvertingModifier } from './chain/ConvertingModifier'
+import { ValidatingModifier } from './chain/ValidatingModifier'
+import { AsyncValidatingModifier } from './chain/AsyncValidatingModifier'
+import { ChangeEventHandler } from './chain/ChangeEventHandler'
+import { Context } from './Context'
+import { AsyncValidator, Validator } from '../../validation/Validator'
 
 // tslint:disable max-classes-per-file
-
-export interface Context<ValidationResult> {
-    /**
-     * The function used to translate validation results.
-     */
-    readonly translate: (result: ValidationResult) => string
-    /**
-     * A function used to check if a validation result means that validation was successful, or not.
-     */
-    readonly valid: (result: ValidationResult) => boolean
-
-    /**
-     * The return value of _validate()_ / _validateAsync_ in case there is no validator configured.
-     */
-    readonly validResult: ValidationResult
-
-    /**
-     * A function that returns a Validator which is added to the validator chain on `.isRequired()`.
-     */
-    readonly requiredValidator: (messageKey?: string) => Validator<ValidationResult, any>
-}
-
-/**
- * Interface to be fulfulled by any validator for use with `withValidator`
- */
-export type Validator<ValidationResult, T> = (value?: T) => ValidationResult
-
-/**
- * Interface to be fulfulled by any asynchronous validator for use with `withAsyncValidator`
- */
-export type AsyncValidator<ValidationResult, T> = (value?: T) => Promise<ValidationResult>
 
 /**
  * API for single field binding
@@ -59,6 +36,7 @@ export interface Binding<ValidationResult> {
 
     /**
      * Perform synchronous validation
+     * @deprecated triggers nothing as validity is pure computed state now
      */
     validate(): ValidationResult
 
@@ -80,11 +58,12 @@ export class Binder<ValidationResult> {
      * Indicates if a #submit() operation is currently in progress. This covers async validations happening on submit and also the `onSuccess` operation.
      */
     @observable
-    public submitting: boolean = false
+    public submitting?: boolean
 
-    private bindings: Array<Binding<ValidationResult>> = observable([])
+    private bindings: Array<StandardBinding<ValidationResult>> = observable([])
 
     constructor(public readonly context: Context<ValidationResult>) {
+        runInAction(() => { this.submitting = false })
     }
 
     /**
@@ -101,7 +80,7 @@ export class Binder<ValidationResult> {
      * @param binding
      */
     @action
-    public addBinding(binding: Binding<ValidationResult>) {
+    public addBinding(binding: StandardBinding<ValidationResult>) {
         this.bindings.push(binding)
     }
 
@@ -169,7 +148,7 @@ export class Binder<ValidationResult> {
      */
     @computed
     public get valid(): boolean | undefined {
-        const validities = this.bindings.map(binding => binding.field.valid)
+        const validities = this.bindings.map(binding => binding.valid)
         if (validities.every((validity: boolean | undefined) => validity === true)) {
             return true
         } else if (validities.some((validity: boolean | undefined) => validity === false)) {
@@ -184,7 +163,7 @@ export class Binder<ValidationResult> {
     @computed
     public get validating(): boolean {
         return this.bindings
-            .map(binding => !!binding.field.validating)
+            .map(binding => !!binding.validating)
             .every(validating => validating)
     }
 
@@ -212,12 +191,10 @@ export class Binder<ValidationResult> {
      * Actively trigger async validation / wait for still ongoing validations.
      * Please note that async validation results for a value might be cached.
      */
-    public validateAsync(): Promise<void> {
-        return Promise.all(this.bindings.map(binding => binding.validateAsync()))
+    public async validateAsync(): Promise<void> {
+        await Promise.all(this.bindings.map(binding => binding.validateAsync()))
             .then(results => {
-                if (results.every(result => this.context.valid(result))) {
-                    return
-                } else {
+                if (!results.every(result => this.context.valid(result))) {
                     throw new Error()
                 }
             })
@@ -237,7 +214,6 @@ export class Binder<ValidationResult> {
     public submit<TargetType = any>(target: Partial<TargetType> = {},
                                     onSuccess?: (target: TargetType) => Promise<TargetType> | void | undefined): Promise<TargetType> {
         let promise: Promise<any> = Promise.resolve()
-
         this.submitting = true
         if (this.valid !== false) {
             promise = promise
@@ -285,27 +261,13 @@ export class Binder<ValidationResult> {
 
 }
 
-interface Modifier<ValidationResult> {
-    converter?: Converter<ValidationResult, any, any>
-    validator?: Validator<ValidationResult, any>
-    asyncValidator?: AsyncValidator<any, any>
-    asyncValidateOnBlur?: boolean
-    onChange?: (value: any) => any
-
-    lastValidation?: {
-        promise?: Promise<any>
-        validatedValue?: any
-        result?: ValidationResult
-    }
-}
-
 export class BindingBuilder<ValidationResult, ValueType> {
-    private modifiers: Array<Modifier<ValidationResult>> = []
     private readOnly = false
     private required = false
 
     constructor(private readonly binder: Binder<ValidationResult>,
-                private readonly field: FieldStore<ValueType>) {
+                private readonly field: FieldStore<ValueType>,
+                private last: Modifier<ValidationResult, any, any> = new FieldView(field, binder.context)) {
         if (this.field.valueType === 'string') {
             this.withConverter(new StringConverter() as any)
         }
@@ -317,8 +279,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param converter
      */
     public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType> {
-        this.modifiers.push({ converter })
-        return this as any
+        return this.addModifier<NextType>(new ConvertingModifier(this.last, converter, this.binder.context))
     }
 
     /**
@@ -326,8 +287,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param validator
      */
     public withValidator(validator: Validator<ValidationResult, ValueType>): BindingBuilder<ValidationResult, ValueType> {
-        this.modifiers.push({ validator })
-        return this
+        return this.addModifier<ValueType>(new ValidatingModifier(this.last, validator, this.binder.context))
     }
 
     /**
@@ -335,10 +295,10 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param asyncValidator
      * @param options
      */
+    @action
     public withAsyncValidator(asyncValidator: AsyncValidator<ValidationResult, ValueType>,
                               options: { onBlur: boolean } = { onBlur: false }): BindingBuilder<ValidationResult, ValueType> {
-        this.modifiers.push({ asyncValidator, asyncValidateOnBlur: options.onBlur })
-        return this
+        return this.addModifier<ValueType>(new AsyncValidatingModifier(this.last, asyncValidator, this.binder.context, options))
     }
 
     /**
@@ -363,8 +323,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param onChange
      */
     public onChange(onChange: (value: ValueType) => any): BindingBuilder<ValidationResult, ValueType> {
-        this.modifiers.push({ onChange })
-        return this
+        return this.addModifier(new ChangeEventHandler(this.last, onChange))
     }
 
     /**
@@ -387,279 +346,122 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param read
      * @param write
      */
+    @action
     public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void) {
         this.field.readOnly = this.readOnly || !write
         this.field.required = this.required
 
-        this.binder.addBinding(new StandardBinding(this.binder.context, this.field, this.modifiers,
+        this.binder.addBinding(new StandardBinding(this.binder.context, this.field, this.last,
             read, this.readOnly ? undefined : write))
         return this.binder
     }
-}
 
-interface Node<ValidationResult> {
-    valid?: boolean
-    value?: any
-    validationPromise?: Promise<ValidationResult>
-    validationResult?: ValidationResult
-}
-
-type Handler<ValidationResult> = (context: Context<ValidationResult>, modifier: Modifier<ValidationResult>, node: Node<ValidationResult>)
-    => Node<ValidationResult> | undefined
-
-interface TraversalOptions {
-    noInvalid: boolean
+    private addModifier<NextType>(modifier: Modifier<ValidationResult, ValueType, NextType>) {
+        this.last = modifier
+        return this as any
+    }
 }
 
 class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     @observable
     private unchangedValue?: any
 
-    private ignoreChange = false
-
-    private readonly reverseModifiers: Array<Modifier<ValidationResult>>
-
     constructor(private readonly context: Context<ValidationResult>,
                 public readonly field: FieldStore<any>,
-                private readonly modifiers: Array<Modifier<ValidationResult>>,
+                private readonly last: Modifier<ValidationResult, any, any>,
                 private read: (source: any) => any,
                 private write?: (target: any, value: any) => void) {
 
-        this.reverseModifiers = [ ...modifiers ].reverse()
-        this.unchangedValue = field.value
-        field.changed = this.changed
-        this.validate()
-        observe(field, 'value', this.handleChange.bind(this))
+        this.setUnchanged()
+        this.observeField()
         this.addOnBlurValidationInterceptor()
     }
 
     @computed
     public get changed() {
-        if (isObservable(this.field.value) && isObservable(this.unchangedValue)) {
-            return JSON.stringify(toJS(this.field.value)) !== JSON.stringify(toJS(this.unchangedValue))
+        if (isObservable(this.field.value)) {
+            return JSON.stringify(toJS(this.field.value)) !== JSON.stringify(this.unchangedValue)
         }
 
         return this.field.value !== this.unchangedValue
     }
 
-    @action
-    public setUnchanged() {
-        this.unchangedValue = this.field.value
-        this.field.changed = this.changed
+    @computed
+    get validating() {
+        return this.validity.status === 'validating'
     }
 
-    @action
-    public handleChange() {
-        if (!this.ignoreChange) {
-            const result = this.traverse(this.presentationNode(), [ this.changeHandler ])
-            this.field.changed = this.changed
-            this.exposeValidationResults(result)
+    @computed
+    get model() {
+        return this.last ? this.last.data : {
+            value: this.field.value,
+            pending: false,
         }
     }
 
-    @action
-    public validate(): ValidationResult {
-        const result = this.traverse()
-        this.exposeValidationResults(result)
-        return result.validationResult || this.context.validResult
+    @computed
+    get validity() {
+        const validity = this.last.validity
+        return validity
+    }
+
+    @computed
+    public get valid() {
+        return this.validity.status === 'validated' ? this.context.valid(this.validity.result!) : undefined
+    }
+
+    @computed
+    get errorMessage() {
+        return this.valid === false ? this.context.translate(this.validity.result!) : undefined
     }
 
     @action
-    public validateAsync(onBlur = false): Promise<ValidationResult> {
-        const node = this.traverse(this.presentationNode(), [ this.asyncValidationHandlerFactory(onBlur) ])
-        return node.validationPromise ? node.validationPromise : Promise.resolve(this.context.validResult)
+    public setUnchanged() {
+        const fieldValue = this.field.value
+        this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
+    }
+
+    public validate(): ValidationResult {
+        return this.validity.status === 'validated' ? this.validity.result! : this.context.validResult
+    }
+
+    @action
+    public async validateAsync(onBlur = false): Promise<ValidationResult> {
+        await this.last.validateAsync(onBlur)
+        const validity = this.validity
+        const result = validity.status !== 'validated' ? this.context.validResult : validity.result!
+        return result
     }
 
     @action
     public load(source: any): void {
         const value = this.read(source)
-        const node: Node<ValidationResult> = { value, valid: true }
-        const result = this.traverseBackwards(node)
-
-        this.unchangedValue = result.value
-        try {
-            this.ignoreChange = true
-
-            this.field.reset(result.value)
-            this.validate()
-        } finally {
-            this.ignoreChange = false
-        }
+        const viewValue = this.last.toView(value)
+        this.field.reset(viewValue)
+        this.setUnchanged()
     }
 
     public store(target: any) {
         if (this.write) {
-            const result = this.traverse()
-            if (!result.validationResult || this.context.valid(result.validationResult)) {
-                this.write(target, result.value)
+            if (this.valid && !this.model.pending) {
+                this.write(target, this.model.value)
             }
-        }
-    }
-
-    private presentationNode() {
-        return {
-            value: this.field.value,
-            valid: true,
-        }
-    }
-
-    @action
-    private exposeValidationResults(node: Node<ValidationResult>) {
-        this.field.valid = node.validationResult ?
-            this.context.valid(node.validationResult) :
-            (node.validationPromise ? undefined : node.valid)
-        this.field.errorMessage = this.field.valid === false ? this.context.translate(node.validationResult!) : undefined
-    }
-
-    private traverse(node: Node<ValidationResult> = this.presentationNode(), handlers: Array<Handler<ValidationResult>> = [], options?: TraversalOptions) {
-        return this.traverseList(node, this.modifiers, [
-            ...handlers,
-            this.validationHandler,
-            this.conversionHandlerFactory(true),
-        ], options)
-    }
-
-    private traverseBackwards(node: Node<ValidationResult>, handlers: Array<Handler<ValidationResult>> = [], options?: TraversalOptions) {
-        return this.traverseList(node, this.reverseModifiers, [
-            ...handlers,
-            this.conversionHandlerFactory(false),
-        ], options)
-    }
-
-    private traverseList(node: Node<ValidationResult>,
-                         list: Array<Modifier<ValidationResult>>,
-                         handlers: Array<Handler<ValidationResult>>,
-                         { noInvalid }: TraversalOptions = { noInvalid: false }): Node<ValidationResult> {
-
-        for (const modifier of list) {
-            if (noInvalid && node.valid === false) {
-                // nothing more to do - skip rest of modifier chain
-                break
-            }
-            if (!noInvalid || node.valid !== false) {
-                node = handlers.reduce((prevNode: Node<ValidationResult>, handler: Handler<ValidationResult>) => {
-                    const result = handler(this.context, modifier, prevNode)
-                    return result || prevNode
-                }, node)
-            }
-        }
-        return node
-    }
-
-    private conversionHandlerFactory(forward: boolean): Handler<ValidationResult> {
-        return (context: Context<ValidationResult>, modifier: Modifier<ValidationResult>, node: Node<ValidationResult>): Node<ValidationResult> => {
-            if (node.valid && modifier.converter) {
-                try {
-                    const value = forward ? modifier.converter.convertToModel(node.value) :
-                        modifier.converter.convertToPresentation(node.value)
-
-                    return {
-                        ...node,
-                        value,
-                    }
-                } catch (e) {
-                    return {
-                        ...node,
-                        valid: this.context.valid(e.result),
-                        validationResult: e.result,
-                    }
-                }
-            }
-            return node
-        }
-    }
-
-    @action
-    private validationHandler =
-        (context: Context<ValidationResult>, modifier: Modifier<ValidationResult>, node: Node<ValidationResult>): Node<ValidationResult> => {
-        if (node.valid) {
-            if (modifier.validator) {
-                const validationResult = modifier.validator(node.value)
-                return {
-                    ...node,
-                    valid: this.context.valid(validationResult),
-                    validationResult,
-                }
-            } else if (modifier.asyncValidator) {
-                if (modifier.lastValidation && modifier.lastValidation.validatedValue === node.value && modifier.lastValidation.result) {
-                    return {
-                        ...node,
-                        valid: this.context.valid(modifier.lastValidation.result),
-                        validationResult: modifier.lastValidation.result,
-                    }
-                } else {
-                    return {
-                        ...node,
-                        valid: undefined,
-                        validationResult: undefined,
-                    }
-                }
-            }
-        } else { // invalid
-            if (modifier.asyncValidator) {
-                delete modifier.lastValidation
-                this.field.validating = false
-            }
-        }
-        return node
-    }
-
-    private changeHandler = (_: Context<ValidationResult>, modifier: Modifier<ValidationResult>, node: Node<ValidationResult>): Node<ValidationResult> => {
-        if (node.valid && modifier.onChange) {
-            modifier.onChange(node.value)
-        }
-        return node
-    }
-
-    private asyncValidationHandlerFactory = (onBlur: boolean) => {
-        return (context: Context<ValidationResult>, modifier: Modifier<ValidationResult>, node: Node<ValidationResult>): Node<ValidationResult> => {
-            if (node.valid !== false && modifier.asyncValidator && (!onBlur || modifier.asyncValidateOnBlur)) {
-                if (!modifier.lastValidation || (modifier.lastValidation.validatedValue !== node.value)) {
-                    return this.startAsyncValidation(modifier, node)
-                } else if (modifier.lastValidation && modifier.lastValidation.result) {
-                    return {
-                        ...node,
-                        valid: this.context.valid(modifier.lastValidation.result),
-                        validationResult: modifier.lastValidation.result,
-                    }
-                }
-            }
-            return node
-        }
-    }
-
-    @action
-    private startAsyncValidation(modifier: Modifier<ValidationResult>, node: Node<ValidationResult>) {
-        this.field.validating = true
-        modifier.lastValidation = {
-            validatedValue: node.value,
-            promise: modifier.asyncValidator!(node.value).then(action((validationResult: ValidationResult) => {
-                if (modifier.lastValidation && modifier.lastValidation.validatedValue === node.value) {
-                    modifier.lastValidation = {
-                        validatedValue: node.value,
-                        result: validationResult,
-                    }
-                    this.exposeValidationResults({
-                        ...node,
-                        valid: this.context.valid(validationResult),
-                        validationResult,
-                    })
-                    this.field.validating = false
-                    return validationResult
-                }
-            })),
-        }
-        return {
-            ...node,
-            validationPromise: modifier.lastValidation.promise,
         }
     }
 
     private addOnBlurValidationInterceptor() {
         const previous = this.field.handleBlur
 
-        this.field.handleBlur = () => {
-            this.validateAsync(true).then(() => previous.call(this.field))
+        this.field.handleBlur = async () => {
+            await this.validateAsync(true)
+            previous.call(this.field)
         }
+    }
+
+    private observeField() {
+        Object.defineProperty(this.field, 'valid', { get: () => this.valid })
+        Object.defineProperty(this.field, 'validating', { get: () => this.validating })
+        Object.defineProperty(this.field, 'errorMessage', { get: () => this.errorMessage })
+        Object.defineProperty(this.field, 'changed', { get: () => this.changed })
     }
 }

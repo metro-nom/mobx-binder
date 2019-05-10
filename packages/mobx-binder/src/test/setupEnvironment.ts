@@ -1,6 +1,5 @@
 import chai = require('chai')
 import chaiAsPromised = require('chai-as-promised')
-import sinon = require('sinon')
 import sinonChai = require('sinon-chai')
 import { configure } from 'mobx'
 

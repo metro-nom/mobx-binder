@@ -22,7 +22,13 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     public valid?: boolean = undefined
 
     @observable
-    public validating?: boolean = false
+    public loading: boolean = false
+
+    @observable
+    public validating: boolean = false
+
+    @observable
+    public touched: boolean = false
 
     @observable
     public visited: boolean = false
@@ -41,6 +47,7 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     @action
     public updateValue(newValue: ValueType) {
         this.value = newValue
+        this.touched = true
     }
 
     @action
@@ -59,6 +66,7 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     public reset(value: ValueType) {
         this.value = value
         this.changed = false
+        this.touched = false
         this.visited = false
         this.showValidationResults = false
         this.valid = undefined
