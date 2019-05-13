@@ -7,7 +7,7 @@ import { MomentConverter } from 'mobx-binder-moment'
 import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
 import { TranslateFunction } from 'react-mobx-i18n'
-import { ToggleField } from '../../../../../mobx-binder-core/src'
+import { ToggleField, TrimConverter } from '../../../../../mobx-binder-core/src'
 
 const { action } = mobx
 
@@ -24,12 +24,13 @@ export default class ProfileStore {
     constructor(private personStore: PersonStore, t: TranslateFunction) {
         this.binder = new DefaultBinder({ t })
         this.binder
-            .forField(this.salutation).isRequired().bind()
-            .forField(this.fullName).isRequired().bind()
-            .forField(this.dateOfBirth).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
+            .forField(this.salutation).isRequired().withConverter(new TrimConverter()).bind()
+            .forField(this.fullName).isRequired().withConverter(new TrimConverter()).bind()
+            .forField(this.dateOfBirth).withConverter(new TrimConverter()).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
 
             .forField(this.email)
             .isRequired()
+            .withConverter(new TrimConverter())
             .withAsyncValidator(async (value?: string) => {
                 await sleep(1000)
                 return EmailValidator.validate()(value)
@@ -39,7 +40,7 @@ export default class ProfileStore {
             })
             .bind()
 
-            .forField(this.phoneNumber).bind()
+            .forField(this.phoneNumber).withConverter(new TrimConverter()).bind()
             .forField(this.toggle).bind()
     }
 
