@@ -8,7 +8,7 @@
         "build": "tsc",
         "lint": "tslint -p tsconfig.json 'src/**/*.ts' 'src/**/*.tsx'",
         "lint:fix": "npm run lint -- --fix",
-        "test": "_mocha --opts src/test/mocha.opts 'src/**/*Spec.ts'",
+        "test": "_mocha 'src/**/*Spec.ts'",
         "coverage": "nyc npm test",
         "verify": "npm run build && npm run lint && npm run test"
     },
