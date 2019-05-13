@@ -20,8 +20,8 @@ export class ChangeEventHandler<ValidationResult, ValueType> implements Modifier
         return this.view.toView(modelValue)
     }
 
-    public validateAsync(onBlur: boolean): Promise<Validity<ValidationResult>> {
-        return this.view.validateAsync(onBlur)
+    public validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
+        return this.view.validateAsync(blurEvent)
     }
 
     private handleChange = (data?: Data<ValueType>) => {

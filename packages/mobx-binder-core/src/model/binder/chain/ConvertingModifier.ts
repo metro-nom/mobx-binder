@@ -60,7 +60,7 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> implement
         return this.view.toView(this.converter.convertToPresentation(modelValue))
     }
 
-    public validateAsync(onBlur: boolean): Promise<Validity<ValidationResult>> {
-        return this.view.validateAsync(onBlur)
+    public validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
+        return this.view.validateAsync(blurEvent)
     }
 }

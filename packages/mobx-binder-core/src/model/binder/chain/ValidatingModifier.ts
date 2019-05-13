@@ -33,8 +33,8 @@ export class ValidatingModifier<ValidationResult, ValueType> implements Modifier
         return this.view.toView(modelValue)
     }
 
-    public async validateAsync(onBlur: boolean): Promise<Validity<ValidationResult>> {
-        return this.calculateValidity(await this.view.validateAsync(onBlur))
+    public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
+        return this.calculateValidity(await this.view.validateAsync(blurEvent))
     }
 
     private calculateValidity(upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> {
