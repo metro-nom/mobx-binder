@@ -9,8 +9,13 @@ export class ChangeEventHandler<ValidationResult, ValueType> extends AbstractMod
                 private callback: (value: ValueType) => any) {
         super(view, context)
         reaction(
-            () => this.field.touched && !view.data.pending ? view.data : undefined,
-            this.handleChange)
+            () => this.field.touched &&
+            !view.data.pending &&
+            view.validity.status === 'validated' &&
+            this.context.valid(view.validity.result!)
+                ? view.data : undefined,
+            this.handleChange
+        )
     }
 
     private handleChange = (data?: Data<ValueType>) => {

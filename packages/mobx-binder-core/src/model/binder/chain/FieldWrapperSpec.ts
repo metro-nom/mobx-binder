@@ -28,9 +28,21 @@ describe('FieldWrapper', () => {
         })
     })
 
+    it('should return validity as async result', async () => {
+        expect(await fieldWrapper.validateAsync()).to.deep.equal({
+            status: 'validated',
+            result: undefined,
+        })
+    })
+
     describe('toView', () => {
         it('should return unchanged model value', () => {
             expect(fieldWrapper.toView('abc')).to.equal('abc')
         })
+    })
+
+    it('should not apply anything to field', () => {
+        fieldWrapper.applyConversionsToField()
+        expect(field.value).to.equal('myValue')
     })
 })

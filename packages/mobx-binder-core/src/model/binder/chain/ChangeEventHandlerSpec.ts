@@ -5,7 +5,7 @@ import { ChangeEventHandler } from './ChangeEventHandler'
 import { observable, runInAction } from 'mobx'
 import sinon = require('sinon')
 
-describe('ValidatingModifier', () => {
+describe('ChangeEventHandler', () => {
     const sandbox = sinon.createSandbox()
     const context = new SimpleContext()
     let field: TextField
@@ -42,6 +42,25 @@ describe('ValidatingModifier', () => {
         it('should not trigger callback if field is not touched', () => {
             runInAction(() => {
                 field.touched = false
+                upstream.data.value = 'newValue'
+            })
+            expect(callbackMock).to.not.have.been.called
+        })
+
+        it('should not trigger callback if value is pending', () => {
+            runInAction(() => {
+                field.touched = true
+                upstream.data.pending = true
+                upstream.data.value = 'newValue'
+            })
+            expect(callbackMock).to.not.have.been.called
+        })
+        it('should not trigger callback if value is invalid', () => {
+            upstream.validity = {
+                status: 'unknown',
+            }
+            runInAction(() => {
+                field.touched = true
                 upstream.data.value = 'newValue'
             })
             expect(callbackMock).to.not.have.been.called
