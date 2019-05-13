@@ -24,6 +24,10 @@ describe('ValidatingModifier', () => {
                 result: undefined,
             },
             field,
+            validateAsync: sandbox.stub().resolves({
+                status: 'validated',
+                result: undefined,
+            }),
             toView: sandbox.spy((value: any) => value),
         }
         validatorMock = sandbox.stub()
@@ -75,6 +79,34 @@ describe('ValidatingModifier', () => {
         it('should return non-pending error message if invalid', () => {
             validatorMock.withArgs('myValue').returns('fail')
             expect(modifier.validity).to.deep.equal({
+                status: 'validated',
+                result: 'fail',
+            })
+        })
+    })
+
+    describe('validateAsync', () => {
+        it('should return upstream validity if still unknown', async () => {
+            upstream.validateAsync.withArgs(false).resolves({ status: 'unknown' })
+            expect(await modifier.validateAsync(false)).to.deep.equal({
+                status: 'unknown',
+            })
+        })
+        it('should return upstream validity if still validating', async () => {
+            upstream.validateAsync.withArgs(false).resolves({ status: 'validating' })
+            expect(await modifier.validateAsync(false)).to.deep.equal({
+                status: 'validating',
+            })
+        })
+        it('should return non-pending validity if validation succeeds', async () => {
+            expect(await modifier.validateAsync(false)).to.deep.equal({
+                status: 'validated',
+                result: undefined,
+            })
+        })
+        it('should return non-pending error message if invalid', async () => {
+            validatorMock.withArgs('myValue').returns('fail')
+            expect(await modifier.validateAsync(false)).to.deep.equal({
                 status: 'validated',
                 result: 'fail',
             })
