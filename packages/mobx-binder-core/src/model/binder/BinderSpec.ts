@@ -13,7 +13,7 @@ const lengthValidator = (min: number, max: number): Validator<ErrorMessage, stri
 
 const numberValidator = (max: number) => (num?: number) => num !== undefined && num > max ? 'Too much' : undefined
 
-describe('Binder', () => {
+xdescribe('Binder', () => {
     const sandbox = sinon.createSandbox()
 
     let myField: FieldStore<string>

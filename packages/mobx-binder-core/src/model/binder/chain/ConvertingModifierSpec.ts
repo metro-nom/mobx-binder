@@ -26,6 +26,7 @@ describe('ConvertingModifier', () => {
             },
             field,
             toView: sandbox.spy((value: any) => value),
+            validateAsync: sandbox.stub()
         }
         converter = new SimpleNumberConverter()
         modifier = new ConvertingModifier(upstream, context, converter)
@@ -72,6 +73,12 @@ describe('ConvertingModifier', () => {
                 status: 'validating',
             })
         })
+        it('should return pending validity if data is pending', () => {
+            upstream.data.pending = true
+            expect(modifier.validity).to.deep.equal({
+                status: 'unknown',
+            })
+        })
         it('should return non-pending validity if validation succeeds', () => {
             expect(modifier.validity).to.deep.equal({
                 status: 'validated',
@@ -89,6 +96,20 @@ describe('ConvertingModifier', () => {
             const error = new Error('fail')
             converter.convertToModel = () => { throw error }
             expect(() => modifier.validity).to.throw(error)
+        })
+    })
+
+    describe('validateAsync', () => {
+        it('should return validity like in `validity`, but based on upstream validateAsync() response', async () => {
+            upstream.data = { pending: false, value: 'abc' }
+            upstream.validateAsync.withArgs(false).resolves({
+                status: 'validated',
+                result: undefined,
+            })
+            expect(await modifier.validateAsync(false)).to.deep.equal({
+                status: 'validated',
+                result: 'Not a number',
+            })
         })
     })
 
