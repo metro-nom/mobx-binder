@@ -58,21 +58,21 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
             return upstreamValidity
         }
         const upstreamData = this.view.data
-        if (this.status === 'initial' || this.status === 'validating' || upstreamData.value !== this.validatedValue) {
-            if (!blurEvent || this.options.onBlur) {
-                const result = await this.startNewValidation(upstreamData.value!)
-                return {
-                    status: 'validated',
-                    result,
-                }
-            }
+        if (this.status === 'validated' && upstreamData.value === this.validatedValue) {
             return {
-                status: this.status === 'validating' ? 'validating' : 'unknown',
+                status: 'validated',
+                result: this.lastValidationResult,
+            }
+        }
+        if (!blurEvent || this.options.onBlur) {
+            const result = await this.startNewValidation(upstreamData.value!)
+            return {
+                status: 'validated',
+                result,
             }
         }
         return {
-            status: 'validated',
-            result: this.lastValidationResult,
+            status: this.status === 'validating' ? 'validating' : 'unknown',
         }
     }
 

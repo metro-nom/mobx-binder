@@ -68,15 +68,15 @@ describe('AsyncValidatingModifier', () => {
     describe('validity', () => {
         it('should return upstream validity if still unknown', () => {
             upstream.validity = { status: 'unknown' }
-            expect(modifier.validity).to.deep.equal({
-                status: 'unknown',
-            })
+            expect(modifier.validity).to.deep.equal(upstream.validity)
         })
         it('should return upstream validity if still validating', () => {
             upstream.validity = { status: 'validating' }
-            expect(modifier.validity).to.deep.equal({
-                status: 'validating',
-            })
+            expect(modifier.validity).to.deep.equal(upstream.validity)
+        })
+        it('should return upstream validity if it failed', () => {
+            upstream.validity = { status: 'validated', result: 'fail' }
+            expect(modifier.validity).to.deep.equal(upstream.validity)
         })
         it('should return non-pending success if previous async validation succeeded', async () => {
             await modifier.validateAsync(false)
@@ -101,6 +101,23 @@ describe('AsyncValidatingModifier', () => {
                 status: 'unknown',
             })
         })
+        it('should not start a new validation on two consecutive calls', async () => {
+            await modifier.validateAsync(false)
+            await modifier.validateAsync(false)
+            expect(modifier.validity).to.deep.equal({
+                status: 'validated',
+                result: undefined,
+            })
+            expect(validatorMock).to.have.been.calledOnce
+        })
+        it('should start new validation if previous value was different', async () => {
+            upstream.data.value = 'wrong'
+            const promise = modifier.validateAsync(false)
+            upstream.data.value = 'ok'
+            await modifier.validateAsync(false)
+            expect(validatorMock).to.have.been.calledTwice
+            await promise // cleanup
+        })
         it('should not apply validation results if value changed before validation finished', async () => {
             upstream.data.value = 'wrong'
             const validationPromise = modifier.validateAsync(false)
@@ -116,13 +133,22 @@ describe('AsyncValidatingModifier', () => {
                 status: 'unknown',
             })
         })
-        it('should return pending validity if validation is ongoing', async () => {
+        it('should have pending validity if validation is ongoing', async () => {
             const promise = modifier.validateAsync(false)
             await sleep(5)
             expect(modifier.validity).to.deep.equal({
                 status: 'validating',
             })
-            await promise
+            await promise // for cleanup
+        })
+
+        it('should return pending validity if it is not itself validating but previous validation is still in progress', async () => {
+            const promise = modifier.validateAsync(false)
+            await sleep(5)
+            expect(await modifier.validateAsync(true)).to.deep.equal({
+                status: 'validating',
+            })
+            await promise // for cleanup
         })
 
         describe('onBlur', () => {
