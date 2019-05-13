@@ -24,7 +24,8 @@ describe('AbstractModifier', () => {
                 result: undefined,
             },
             field,
-            toView: sandbox.spy((value: any) => value),
+            toView: sandbox.stub().returnsArg(0),
+            applyConversionsToField: sandbox.stub(),
         }
         modifier = new AbstractModifier<ErrorMessage, string, string>(upstream, context)
     })
@@ -64,6 +65,23 @@ describe('AbstractModifier', () => {
         it('should pass unchanged value to upstream.toView()', () => {
             expect(modifier.toView('abc')).to.equal('abc')
             expect(upstream.toView).to.have.been.calledWith('abc')
+        })
+    })
+
+    describe('applyConversionsToField', () => {
+        it('should write back converted value to the field if own model value is valid', () => {
+            upstream.toView.withArgs('myValue').returns('123')
+            modifier.applyConversionsToField()
+            expect(field.value).to.equal('123')
+            expect(upstream.applyConversionsToField).to.not.have.been.called
+        })
+        it('should call upstream apply method if data is not valid', () => {
+            upstream.validity = {
+                status: 'validated',
+                result: 'error',
+            }
+            modifier.applyConversionsToField()
+            expect(upstream.applyConversionsToField).to.have.been.called
         })
     })
 })
