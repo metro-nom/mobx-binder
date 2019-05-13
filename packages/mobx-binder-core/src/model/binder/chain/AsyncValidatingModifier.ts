@@ -2,8 +2,9 @@ import { action, computed, observable, runInAction } from 'mobx'
 import { Modifier, Validity } from './Modifier'
 import { Context } from '../Context'
 import { AsyncValidator } from '../../../validation/Validator'
+import { AbstractModifier } from './AbstractModifier'
 
-export class AsyncValidatingModifier<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
+export class AsyncValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     @observable
     private status: 'initial' | 'validating' | 'validated' = 'initial'
 
@@ -14,11 +15,12 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> implements Mod
     private lastValidationResult?: ValidationResult
 
     constructor(
-        private view: Modifier<ValidationResult, any, ValueType>,
+        view: Modifier<ValidationResult, any, ValueType>,
+        context: Context<ValidationResult>,
         private validator: AsyncValidator<ValidationResult, ValueType>,
-        private context: Context<ValidationResult>,
-        private options: { onBlur: boolean },
-        public field = view.field) {
+        private options: { onBlur: boolean }
+    ) {
+        super(view, context)
     }
 
     get data() {
@@ -48,10 +50,6 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> implements Mod
         return {
             status: status === 'validating' ? 'validating' : 'unknown',
         }
-    }
-
-    public toView(modelValue: any) {
-        return this.view.toView(modelValue)
     }
 
     public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {

@@ -27,7 +27,7 @@ describe('ValidatingModifier', () => {
             toView: sandbox.spy((value: any) => value),
         }
         validatorMock = sandbox.stub()
-        modifier = new ValidatingModifier<ErrorMessage, string>(upstream, validatorMock, context)
+        modifier = new ValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock)
     })
 
     describe('data', () => {

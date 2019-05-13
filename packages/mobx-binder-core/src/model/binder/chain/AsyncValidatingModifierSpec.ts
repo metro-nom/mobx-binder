@@ -32,7 +32,7 @@ describe('AsyncValidatingModifier', () => {
             await sleep(10)
             return value === 'wrong' ? 'fail' : undefined
         })
-        modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, validatorMock, context, { onBlur: false })
+        modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock, { onBlur: false })
     })
 
     describe('data', () => {
@@ -134,7 +134,7 @@ describe('AsyncValidatingModifier', () => {
             })
 
             it('should validate on blur if configured', async () => {
-                modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, validatorMock, context, { onBlur: true })
+                modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock, { onBlur: true })
                 await modifier.validateAsync(true)
                 expect(modifier.validity).to.deep.equal({
                     status: 'validated',

@@ -28,7 +28,7 @@ describe('ConvertingModifier', () => {
             toView: sandbox.spy((value: any) => value),
         }
         converter = new SimpleNumberConverter()
-        modifier = new ConvertingModifier(upstream, converter, context)
+        modifier = new ConvertingModifier(upstream, context, converter)
     })
 
     describe('data', () => {

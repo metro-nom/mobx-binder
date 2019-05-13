@@ -1,13 +1,15 @@
 import { Modifier, Validity } from './Modifier'
 import { Converter } from '../../../conversion/Converter'
 import { Context } from '../Context'
+import { AbstractModifier } from './AbstractModifier'
 
-export class ConvertingModifier<ValidationResult, ViewType, ModelType> implements Modifier<ValidationResult, ViewType, ModelType> {
+export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends AbstractModifier<ValidationResult, ViewType, ModelType> {
     constructor(
-        private view: Modifier<ValidationResult, any, ViewType>,
-        private converter: Converter<ValidationResult, ViewType, ModelType>,
-        private context: Context<ValidationResult>,
-        public field = view.field) {
+        view: Modifier<ValidationResult, any, ViewType>,
+        context: Context<ValidationResult>,
+        private converter: Converter<ValidationResult, ViewType, ModelType>
+    ) {
+        super(view, context)
     }
 
     get data() {
@@ -31,8 +33,21 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> implement
 
     get validity(): Validity<ValidationResult> {
         const result = this.view.validity
-        if (result.status !== 'validated' || !this.context.valid(result.result!)) {
-            return result
+        return this.calculateValidity(result)
+    }
+
+
+    public toView(modelValue: any) {
+        return this.view.toView(this.converter.convertToPresentation(modelValue))
+    }
+
+    public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
+        return this.calculateValidity(await this.view.validateAsync(blurEvent))
+    }
+
+    private calculateValidity(upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> {
+        if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result!)) {
+            return upstreamValidity
         } else {
             const upstreamData = this.view.data
             if (upstreamData.pending) {
@@ -54,13 +69,5 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> implement
                 throw err
             }
         }
-    }
-
-    public toView(modelValue: any) {
-        return this.view.toView(this.converter.convertToPresentation(modelValue))
-    }
-
-    public validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
-        return this.view.validateAsync(blurEvent)
     }
 }

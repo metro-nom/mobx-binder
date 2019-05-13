@@ -17,5 +17,6 @@ export interface Modifier<ValidationResult, ViewType, ModelType> {
     toView(modelValue: any): {
         value?: ViewType
     }
+    applyConversionsToField(): void
     validateAsync(onBlur: boolean): Promise<Validity<ValidationResult>>
 }

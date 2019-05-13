@@ -28,4 +28,8 @@ export class FieldWrapper<ValidationResult, ValueType> implements Modifier<Valid
     public validateAsync(): Promise<Validity<ValidationResult>> {
         return Promise.resolve(this.validity)
     }
+
+    public applyConversionsToField(): void {
+        // nothing to apply
+    }
 }

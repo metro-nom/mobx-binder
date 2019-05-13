@@ -1,13 +1,14 @@
 import { Modifier, Validity } from './Modifier'
 import { Context } from '../Context'
 import { Validator } from '../../../validation/Validator'
+import { AbstractModifier } from './AbstractModifier'
 
-export class ValidatingModifier<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
+export class ValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     constructor(
-        private view: Modifier<ValidationResult, any, ValueType>,
-        private validator: Validator<ValidationResult, ValueType>,
-        private context: Context<ValidationResult>,
-        public field = view.field) {
+        view: Modifier<ValidationResult, any, ValueType>,
+        context: Context<ValidationResult>,
+        private validator: Validator<ValidationResult, ValueType>) {
+        super(view, context)
     }
 
     get data() {
@@ -27,10 +28,6 @@ export class ValidatingModifier<ValidationResult, ValueType> implements Modifier
 
     get validity() {
         return this.calculateValidity(this.view.validity)
-    }
-
-    public toView(modelValue: any) {
-        return this.view.toView(modelValue)
     }
 
     public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {

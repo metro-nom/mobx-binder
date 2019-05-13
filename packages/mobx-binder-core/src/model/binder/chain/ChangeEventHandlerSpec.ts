@@ -1,5 +1,5 @@
 import { TextField } from '../../..'
-import { ErrorMessage } from '../SimpleBinder'
+import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
 import { ChangeEventHandler } from './ChangeEventHandler'
 import { observable, runInAction } from 'mobx'
@@ -7,6 +7,7 @@ import sinon = require('sinon')
 
 describe('ValidatingModifier', () => {
     const sandbox = sinon.createSandbox()
+    const context = new SimpleContext()
     let field: TextField
     let upstream: any
     let callbackMock: any
@@ -27,7 +28,7 @@ describe('ValidatingModifier', () => {
             toView: sandbox.spy((value: any) => value),
         }
         callbackMock = sandbox.stub()
-        handler = new ChangeEventHandler<ErrorMessage, string>(upstream, callbackMock)
+        handler = new ChangeEventHandler<ErrorMessage, string>(upstream, context, callbackMock)
     })
 
     describe('data', () => {

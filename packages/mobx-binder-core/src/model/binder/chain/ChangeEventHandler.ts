@@ -1,29 +1,16 @@
-import { Data, Modifier, Validity } from './Modifier'
+import { Data, Modifier } from './Modifier'
 import { reaction } from 'mobx'
+import { AbstractModifier } from './AbstractModifier'
+import { Context } from '../Context'
 
-export class ChangeEventHandler<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
-    constructor(private view: Modifier<ValidationResult, any, ValueType>,
-                private callback: (value: ValueType) => any,
-                public field = view.field) {
+export class ChangeEventHandler<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
+    constructor(view: Modifier<ValidationResult, any, ValueType>,
+                context: Context<ValidationResult>,
+                private callback: (value: ValueType) => any) {
+        super(view, context)
         reaction(
-            () => field.touched && !view.data.pending ? view.data : undefined,
+            () => this.field.touched && !view.data.pending ? view.data : undefined,
             this.handleChange)
-    }
-
-    get data() {
-        return this.view.data
-    }
-
-    get validity() {
-        return this.view.validity
-    }
-
-    public toView(modelValue: any): { value?: ValueType } {
-        return this.view.toView(modelValue)
-    }
-
-    public validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
-        return this.view.validateAsync(blurEvent)
     }
 
     private handleChange = (data?: Data<ValueType>) => {

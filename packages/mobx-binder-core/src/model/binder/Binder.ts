@@ -279,7 +279,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param converter
      */
     public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType> {
-        return this.addModifier<NextType>(new ConvertingModifier(this.last, converter, this.binder.context))
+        return this.addModifier<NextType>(new ConvertingModifier(this.last, this.binder.context, converter))
     }
 
     /**
@@ -287,7 +287,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param validator
      */
     public withValidator(validator: Validator<ValidationResult, ValueType>): BindingBuilder<ValidationResult, ValueType> {
-        return this.addModifier<ValueType>(new ValidatingModifier(this.last, validator, this.binder.context))
+        return this.addModifier<ValueType>(new ValidatingModifier(this.last, this.binder.context, validator))
     }
 
     /**
@@ -298,7 +298,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
     @action
     public withAsyncValidator(asyncValidator: AsyncValidator<ValidationResult, ValueType>,
                               options: { onBlur: boolean } = { onBlur: false }): BindingBuilder<ValidationResult, ValueType> {
-        return this.addModifier<ValueType>(new AsyncValidatingModifier(this.last, asyncValidator, this.binder.context, options))
+        return this.addModifier<ValueType>(new AsyncValidatingModifier(this.last, this.binder.context, asyncValidator, options))
     }
 
     /**
@@ -323,7 +323,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param onChange
      */
     public onChange(onChange: (value: ValueType) => any): BindingBuilder<ValidationResult, ValueType> {
-        return this.addModifier(new ChangeEventHandler(this.last, onChange))
+        return this.addModifier(new ChangeEventHandler(this.last, this.binder.context, onChange))
     }
 
     /**
@@ -451,6 +451,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
         this.field.handleBlur = async () => {
             await this.validateAsync(true)
+            this.chain.applyConversionsToField()
             previous.call(this.field)
         }
     }
