@@ -133,8 +133,7 @@ describe('Binder', () => {
         let binder: SimpleBinder
 
         beforeEach(() => {
-            binder = new SimpleBinder()
-                .forField(myField).isRequired().withValidator(lengthValidator(5, 10)).bind()
+            binder = new SimpleBinder().forField(myField).isRequired().withValidator(lengthValidator(5, 10)).bind()
         })
 
         it('should expose the initial validity of a field during binding', () => {
@@ -169,6 +168,11 @@ describe('Binder', () => {
 
         it('should add required validation via special isRequired()', () => {
             expect(myField.errorMessage).to.equal('Please enter a value')
+        })
+
+        it('should add required validation with custom translation via special isRequired()', () => {
+            binder = new SimpleBinder().forField(myField).isRequired('custom message').bind()
+            expect(myField.errorMessage).to.equal('custom message')
         })
 
         it('should return positive validation results on validate()', () => {
