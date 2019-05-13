@@ -31,4 +31,8 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
             this.view.applyConversionsToField()
         }
     }
+
+    public isEqual(first: ModelType, second: ModelType): boolean {
+        return this.view.isEqual(first as any as ViewType, second as any as ViewType)
+    }
 }

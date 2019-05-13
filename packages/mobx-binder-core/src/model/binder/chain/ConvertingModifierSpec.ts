@@ -26,7 +26,8 @@ describe('ConvertingModifier', () => {
             },
             field,
             toView: sandbox.spy((value: any) => value),
-            validateAsync: sandbox.stub()
+            validateAsync: sandbox.stub(),
+            isEqual: sandbox.stub(),
         }
         converter = new SimpleNumberConverter()
         modifier = new ConvertingModifier(upstream, context, converter)
@@ -117,6 +118,31 @@ describe('ConvertingModifier', () => {
         it('should pass converted presentation value to upstream.toView()', () => {
             expect(modifier.toView(123)).to.equal('123')
             expect(upstream.toView).to.have.been.calledWith('123')
+        })
+    })
+
+    describe('isEqual', () => {
+        it('should just delegate to the upstream modifier by default', () => {
+            upstream.isEqual.withArgs(123, 123).returns(true)
+            upstream.isEqual.withArgs(123, 456).returns(false)
+
+            expect(modifier.isEqual(123, 123)).to.be.true
+            expect(modifier.isEqual(123, 456)).to.be.false
+
+            expect(upstream.isEqual).to.have.been.calledTwice
+        })
+
+        it('should delegate to the converter isEqual method if existing', () => {
+            const stub = converter.isEqual = sandbox.stub()
+            upstream.isEqual = () => { throw new Error('should not be called') }
+
+            stub.withArgs(123, 123).returns(true)
+            stub.withArgs(123, 456).returns(false)
+
+            expect(modifier.isEqual(123, 123)).to.be.true
+            expect(modifier.isEqual(123, 456)).to.be.false
+
+            expect(stub).to.have.been.calledTwice
         })
     })
 })

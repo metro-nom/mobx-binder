@@ -26,6 +26,7 @@ describe('AsyncValidatingModifier', () => {
             },
             field,
             toView: sandbox.stub(),
+            isEqual: (a: any, b: any) => a === b,
             validateAsync: sandbox.stub().resolves({ status: 'validated', result: undefined }),
         }
         validatorMock = sandbox.spy(async (value: string) => {

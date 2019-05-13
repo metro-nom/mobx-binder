@@ -32,4 +32,8 @@ export class FieldWrapper<ValidationResult, ValueType> implements Modifier<Valid
     public applyConversionsToField(): void {
         // nothing to apply
     }
+
+    public isEqual(first: ValueType, second: ValueType): boolean {
+        return first === second
+    }
 }

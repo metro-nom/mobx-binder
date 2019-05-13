@@ -44,6 +44,13 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
         return this.calculateValidity(await this.view.validateAsync(blurEvent))
     }
 
+    public isEqual(first: ModelType, second: ModelType): boolean {
+        if (this.converter.isEqual) {
+            return this.converter.isEqual.call(this.converter, first, second)
+        }
+        return super.isEqual(first, second)
+    }
+
     private calculateValidity(upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> {
         if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result!)) {
             return upstreamValidity

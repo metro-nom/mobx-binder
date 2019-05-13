@@ -45,4 +45,9 @@ describe('FieldWrapper', () => {
         fieldWrapper.applyConversionsToField()
         expect(field.value).to.equal('myValue')
     })
+
+    it('should provide a simple equality check working for simple types like strings and boolean', () => {
+        expect(fieldWrapper.isEqual('a', 'a')).to.be.true
+        expect(fieldWrapper.isEqual('a', 'b')).to.be.false
+    })
 })

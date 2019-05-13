@@ -21,4 +21,8 @@ export class MomentConverter implements Converter<BinderValidationResult, string
     public convertToPresentation(data?: moment.Moment): string {
         return data ? data.format(this.format) : ''
     }
+
+    public isEqual(first: moment.Moment, second: moment.Moment) {
+        return first.isSame(second)
+    }
 }

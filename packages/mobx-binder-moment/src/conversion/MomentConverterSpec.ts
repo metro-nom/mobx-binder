@@ -45,4 +45,11 @@ describe('MomentConverter', () => {
             expect(converter.convertToPresentation()).to.equal('')
         })
     })
+
+    describe('isEqual', () => {
+        it('should be able to check moments for equality', () => {
+            expect(converter.isEqual(moment('2017-10-23'), moment('2017-10-23'))).to.be.true
+            expect(converter.isEqual(moment('2017-10-23'), moment('2017-10-24'))).to.be.false
+        })
+    })
 })

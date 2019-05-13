@@ -26,6 +26,7 @@ describe('AbstractModifier', () => {
             field,
             toView: sandbox.stub().returnsArg(0),
             applyConversionsToField: sandbox.stub(),
+            isEqual: sandbox.stub(),
         }
         modifier = new AbstractModifier<ErrorMessage, string, string>(upstream, context)
     })
@@ -82,6 +83,16 @@ describe('AbstractModifier', () => {
             }
             modifier.applyConversionsToField()
             expect(upstream.applyConversionsToField).to.have.been.called
+        })
+    })
+
+    describe('isEqual', () => {
+        it('should just delegate to the upstream modifier by default', () => {
+            upstream.isEqual.withArgs('abc', 'abc').returns(true)
+            upstream.isEqual.withArgs('abc', 'def').returns(false)
+
+            expect(modifier.isEqual('abc', 'abc')).to.be.true
+            expect(modifier.isEqual('abc', 'def')).to.be.false
         })
     })
 })

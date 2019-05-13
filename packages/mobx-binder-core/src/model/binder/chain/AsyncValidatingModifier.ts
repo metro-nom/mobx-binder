@@ -41,7 +41,7 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
         if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result!)) {
             return upstreamValidity
         }
-        if (status === 'validated' && this.view.data.value === this.validatedValue) { // TODO equality
+        if (status === 'validated' && this.view.isEqual(this.view.data.value!, this.validatedValue!)) { // TODO equality
             return {
                 status: 'validated',
                 result: this.lastValidationResult,
