@@ -10,6 +10,7 @@ import { TranslateFunction } from 'react-mobx-i18n'
 import { ToggleField, TrimConverter } from '../../../../../mobx-binder-core/src'
 
 const { action } = mobx
+const trimConverter = new TrimConverter()
 
 export default class ProfileStore {
     public salutation = new TextField('salutation')
@@ -24,23 +25,23 @@ export default class ProfileStore {
     constructor(private personStore: PersonStore, t: TranslateFunction) {
         this.binder = new DefaultBinder({ t })
         this.binder
-            .forField(this.salutation).isRequired().withConverter(new TrimConverter()).bind()
-            .forField(this.fullName).isRequired().withConverter(new TrimConverter()).bind()
-            .forField(this.dateOfBirth).withConverter(new TrimConverter()).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
+            .forField(this.salutation).isRequired().withConverter(trimConverter).bind()
+            .forField(this.fullName).isRequired().withConverter(trimConverter).bind()
+            .forField(this.dateOfBirth).withConverter(trimConverter).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
 
             .forField(this.email)
             .isRequired()
-            .withConverter(new TrimConverter())
             .withAsyncValidator(async (value?: string) => {
                 await sleep(1000)
                 return EmailValidator.validate()(value)
             }, { onBlur: true })
+            .withConverter(trimConverter)
             .onChange(() => {
                 console.info('Email changed')
             })
             .bind()
 
-            .forField(this.phoneNumber).withConverter(new TrimConverter()).bind()
+            .forField(this.phoneNumber).withConverter(trimConverter).bind()
             .forField(this.toggle).bind()
     }
 
