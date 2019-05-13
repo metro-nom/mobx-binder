@@ -80,11 +80,4 @@ describe('ValidatingModifier', () => {
             })
         })
     })
-
-    describe('toView', () => {
-        it('should pass unchanged value to upstream.toView()', () => {
-            expect(modifier.toView('abc')).to.equal('abc')
-            expect(upstream.toView).to.have.been.calledWith('abc')
-        })
-    })
 })

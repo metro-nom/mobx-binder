@@ -11,7 +11,6 @@ describe('ValidatingModifier', () => {
     let field: TextField
     let upstream: any
     let callbackMock: any
-    let handler: ChangeEventHandler<ErrorMessage, string>
 
     beforeEach(() => {
         field = new TextField('myField')
@@ -28,25 +27,7 @@ describe('ValidatingModifier', () => {
             toView: sandbox.spy((value: any) => value),
         }
         callbackMock = sandbox.stub()
-        handler = new ChangeEventHandler<ErrorMessage, string>(upstream, context, callbackMock)
-    })
-
-    describe('data', () => {
-        it('should pass through any upstream data', () => {
-            expect(handler.data).to.deep.equal({
-                pending: false,
-                value: 'myValue',
-            })
-        })
-    })
-
-    describe('validity', () => {
-        it('should pass through any validity', () => {
-            expect(handler.validity).to.deep.equal({
-                status: 'validated',
-                result: undefined,
-            })
-        })
+        new ChangeEventHandler<ErrorMessage, string>(upstream, context, callbackMock)
     })
 
     describe('handle change', () => {
