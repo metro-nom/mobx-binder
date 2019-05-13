@@ -24,7 +24,7 @@ describe('ValidatingModifier', () => {
                 result: undefined,
             },
             field,
-            toView: sandbox.stub(),
+            toView: sandbox.spy((value: any) => value),
         }
         callbackMock = sandbox.stub()
         handler = new ChangeEventHandler<ErrorMessage, string>(upstream, callbackMock)

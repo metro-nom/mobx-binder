@@ -25,7 +25,7 @@ describe('ConvertingModifier', () => {
                 result: undefined,
             },
             field,
-            toView: sandbox.stub(),
+            toView: sandbox.spy((value: any) => value),
         }
         converter = new SimpleNumberConverter()
         modifier = new ConvertingModifier(upstream, converter, context)
@@ -89,6 +89,13 @@ describe('ConvertingModifier', () => {
             const error = new Error('fail')
             converter.convertToModel = () => { throw error }
             expect(() => modifier.validity).to.throw(error)
+        })
+    })
+
+    describe('toView', () => {
+        it('should pass converted presentation value to upstream.toView()', () => {
+            expect(modifier.toView(123)).to.equal('123')
+            expect(upstream.toView).to.have.been.calledWith('123')
         })
     })
 })

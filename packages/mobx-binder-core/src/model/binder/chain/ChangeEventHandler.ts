@@ -5,7 +5,9 @@ export class ChangeEventHandler<ValidationResult, ValueType> implements Modifier
     constructor(private view: Modifier<ValidationResult, any, ValueType>,
                 private callback: (value: ValueType) => any,
                 public field = view.field) {
-        reaction(() => field.touched && !view.data.pending ? view.data : undefined, this.handleChange)
+        reaction(
+            () => field.touched && !view.data.pending ? view.data : undefined,
+            this.handleChange)
     }
 
     get data() {

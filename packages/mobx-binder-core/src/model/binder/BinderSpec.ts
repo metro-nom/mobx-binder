@@ -204,6 +204,11 @@ describe('Binder', () => {
 
         it('should initially be valid == false because of sync validation', () => {
             binder = new SimpleBinder().forField(myField).isRequired().withAsyncValidator(validator).bind()
+
+            // TextField <- ViewWrapper <- RequiredValidator <- async validator
+
+
+
             expect(myField.valid).to.be.false
         })
 

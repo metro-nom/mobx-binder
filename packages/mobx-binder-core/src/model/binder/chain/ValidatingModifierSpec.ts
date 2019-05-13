@@ -24,7 +24,7 @@ describe('ValidatingModifier', () => {
                 result: undefined,
             },
             field,
-            toView: sandbox.stub(),
+            toView: sandbox.spy((value: any) => value),
         }
         validatorMock = sandbox.stub()
         modifier = new ValidatingModifier<ErrorMessage, string>(upstream, validatorMock, context)
@@ -83,9 +83,8 @@ describe('ValidatingModifier', () => {
 
     describe('toView', () => {
         it('should pass unchanged value to upstream.toView()', () => {
-            upstream.toView.returns('myValue')
-            expect(upstream.toView('myValue')).to.equal('myValue')
-            expect(upstream.toView).to.have.been.calledWith('myValue')
+            expect(modifier.toView('abc')).to.equal('abc')
+            expect(upstream.toView).to.have.been.calledWith('abc')
         })
     })
 })

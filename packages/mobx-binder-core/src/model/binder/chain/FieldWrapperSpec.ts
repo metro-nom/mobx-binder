@@ -27,4 +27,10 @@ describe('FieldWrapper', () => {
             result: undefined,
         })
     })
+
+    describe('toView', () => {
+        it('should return unchanged model value', () => {
+            expect(fieldWrapper.toView('abc')).to.equal('abc')
+        })
+    })
 })
