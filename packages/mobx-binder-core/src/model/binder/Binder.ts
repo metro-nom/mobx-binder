@@ -3,7 +3,7 @@ import { action, computed, isObservable, observable, toJS, runInAction } from 'm
 import { StringConverter } from '../../conversion/StringConverter'
 import { FieldStore } from '../fields/FieldStore'
 import { Modifier } from './chain/Modifier'
-import { FieldView } from './chain/FieldView'
+import { FieldWrapper } from './chain/FieldWrapper'
 import { ConvertingModifier } from './chain/ConvertingModifier'
 import { ValidatingModifier } from './chain/ValidatingModifier'
 import { AsyncValidatingModifier } from './chain/AsyncValidatingModifier'
@@ -267,7 +267,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
 
     constructor(private readonly binder: Binder<ValidationResult>,
                 private readonly field: FieldStore<ValueType>,
-                private last: Modifier<ValidationResult, any, any> = new FieldView(field, binder.context)) {
+                private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context)) {
         if (this.field.valueType === 'string') {
             this.withConverter(new StringConverter() as any)
         }
@@ -356,7 +356,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
         return this.binder
     }
 
-    private addModifier<NextType>(modifier: Modifier<ValidationResult, ValueType, NextType>) {
+    private addModifier<NextType>(modifier: Modifier<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType> {
         this.last = modifier
         return this as any
     }

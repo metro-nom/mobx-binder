@@ -4,27 +4,14 @@ import { TextField } from '../fields/TextField'
 import * as sinon from 'sinon'
 import sleep from '../../test/sleep'
 import { ErrorMessage, SimpleBinder } from './SimpleBinder'
-import { Converter, ValidationError } from '../..'
 import { action, observable } from 'mobx'
 import { Validator } from '../../validation/Validator'
+import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
 
 const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string> =>
     (value?: string) => !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
 
 const numberValidator = (max: number) => (num?: number) => num !== undefined && num > max ? 'Too much' : undefined
-
-class SimpleNumberConverter implements Converter<ErrorMessage, string, number> {
-    public convertToModel(value: string): number | undefined {
-        if (isNaN(Number(value))) {
-            throw new ValidationError('Not a number')
-        }
-        return Number(value)
-    }
-
-    public convertToPresentation(data?: number): string | undefined {
-        return data !== undefined ? `${data}` : ''
-    }
-}
 
 describe('Binder', () => {
     const sandbox = sinon.createSandbox()

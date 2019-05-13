@@ -2,7 +2,7 @@ import { Modifier, Validity } from './Modifier'
 import { Context } from '../Context'
 import { FieldStore } from '../../fields/FieldStore'
 
-export class FieldView<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
+export class FieldWrapper<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
     constructor(public field: FieldStore<ValueType>,
                 private context: Context<ValidationResult>) {
     }

@@ -2,7 +2,6 @@ import { action, computed, observable, runInAction } from 'mobx'
 import { Modifier, Validity } from './Modifier'
 import { Context } from '../Context'
 import { AsyncValidator } from '../../../validation/Validator'
-import { ValidationError } from '../../../conversion/ValidationError'
 
 export class AsyncValidatingModifier<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
     @observable
@@ -24,23 +23,12 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> implements Mod
 
     get data() {
         const data = this.view.data
-        if (data.pending) {
+        if (this.status === 'validated' && data.value === this.validatedValue && this.context.valid(this.lastValidationResult!)) {
             return data
         }
-        if (this.status === 'initial' || data.value !== this.validatedValue) { // TODO equality
-            return {
-                pending: true,
-            }
+        return {
+            pending: true,
         }
-        if (this.status === 'validating') {
-            return {
-                pending: true,
-            }
-        }
-        if (this.context.valid(this.lastValidationResult!)) {
-            return data
-        }
-        throw new ValidationError(this.lastValidationResult)
     }
 
     @computed
@@ -66,14 +54,14 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> implements Mod
         return this.view.toView(modelValue)
     }
 
-    public async validateAsync(onBlur: boolean): Promise<Validity<ValidationResult>> {
-        const upstreamValidity = await this.view.validateAsync(onBlur)
+    public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
+        const upstreamValidity = await this.view.validateAsync(blurEvent)
         if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result!)) {
             return upstreamValidity
         }
         const upstreamData = this.view.data
         if (this.status === 'initial' || this.status === 'validating' || upstreamData.value !== this.validatedValue) {
-            if (!onBlur || this.options.onBlur) {
+            if (!blurEvent || this.options.onBlur) {
                 const result = await this.startNewValidation(upstreamData.value!)
                 return {
                     status: 'validated',

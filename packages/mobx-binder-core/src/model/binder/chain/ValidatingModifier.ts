@@ -1,7 +1,6 @@
 import { Modifier, Validity } from './Modifier'
 import { Context } from '../Context'
 import { Validator } from '../../../validation/Validator'
-import { ValidationError } from '../../../conversion/ValidationError'
 
 export class ValidatingModifier<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
     constructor(
@@ -20,7 +19,9 @@ export class ValidatingModifier<ValidationResult, ValueType> implements Modifier
             if (this.context.valid(result)) {
                 return data
             }
-            throw new ValidationError(result)
+            return {
+                pending: true,
+            }
         }
     }
 

@@ -1,7 +1,6 @@
 import { Modifier, Validity } from './Modifier'
 import { Converter } from '../../../conversion/Converter'
 import { Context } from '../Context'
-import { ValidationError } from '../../../conversion/ValidationError'
 
 export class ConvertingModifier<ValidationResult, ViewType, ModelType> implements Modifier<ValidationResult, ViewType, ModelType> {
     constructor(
@@ -13,11 +12,20 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> implement
 
     get data() {
         const data = this.view.data
-        return data.pending ? {
-            pending: true,
-        } : {
-            pending: false,
-            value: this.converter.convertToModel(data.value!),
+        if (data.pending) {
+            return { pending: true }
+        }
+        try {
+            const value = this.converter.convertToModel(data.value!)
+            return {
+                pending: false,
+                value,
+            }
+        } catch (err) {
+            if (err.validationResult) {
+                return { pending: true }
+            }
+            throw err
         }
     }
 
@@ -26,19 +34,24 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> implement
         if (result.status !== 'validated' || !this.context.valid(result.result!)) {
             return result
         } else {
+            const upstreamData = this.view.data
+            if (upstreamData.pending) {
+                return { status: 'unknown' }
+            }
             try {
-                const data = this.data
-                return data.pending ? {
-                    status: 'unknown',
-                } : {
+                this.converter.convertToModel(upstreamData.value!)
+                return {
                     status: 'validated',
                     result: this.context.validResult,
                 }
             } catch (err) {
-                return {
-                    status: 'validated',
-                    result: (err as ValidationError<ValidationResult>).validationResult,
+                if (err.validationResult) {
+                    return {
+                        status: 'validated',
+                        result: err.validationResult,
+                    }
                 }
+                throw err
             }
         }
     }
