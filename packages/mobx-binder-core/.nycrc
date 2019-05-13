@@ -5,7 +5,11 @@
         "lcov",
         "text"
     ],
+    "include": [
+        "src/**/*.ts"
+    ],
     "exclude": [
+        "src/**/*Spec.ts",
         "src/test/**/*.ts"
     ]
 }

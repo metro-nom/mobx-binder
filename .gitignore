@@ -2,8 +2,10 @@
 .vscode
 .autoenv.zsh
 *.iml
-node_modules
-build
-dist
-lib
+.nyc_output/
+coverage/
+node_modules/
+build/
+dist/
+lib/
 webpack-stats.json
