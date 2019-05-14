@@ -22,6 +22,7 @@ const i18n = new I18nStore('en', {
         'form.fields.email': 'E-mail',
         'form.fields.toggle': 'Please toggle',
         'profilePage.saveButton.label': 'Save',
+        'validations.fullName.submissionError': 'The full name seems to be wrong due to server side validation',
         'validations.required': 'Please enter something',
         'validations.email': 'Please enter a valid email address',
         'conversions.error.moment': 'Please enter a valid date',
