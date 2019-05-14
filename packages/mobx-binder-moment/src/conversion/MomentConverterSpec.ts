@@ -12,6 +12,9 @@ describe('MomentConverter', () => {
         it('should convert empty string presentation to undefined', () => {
             expect(converter.convertToModel('')).to.be.undefined
         })
+        it('should undefined presentation to undefined', () => {
+            expect(converter.convertToModel(undefined)).to.be.undefined
+        })
 
         describe('errors', () => {
             it('should fail with standard message if conversion fails', () => {

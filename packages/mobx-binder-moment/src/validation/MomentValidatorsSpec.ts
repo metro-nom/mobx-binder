@@ -21,6 +21,13 @@ describe('MomentValidators', () => {
     })
 
     data_driven([
+        // with undefined value
+        { method: 'dayInFuture', args: [], value: undefined },
+        { method: 'todayOrInFuture', args: [], value: undefined },
+        { method: 'dayInPast', args: [], value: undefined },
+        { method: 'todayOrInPast', args: [], value: undefined },
+        { method: 'age', args: [ 18 ], value: undefined },
+        // with moment
         { method: 'dayInFuture', args: [], value: date('01.01.2099') },
         { method: 'todayOrInFuture', args: [], value: date('01.01.2099') },
         { method: 'todayOrInFuture', args: [], value: today },

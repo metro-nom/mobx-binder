@@ -2,7 +2,7 @@ import { Converter } from './Converter'
 
 export class StringConverter implements Converter<any, string, string> {
 
-    public convertToModel(value: string): string | undefined {
+    public convertToModel(value?: string): string | undefined {
         return value === '' ? undefined : value
     }
 
