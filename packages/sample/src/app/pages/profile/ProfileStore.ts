@@ -8,6 +8,7 @@ import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
 import { TranslateFunction } from 'react-mobx-i18n'
 import { ToggleField, TrimConverter } from '../../../../../mobx-binder-core/src'
+import { runInAction } from 'mobx'
 
 const { action } = mobx
 const trimConverter = new TrimConverter()
@@ -22,7 +23,7 @@ export default class ProfileStore {
 
     public binder: DefaultBinder
 
-    constructor(private personStore: PersonStore, t: TranslateFunction) {
+    constructor(private personStore: PersonStore, private t: TranslateFunction) {
         this.binder = new DefaultBinder({ t })
         this.binder
             .forField(this.salutation).isRequired().withConverter(trimConverter).bind()
@@ -53,15 +54,24 @@ export default class ProfileStore {
     public onSubmit = () => {
         if (!this.binder.submitting) {
             return this.binder.submit(this.personStore,
-                () => {
+                async data => {
+                    await sleep(1000)
+                    if (data.fullName === 'show-submission-error') {
+                        throw new Error('wrong-fullName')
+                    }
                     this.binder.setUnchanged()
-                    return sleep(1000)
+                    return data
                 })
                 .then(values => {
                     console.info('Submission successful', values)
                 })
                 .catch((err: Error) => {
                     console.info(`Submit validation failed: ${err.message}`)
+                    if (err.message === 'wrong-fullName') {
+                        runInAction(() => {
+                            this.fullName.errorMessage = this.t('validations.fullName.submissionError')
+                        })
+                    }
                 })
         }
     }

@@ -12,8 +12,9 @@ export interface FieldStore<ValueType> {
 
     /**
      * Indicates if the values has changed since last `Binder.load()` or `Binder.setUnchanged()`
+     * This property is replaced by a getter on bind.
      */
-    changed: boolean
+    readonly changed: boolean
 
     /**
      * If false, validation results should not be shown - like on initial rendering or until first field blur event.
@@ -27,8 +28,9 @@ export interface FieldStore<ValueType> {
 
     /**
      * The validity status of a form field. Always set, except for unfinished async validations.
+     * This property is replaced by a getter on bind.
      */
-    valid?: boolean
+    readonly valid?: boolean
 
     /**
      * Set to `true` when a field gets focus for the first time.
@@ -38,15 +40,17 @@ export interface FieldStore<ValueType> {
     /**
      * Set to `true` on first change. Fields are untouched initially, after load() or reset()
      */
-    touched: boolean
+    readonly touched: boolean
 
     /**
      * `true` when an async validation is in progress for the current field.
+     * This property is replaced by a getter on bind.
      */
-    validating: boolean
+    readonly validating: boolean
 
     /**
      * If `valid === false`, containing the validation message.
+     * This property is replaced by a getter/setter on bind.
      */
     errorMessage?: string
 

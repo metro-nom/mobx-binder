@@ -1,5 +1,5 @@
 import { Converter } from '../../conversion/Converter'
-import { action, computed, isObservable, observable, toJS, runInAction } from 'mobx'
+import { action, computed, isObservable, observable, reaction, runInAction, toJS } from 'mobx'
 import { StringConverter } from '../../conversion/StringConverter'
 import { FieldStore } from '../fields/FieldStore'
 import { Modifier } from './chain/Modifier'
@@ -63,7 +63,9 @@ export class Binder<ValidationResult> {
     private bindings: Array<StandardBinding<ValidationResult>> = observable([])
 
     constructor(public readonly context: Context<ValidationResult>) {
-        runInAction(() => { this.submitting = false })
+        runInAction(() => {
+            this.submitting = false
+        })
     }
 
     /**
@@ -246,7 +248,8 @@ export class Binder<ValidationResult> {
             action(err => {
                 this.submitting = false
                 throw err
-            }))
+            })
+        )
     }
 
     /**
@@ -336,7 +339,8 @@ export class BindingBuilder<ValidationResult, ValueType> {
 
         return this.bind2(
             (source: any) => source[ propertyName ],
-            (target: any, value?: ValueType) => target[ propertyName ] = value)
+            (target: any, value?: ValueType) => target[ propertyName ] = value
+        )
     }
 
     /**
@@ -352,7 +356,8 @@ export class BindingBuilder<ValidationResult, ValueType> {
         this.field.required = this.required
 
         this.binder.addBinding(new StandardBinding(this.binder.context, this.field, this.last,
-            read, this.readOnly ? undefined : write))
+            read, this.readOnly ? undefined : write
+        ))
         return this.binder
     }
 
@@ -365,6 +370,9 @@ export class BindingBuilder<ValidationResult, ValueType> {
 class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     @observable
     private unchangedValue?: any
+
+    @observable
+    private customErrorMessage?: string
 
     constructor(private readonly context: Context<ValidationResult>,
                 public readonly field: FieldStore<any>,
@@ -404,11 +412,17 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @computed
     public get valid() {
+        if (this.customErrorMessage) {
+            return false
+        }
         return this.validity.status === 'validated' ? this.context.valid(this.validity.result!) : undefined
     }
 
     @computed
     get errorMessage() {
+        if (this.customErrorMessage) {
+            return this.customErrorMessage
+        }
         return this.valid === false ? this.context.translate(this.validity.result!) : undefined
     }
 
@@ -457,9 +471,22 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     }
 
     private observeField() {
+        this.clearCustomErrorMessageOnValueChange()
         Object.defineProperty(this.field, 'valid', { get: () => this.valid })
         Object.defineProperty(this.field, 'validating', { get: () => this.validating })
-        Object.defineProperty(this.field, 'errorMessage', { get: () => this.errorMessage })
+        Object.defineProperty(this.field, 'errorMessage', {
+            get: () => this.errorMessage,
+            set: (customErrorMessage?: string) => this.customErrorMessage = customErrorMessage,
+        })
         Object.defineProperty(this.field, 'changed', { get: () => this.changed })
+    }
+
+    private clearCustomErrorMessageOnValueChange() {
+        reaction(
+            () => this.field.value,
+            () => {
+                this.customErrorMessage = undefined
+            }
+        )
     }
 }

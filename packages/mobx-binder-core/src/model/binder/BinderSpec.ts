@@ -196,6 +196,28 @@ describe('Binder', () => {
         it('should provide global validation status for submit button', () => {
             expect(binder.valid).to.be.false
         })
+
+        describe('custom error message', () => {
+            it('should allow setting a custom error message', () => {
+                myField.errorMessage = 'My custom error message'
+                expect(myField.errorMessage).to.equal('My custom error message')
+            })
+
+            it('should get invalid if custom error message is set', () => {
+                myField.updateValue('valid')
+                myField.errorMessage = 'My custom error message'
+                expect(myField.valid).to.be.false
+                expect(myField.errorMessage).to.equal('My custom error message')
+            })
+
+            it('should reset to calculated errors on next change', () => {
+                myField.updateValue('valid')
+                myField.errorMessage = 'My custom error message'
+                myField.updateValue('other')
+                expect(myField.valid).to.be.true
+                expect(myField.errorMessage).to.be.undefined
+            })
+        })
     })
 
     describe('async validation', () => {
