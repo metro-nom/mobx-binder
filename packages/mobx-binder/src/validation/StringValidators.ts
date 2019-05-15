@@ -28,6 +28,7 @@ export class StringValidators {
 
     public static regexp(regexp: RegExp, messageKey = 'validations.regexp'): BinderValidator<string> {
         return (value) => {
+            regexp.lastIndex = 0
             const mismatch = !!value && !regexp.test(value)
             return StringValidators.validate(mismatch, messageKey, { value, regexp: regexp.toString() })
         }
