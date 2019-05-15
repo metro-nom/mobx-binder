@@ -401,9 +401,9 @@ describe('Binder', () => {
                 .withAsyncValidator(() => sleep(100).then(() => 'fail'), { onBlur: true }).bind()
 
             myField.updateValue('12345')
-            const promise = binder.validateAsync()
+            const promise = binder.validateAsync().should.be.rejected
             await sleep(200)
-            await promise.should.be.rejected
+            await promise
 
             myField.updateValue('123456')
             expect(myField.valid).to.be.undefined
