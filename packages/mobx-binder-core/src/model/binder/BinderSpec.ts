@@ -68,6 +68,31 @@ describe('Binder', () => {
             })
         })
 
+        describe('apply', () => {
+            it('should update a field value from it\'s backend representation via a given source object', () => {
+                const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                binder.load({ myField: 5 })
+                binder.binding(myField).apply({ myField: 6 })
+                expect(myField.value).to.equal('6')
+                expect(myField.changed).to.be.true
+            })
+
+            it('should not change anything if the backend value didn\'t change', () => {
+                const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                binder.load({ myField: 5 })
+                binder.binding(myField).apply({ myField: 5 })
+                expect(myField.value).to.equal('5')
+                expect(myField.changed).to.be.false
+            })
+        })
+
+        describe('getFieldValue', () => {
+            it('should return the view representation for the data in the given source object', () => {
+                const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                expect(binder.binding(myField).getFieldValue({ myField: 6 })).to.equal('6')
+            })
+        })
+
         describe('store', () => {
             it('should store to bound target property named after the field, updating the given target object', () => {
                 const binder = new SimpleBinder().forField(myField).bind()
@@ -126,6 +151,36 @@ describe('Binder', () => {
 
                 expect(binder.store()).to.deep.equal({})
             })
+        })
+    })
+
+    describe('changedData', () => {
+        let binder: SimpleBinder
+
+        beforeEach(() => {
+            binder = new SimpleBinder()
+                .forField(myField).withValidator(lengthValidator(2, 12)).bind()
+                .forField(secondField).bind()
+            binder.load({
+                myField: 'my',
+                secondField: 'second',
+            })
+        })
+
+        it('should return data of valid and changed bindings', () => {
+            myField.updateValue('changedValue')
+            expect(binder.changedData).to.deep.equal({
+                myField: 'changedValue',
+            })
+        })
+
+        it('should not return data of invalid changed bindings', () => {
+            myField.updateValue('invalidChangedValue')
+            expect(binder.changedData).to.deep.equal({})
+        })
+
+        it('should return an empty object if nothing has changed', () => {
+            expect(binder.changedData).to.deep.equal({})
         })
     })
 

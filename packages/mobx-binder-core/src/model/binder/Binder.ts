@@ -28,6 +28,20 @@ export interface Binding<ValidationResult> {
     load(source: any): void
 
     /**
+     * Update the field value from the source object, treating it as a change.
+     *
+     * @param source
+     */
+    apply(source: any): void
+
+    /**
+     * Return the view representation of the field value from the source object.
+     *
+     * @param source
+     */
+    getFieldValue(source: any): any
+
+    /**
      * Store the valid field value to the target object
      *
      * @param target
@@ -60,12 +74,16 @@ export class Binder<ValidationResult> {
     @observable
     public submitting?: boolean
 
-    private bindings: Array<StandardBinding<ValidationResult>> = observable([])
+    private _bindings: Array<StandardBinding<ValidationResult>> = observable([]) // tslint:disable-line variable-name
 
     constructor(public readonly context: Context<ValidationResult>) {
         runInAction(() => {
             this.submitting = false
         })
+    }
+
+    get bindings(): ReadonlyArray<StandardBinding<ValidationResult>> {
+        return this._bindings
     }
 
     /**
@@ -74,16 +92,7 @@ export class Binder<ValidationResult> {
      * @param field
      */
     public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<ValidationResult, ValueType> {
-        return new BindingBuilder(this, field)
-    }
-
-    /**
-     * Used by the `BindingBuilder` after preparing a new field.
-     * @param binding
-     */
-    @action
-    public addBinding(binding: StandardBinding<ValidationResult>) {
-        this.bindings.push(binding)
+        return new BindingBuilder(this, this.addBinding.bind(this), field)
     }
 
     /**
@@ -95,7 +104,7 @@ export class Binder<ValidationResult> {
     @action
     public removeBinding(field: FieldStore<any>): void {
         const index = this.bindings.findIndex(binding => binding.field === field)
-        this.bindings.splice(index, 1)
+        this._bindings.splice(index, 1)
     }
 
     /**
@@ -177,6 +186,16 @@ export class Binder<ValidationResult> {
         return this.bindings
             .map(binding => binding.changed)
             .some(changed => changed)
+    }
+
+    @computed
+    get changedData(): any {
+        return this.bindings
+            .filter(binding => binding.changed && binding.valid === true)
+            .reduce((data: any, binding: Binding<ValidationResult>) => {
+                binding.store(data)
+                return data
+            }, {})
     }
 
     /**
@@ -262,6 +281,14 @@ export class Binder<ValidationResult> {
         })
     }
 
+    /**
+     * Used by the `BindingBuilder` after preparing a new field.
+     * @param binding
+     */
+    @action
+    private addBinding(binding: StandardBinding<ValidationResult>) {
+        this._bindings.push(binding)
+    }
 }
 
 export class BindingBuilder<ValidationResult, ValueType> {
@@ -269,6 +296,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
     private required = false
 
     constructor(private readonly binder: Binder<ValidationResult>,
+                private readonly addBinding: (binding: StandardBinding<ValidationResult>) => void,
                 private readonly field: FieldStore<ValueType>,
                 private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context)) {
         if (this.field.valueType === 'string') {
@@ -355,7 +383,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
         this.field.readOnly = this.readOnly || !write
         this.field.required = this.required
 
-        this.binder.addBinding(new StandardBinding(this.binder.context, this.field, this.last,
+        this.addBinding(new StandardBinding(this.binder.context, this.field, this.last,
             read, this.readOnly ? undefined : write
         ))
         return this.binder
@@ -411,7 +439,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     }
 
     @computed
-    public get valid() {
+    public get valid(): boolean | undefined {
         if (this.customErrorMessage) {
             return false
         }
@@ -446,10 +474,20 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @action
     public load(source: any): void {
-        const value = this.read(source)
-        const viewValue = this.chain.toView(value)
-        this.field.reset(viewValue)
+        const fieldValue = this.getFieldValue(source)
+        this.field.reset(fieldValue)
         this.setUnchanged()
+    }
+
+    @action
+    public apply(source: any): void {
+        const fieldValue = this.getFieldValue(source)
+        this.field.updateValue(fieldValue)
+    }
+
+    public getFieldValue(source: any) {
+        const value = this.read(source)
+        return this.chain.toView(value)
     }
 
     public store(target: any) {
