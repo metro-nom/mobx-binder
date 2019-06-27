@@ -140,6 +140,18 @@ export class Binder<ValidationResult> {
     }
 
     /**
+     * Update all field values from the given backend object, treating them as changed.
+     *
+     * @param source
+     */
+    @action
+    public apply(source: any): void {
+        this.bindings.forEach(binding => {
+            binding.apply(source)
+        })
+    }
+
+    /**
      * Stores converted valid field values to to the given backend object.
      *
      * @param target

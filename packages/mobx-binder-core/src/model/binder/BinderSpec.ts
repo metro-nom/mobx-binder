@@ -69,20 +69,41 @@ describe('Binder', () => {
         })
 
         describe('apply', () => {
-            it('should update a field value from it\'s backend representation via a given source object', () => {
-                const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
-                binder.load({ myField: 5 })
-                binder.binding(myField).apply({ myField: 6 })
-                expect(myField.value).to.equal('6')
-                expect(myField.changed).to.be.true
+            describe('on Binder level', () => {
+                it('should update all field values from a source object', () => {
+                    const binder = new SimpleBinder()
+                        .forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                        .forField(secondField).bind()
+                    binder.load({
+                        myField: 'my',
+                        secondField: 'second',
+                    })
+                    binder.apply({
+                        myField: 'changedValue',
+                        secondField: 'second',
+                    })
+                    expect(myField.value).to.equal('changedValue')
+                    expect(myField.changed).to.be.true
+                    expect(secondField.changed).to.be.false
+                })
             })
 
-            it('should not change anything if the backend value didn\'t change', () => {
-                const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
-                binder.load({ myField: 5 })
-                binder.binding(myField).apply({ myField: 5 })
-                expect(myField.value).to.equal('5')
-                expect(myField.changed).to.be.false
+            describe('on Binding level', () => {
+                it('should update a field value from it\'s backend representation via a given source object', () => {
+                    const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                    binder.load({ myField: 5 })
+                    binder.binding(myField).apply({ myField: 6 })
+                    expect(myField.value).to.equal('6')
+                    expect(myField.changed).to.be.true
+                })
+
+                it('should not change anything if the backend value didn\'t change', () => {
+                    const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                    binder.load({ myField: 5 })
+                    binder.binding(myField).apply({ myField: 5 })
+                    expect(myField.value).to.equal('5')
+                    expect(myField.changed).to.be.false
+                })
             })
         })
 
