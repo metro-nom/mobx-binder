@@ -148,7 +148,7 @@ binder.store(values) // =>  values == { foo: 'bar', fullName: 'Max Mustermann' }
 
 The `bind()` command is a shorthand for a call to `bind2`, which just stores a (converted and validated) field value to a backing object using a property named like the field. But it's also possible to bind using more complex read and write callbacks:
 
-[source,typescript]
+[source,js]
 ----
 public fullName = new TextField('fullName')
 ...
@@ -178,7 +178,7 @@ You can get a backend object only filled with data that has been changed via the
 
 In combination with the Binders `apply()` method it's possible to find changes between two sets of data:
 
-[source,typescript]
+[source,js]
 ----
 public fullName = new TextField('fullName')
 public email = new TextField('email')
