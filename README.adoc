@@ -148,7 +148,7 @@ binder.store(values) // =>  values == { foo: 'bar', fullName: 'Max Mustermann' }
 
 The `bind()` command is a shorthand for a call to `bind2`, which just stores a (converted and validated) field value to a backing object using a property named like the field. But it's also possible to bind using more complex read and write callbacks:
 
-[source,js]
+[source,typescript]
 ----
 public fullName = new TextField('fullName')
 ...
@@ -170,6 +170,37 @@ binder.load(account) // => fullName.value === 'Max Mustermann'
 binder.store(account) // =>  account.businessRelation.person.fullName === 'Max Mustermann'
 ----
 
+=== Handling changes
+
+When you load() data, all the field values get a new value, which is internally stored as "unchanged". Only if the field value is changing via an `updateValue()` operation, the `changed` property on field level gets true.
+
+You can get a backend object only filled with data that has been changed via the `Binder.changedData` getter.
+
+In combination with the Binders `apply()` method it's possible to find changes between two sets of data:
+
+[source,typescript]
+----
+public fullName = new TextField('fullName')
+public email = new TextField('email')
+...
+binder
+    .forField(fullName).bind()
+    .forField(email).bind()
+
+// loading from object
+binder.load({
+    fullName: 'Max Mustermann',
+    email: 'max.mustermann@codecentric.de'
+})
+
+// applying new set of data as field changes
+binder.apply({
+    fullName: 'Max Mustermann-Musterfrau',
+    email: 'max.mustermann@codecentric.de'
+})
+
+// binder.changedData returns { fullName: 'Max Mustermann-Musterfrau' }
+----
 
 === Validation
 
