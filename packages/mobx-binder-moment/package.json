@@ -1,6 +1,6 @@
 {
     "name": "mobx-binder-moment",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "Moment conversion and validation support for mobx-binder",
     "main": "./lib/index.js",
     "scripts": {
@@ -28,7 +28,7 @@
     },
     "homepage": "https://github.com/metro-nom/mobx-binder#readme",
     "dependencies": {
-        "mobx-binder": "^0.2.2",
+        "mobx-binder": "^0.2.3",
         "moment": "^2.0.0"
     },
     "devDependencies": {
