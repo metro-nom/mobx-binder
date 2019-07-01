@@ -1,4 +1,4 @@
-import { Binder, Context } from 'mobx-binder-core'
+import { Binder, BindingBuilder, Context, FieldStore } from 'mobx-binder-core'
 import { StringValidators } from '../validation/StringValidators'
 import { BinderValidationResult } from '../validation/Validation'
 import { TranslateFunction } from './Translation'
@@ -20,5 +20,9 @@ export class DefaultContext implements Context<BinderValidationResult> {
 export class DefaultBinder extends Binder<BinderValidationResult> {
     constructor(options: DefaultContextOptions) {
         super(new DefaultContext(options))
+    }
+
+    public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<BinderValidationResult, ValueType, DefaultBinder> {
+        return super.forField(field) as BindingBuilder<BinderValidationResult, ValueType, DefaultBinder>
     }
 }

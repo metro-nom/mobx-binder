@@ -303,11 +303,11 @@ export class Binder<ValidationResult> {
     }
 }
 
-export class BindingBuilder<ValidationResult, ValueType> {
+export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult> = Binder<ValidationResult>> {
     private readOnly = false
     private required = false
 
-    constructor(private readonly binder: Binder<ValidationResult>,
+    constructor(private readonly binder: BinderType,
                 private readonly addBinding: (binding: StandardBinding<ValidationResult>) => void,
                 private readonly field: FieldStore<ValueType>,
                 private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context)) {
@@ -374,7 +374,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param name
      */
     @action
-    public bind(name?: string) {
+    public bind(name?: string): BinderType {
         const propertyName = name || this.field.name
 
         return this.bind2(
@@ -391,7 +391,7 @@ export class BindingBuilder<ValidationResult, ValueType> {
      * @param write
      */
     @action
-    public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void) {
+    public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void): BinderType {
         this.field.readOnly = this.readOnly || !write
         this.field.required = this.required
 

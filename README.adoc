@@ -297,7 +297,7 @@ This updates the global validation status based on the fields that are left.
 
 If the submit button of a form is clicked, this may trigger a `binder.submit()` call. Just like `binder.store()`, it stores the form field values into an object, but it also waits for asynchronous validations to be finished and maintains submission state.
 
-[source,js]
+[source,js
 ----
 public handleSubmit() {
     return this.binder.submit()
