@@ -91,7 +91,7 @@ export class Binder<ValidationResult> {
      *
      * @param field
      */
-    public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<ValidationResult, ValueType> {
+    public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<ValidationResult, ValueType, Binder<ValidationResult>> {
         return new BindingBuilder(this, this.addBinding.bind(this), field)
     }
 
@@ -303,7 +303,7 @@ export class Binder<ValidationResult> {
     }
 }
 
-export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult> = Binder<ValidationResult>> {
+export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult>> {
     private readOnly = false
     private required = false
 
@@ -321,7 +321,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      *
      * @param converter
      */
-    public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType> {
+    public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
         return this.addModifier<NextType>(new ConvertingModifier(this.last, this.binder.context, converter))
     }
 
@@ -329,7 +329,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      * Add a synchronous Validator to the binding chain. Sync validations happen on every value update.
      * @param validator
      */
-    public withValidator(validator: Validator<ValidationResult, ValueType>): BindingBuilder<ValidationResult, ValueType> {
+    public withValidator(validator: Validator<ValidationResult, ValueType>): BindingBuilder<ValidationResult, ValueType, BinderType> {
         return this.addModifier<ValueType>(new ValidatingModifier(this.last, this.binder.context, validator))
     }
 
@@ -340,14 +340,14 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      */
     @action
     public withAsyncValidator(asyncValidator: AsyncValidator<ValidationResult, ValueType>,
-                              options: { onBlur: boolean } = { onBlur: false }): BindingBuilder<ValidationResult, ValueType> {
+                              options: { onBlur: boolean } = { onBlur: false }): BindingBuilder<ValidationResult, ValueType, BinderType> {
         return this.addModifier<ValueType>(new AsyncValidatingModifier(this.last, this.binder.context, asyncValidator, options))
     }
 
     /**
      * Mark the field as read-only.
      */
-    public isReadOnly(): BindingBuilder<ValidationResult, ValueType> {
+    public isReadOnly(): BindingBuilder<ValidationResult, ValueType, BinderType> {
         this.readOnly = true
         return this
     }
@@ -356,7 +356,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      * Add a "required" validator and mark the field as required.
      * @param messageKey
      */
-    public isRequired(messageKey?: string): BindingBuilder<ValidationResult, ValueType> {
+    public isRequired(messageKey?: string): BindingBuilder<ValidationResult, ValueType, BinderType> {
         this.required = true
         return this.withValidator(this.binder.context.requiredValidator(messageKey))
     }
@@ -365,7 +365,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      * Add a value change event handler to the chain - it's only called if previous validations succeed.
      * @param onChange
      */
-    public onChange(onChange: (value: ValueType) => any): BindingBuilder<ValidationResult, ValueType> {
+    public onChange(onChange: (value: ValueType) => any): BindingBuilder<ValidationResult, ValueType, BinderType> {
         return this.addModifier(new ChangeEventHandler(this.last, this.binder.context, onChange))
     }
 
@@ -401,7 +401,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
         return this.binder
     }
 
-    private addModifier<NextType>(modifier: Modifier<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType> {
+    private addModifier<NextType>(modifier: Modifier<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
         this.last = modifier
         return this as any
     }
