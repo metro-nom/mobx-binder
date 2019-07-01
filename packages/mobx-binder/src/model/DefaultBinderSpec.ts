@@ -25,7 +25,7 @@ describe('DefaultBinder', () => {
         // this assignment could fail if types are wrong
         const binder: DefaultBinder = new DefaultBinder({
             t: BinderSamples.t,
-            requiredValidator: () => (value: any) => value === '(empty)' ? { messageKey: 'wrong' } : {}
+            requiredValidator: () => (value: any) => value === '(empty)' ? { messageKey: 'wrong' } : {},
         })
             .forField(myField).isRequired().bind()
 
