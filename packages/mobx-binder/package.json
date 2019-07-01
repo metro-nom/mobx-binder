@@ -1,6 +1,6 @@
 {
     "name": "mobx-binder",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "description": "A form handling / field binding library for MobX",
     "main": "./lib/index.js",
     "scripts": {
