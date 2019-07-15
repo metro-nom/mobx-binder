@@ -56,5 +56,5 @@
         "tslint-no-circular-imports": "^0.6.2",
         "typescript": "^3.0.3"
     },
-    "gitHead": "57c559c783cc8c2b24c8966f42c19c9f5a5d8cee"
+    "gitHead": "29f34a6aff98c342fc2a5cff826479f20fb2f57f"
 }
