@@ -408,7 +408,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
 }
 
 class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
-    @observable
+    @observable.ref
     private unchangedValue?: any
 
     @observable
