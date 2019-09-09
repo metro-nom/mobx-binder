@@ -1,12 +1,13 @@
 import { expect } from 'chai'
 import { FieldStore } from '../fields/FieldStore'
 import { TextField } from '../fields/TextField'
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 import sleep from '../../test/sleep'
 import { ErrorMessage, SimpleBinder } from './SimpleBinder'
 import { action, observable } from 'mobx'
 import { Validator } from '../../validation/Validator'
 import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
+import { ComplexField } from '../../test/ComplexField'
 
 const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string> =>
     (value?: string) => !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
@@ -148,7 +149,8 @@ describe('Binder', () => {
             it('should allow storing via custom write function', () => {
                 const binder = new SimpleBinder().forField(myField).bind2(
                     () => '',
-                    (target: any, value?: string) => target.someKey = value)
+                    (target: any, value?: string) => target.someKey = value
+                )
 
                 myField.updateValue('changedValue')
 
@@ -599,6 +601,15 @@ describe('Binder', () => {
             binder.load({ myField: 'value' })
             myField.updateValue('other')
             myField.updateValue('value')
+            expect(binder.changed).to.be.false
+        })
+
+        it('should be marked as unchanged after change back to initial value even on complex values', () => {
+            const field = new ComplexField('myComplexField')
+            binder = new SimpleBinder().forField(field).bind()
+            binder.load({ myComplexField: [ 'value' ] })
+            field.updateValue([ 'other' ])
+            field.updateValue([ 'value' ])
             expect(binder.changed).to.be.false
         })
 

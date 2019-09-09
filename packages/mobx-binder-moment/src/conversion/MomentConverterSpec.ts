@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { MomentConverter } from './MomentConverter'
-import * as moment from 'moment'
+import moment from 'moment'
 
 describe('MomentConverter', () => {
     let converter = new MomentConverter('DD.MM.YYYY')

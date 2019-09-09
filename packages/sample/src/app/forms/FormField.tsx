@@ -1,6 +1,6 @@
 import { FormFeedback, FormGroup, Input, Label } from 'reactstrap'
 import { FieldStore } from 'mobx-binder'
-import * as React from 'react'
+import React from 'react'
 import { translatable } from 'react-mobx-i18n'
 
 export interface FormFieldProps {

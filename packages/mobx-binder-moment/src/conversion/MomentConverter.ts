@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import moment from 'moment'
 import { BinderValidationResult, Converter, ValidationError } from 'mobx-binder'
 
 export class MomentConverter implements Converter<BinderValidationResult, string, moment.Moment> {

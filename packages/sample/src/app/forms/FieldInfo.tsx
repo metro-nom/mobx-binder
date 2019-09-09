@@ -1,5 +1,5 @@
 import { FieldStore } from 'mobx-binder'
-import * as React from 'react'
+import React from 'react'
 import { observer } from 'mobx-react'
 
 export interface FieldInfoProps {
@@ -15,7 +15,7 @@ export default class FieldInfo extends React.Component<FieldInfoProps, any> {
     public render() {
         const {
             name, valueType, readOnly, required, value, touched, visited, changed,
-            validating, valid, showValidationResults, errorMessage
+            validating, valid, showValidationResults, errorMessage,
         } = this.props.field
         const bool = (it?: boolean) => it === undefined ? 'undefined' : (it ? 'true' : 'false')
 

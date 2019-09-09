@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { inject } from 'mobx-react'
 import ProfileStore from './ProfileStore'
 import { translatable } from 'react-mobx-i18n'

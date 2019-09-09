@@ -1,4 +1,4 @@
-import * as mobx from 'mobx'
+import { action, runInAction } from 'mobx'
 import { DefaultBinder, TextField, EmailValidator } from 'mobx-binder'
 import { MomentConverter } from 'mobx-binder-moment'
 
@@ -8,9 +8,7 @@ import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
 import { TranslateFunction } from 'react-mobx-i18n'
 import { ToggleField, TrimConverter } from '../../../../../mobx-binder-core/src'
-import { runInAction } from 'mobx'
 
-const { action } = mobx
 const trimConverter = new TrimConverter()
 
 export default class ProfileStore {

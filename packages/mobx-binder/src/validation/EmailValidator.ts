@@ -1,4 +1,4 @@
-import * as emailValidator from 'email-validator'
+import emailValidator from 'email-validator'
 import { BinderValidator } from './Validation'
 
 export class EmailValidator {

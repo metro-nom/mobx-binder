@@ -8,6 +8,7 @@
         "strict": true,
         "noUnusedLocals": true,
         "experimentalDecorators": true,
+        "esModuleInterop": true,
         "lib": [
             "es6", "dom"
         ]

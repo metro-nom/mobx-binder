@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { MomentValidators } from './MomentValidators'
-import * as moment from 'moment'
+import moment from 'moment'
 import data_driven = require('data-driven')
 import sinon = require('sinon')
 

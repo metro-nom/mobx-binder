@@ -1,6 +1,6 @@
 import { observable } from 'mobx'
 import { init, tFactory, TranslateFunction } from 'react-mobx-i18n'
-import * as i18n from 'i18n-harmony'
+import i18n from 'i18n-harmony'
 import { Locales } from './Locales'
 
 export default class I18nStore {

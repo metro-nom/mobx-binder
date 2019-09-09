@@ -10,6 +10,7 @@ import { AsyncValidatingModifier } from './chain/AsyncValidatingModifier'
 import { ChangeEventHandler } from './chain/ChangeEventHandler'
 import { Context } from './Context'
 import { AsyncValidator, Validator } from '../../validation/Validator'
+import isEqual from 'lodash.isequal'
 
 // tslint:disable max-classes-per-file
 
@@ -427,11 +428,9 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 
     @computed
     public get changed() {
-        if (isObservable(this.field.value)) {
-            return JSON.stringify(toJS(this.field.value)) !== JSON.stringify(this.unchangedValue)
-        }
+        const currentValue = isObservable(this.field.value) ? toJS(this.field.value) : this.field.value
 
-        return this.field.value !== this.unchangedValue
+        return !isEqual(currentValue, this.unchangedValue)
     }
 
     @computed
