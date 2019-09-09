@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { TextField } from './TextField'
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 import * as mobx from 'mobx'
 
 describe('TextField', () => {

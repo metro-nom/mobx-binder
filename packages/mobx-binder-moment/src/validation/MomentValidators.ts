@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import moment from 'moment'
 import { BinderValidationResult, BinderValidator } from 'mobx-binder'
 
 export class MomentValidators {

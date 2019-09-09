@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Container } from 'reactstrap'
 
 export class Root extends React.Component<any, any> {

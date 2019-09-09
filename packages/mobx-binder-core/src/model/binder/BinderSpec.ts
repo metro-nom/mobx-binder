@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { FieldStore } from '../fields/FieldStore'
 import { TextField } from '../fields/TextField'
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 import sleep from '../../test/sleep'
 import { ErrorMessage, SimpleBinder } from './SimpleBinder'
 import { action, observable } from 'mobx'

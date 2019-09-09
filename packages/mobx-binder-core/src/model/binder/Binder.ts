@@ -10,7 +10,7 @@ import { AsyncValidatingModifier } from './chain/AsyncValidatingModifier'
 import { ChangeEventHandler } from './chain/ChangeEventHandler'
 import { Context } from './Context'
 import { AsyncValidator, Validator } from '../../validation/Validator'
-import isEqual = require('lodash.isequal')
+import isEqual from 'lodash.isequal'
 
 // tslint:disable max-classes-per-file
 

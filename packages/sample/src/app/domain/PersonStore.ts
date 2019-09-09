@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import * as moment from 'moment'
+import moment from 'moment'
 
 export default class PersonStore {
     @observable public salutation = 'Mr'
