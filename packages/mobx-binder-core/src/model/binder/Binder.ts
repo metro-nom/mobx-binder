@@ -12,8 +12,6 @@ import { Context } from './Context'
 import { AsyncValidator, Validator } from '../../validation/Validator'
 import isEqual from 'lodash.isequal'
 
-// tslint:disable max-classes-per-file
-
 /**
  * API for single field binding
  */
@@ -310,7 +308,7 @@ export class Binder<ValidationResult> {
     @observable
     public submitting?: boolean
 
-    private _bindings: Array<StandardBinding<ValidationResult>> = observable([]) // tslint:disable-line variable-name
+    private _bindings: Array<StandardBinding<ValidationResult>> = observable([])
 
     constructor(public readonly context: Context<ValidationResult>) {
         runInAction(() => {
