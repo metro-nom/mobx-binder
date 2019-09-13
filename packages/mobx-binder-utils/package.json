@@ -1,0 +1,19 @@
+{
+  "name": "mobx-binder-utils",
+  "version": "0.2.8",
+  "private": true,
+  "description": "Build and test support utility package",
+  "scripts": {
+    "test": "echo \"Nothing to test yet\""
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.2.0",
+    "@typescript-eslint/parser": "^2.2.0",
+    "eslint": "^6.3.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-react": "^7.14.3",
+    "prettier": "^1.18.2"
+  }
+}
