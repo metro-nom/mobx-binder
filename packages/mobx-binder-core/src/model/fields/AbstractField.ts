@@ -2,7 +2,6 @@ import { action, observable, autorun, runInAction } from 'mobx'
 import { FieldStore } from './FieldStore'
 
 export abstract class AbstractField<ValueType> implements FieldStore<ValueType> {
-
     @observable
     public readOnly: boolean
 
@@ -10,10 +9,10 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     public required: boolean
 
     @observable
-    public changed: boolean = false
+    public changed = false
 
     @observable
-    public showValidationResults: boolean = false
+    public showValidationResults = false
 
     @observable
     public abstract value?: ValueType
@@ -22,21 +21,18 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     public valid?: boolean = undefined
 
     @observable
-    public validating: boolean = false
+    public validating = false
 
     @observable
-    public touched: boolean = false
+    public touched = false
 
     @observable
-    public visited: boolean = false
+    public visited = false
 
     @observable
     public errorMessage?: string = undefined
 
-    protected constructor(
-        public readonly valueType: string,
-        public readonly name: string) {
-
+    protected constructor(public readonly valueType: string, public readonly name: string) {
         this.readOnly = false
         this.required = false
     }
@@ -54,9 +50,12 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
 
     @action
     public handleBlur(): void {
-        autorun(() => {
-            runInAction('showValidationResults', () => this.showValidationResults = true)
-        }, { name: 'handleBlur', delay: 100 })
+        autorun(
+            () => {
+                runInAction('showValidationResults', () => (this.showValidationResults = true))
+            },
+            { name: 'handleBlur', delay: 100 },
+        )
     }
 
     @action

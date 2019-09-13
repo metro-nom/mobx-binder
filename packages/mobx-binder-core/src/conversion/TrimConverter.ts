@@ -1,7 +1,6 @@
 import { Converter } from './Converter'
 
 export class TrimConverter implements Converter<any, string, string> {
-
     public convertToModel(value?: string): string | undefined {
         const trimmed = !!value ? value.trim() : value
         return trimmed === '' ? undefined : trimmed

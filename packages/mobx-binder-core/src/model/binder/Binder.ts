@@ -68,6 +68,241 @@ export interface Binding<ValidationResult> {
     setUnchanged(): void
 }
 
+class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
+    @observable.ref
+    private unchangedValue?: any
+
+    @observable
+    private customErrorMessage?: string
+
+    constructor(
+        private readonly context: Context<ValidationResult>,
+        public readonly field: FieldStore<any>,
+        private readonly chain: Modifier<ValidationResult, any, any>,
+        private read: (source: any) => any,
+        private write?: (target: any, value: any) => void,
+    ) {
+        this.setUnchanged()
+        this.observeField()
+        this.addOnBlurValidationInterceptor()
+    }
+
+    @computed
+    public get changed() {
+        const currentValue = isObservable(this.field.value) ? toJS(this.field.value) : this.field.value
+
+        return !isEqual(currentValue, this.unchangedValue)
+    }
+
+    @computed
+    get validating() {
+        return this.validity.status === 'validating'
+    }
+
+    @computed
+    get model() {
+        return this.chain.data
+    }
+
+    @computed
+    get validity() {
+        return this.chain.validity
+    }
+
+    @computed
+    public get valid(): boolean | undefined {
+        if (this.customErrorMessage) {
+            return false
+        }
+        return this.validity.status === 'validated' ? this.context.valid(this.validity.result!) : undefined
+    }
+
+    @computed
+    get errorMessage() {
+        if (this.customErrorMessage) {
+            return this.customErrorMessage
+        }
+        return this.valid === false ? this.context.translate(this.validity.result!) : undefined
+    }
+
+    @action
+    public setUnchanged() {
+        const fieldValue = this.field.value
+        this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
+    }
+
+    public validate(): ValidationResult {
+        return this.validity.status === 'validated' ? this.validity.result! : this.context.validResult
+    }
+
+    @action
+    public async validateAsync(onBlur = false): Promise<ValidationResult> {
+        await this.chain.validateAsync(onBlur)
+        const validity = this.validity
+        const result = validity.status !== 'validated' ? this.context.validResult : validity.result!
+        return result
+    }
+
+    @action
+    public load(source: any): void {
+        const fieldValue = this.getFieldValue(source)
+        this.field.reset(fieldValue)
+        this.setUnchanged()
+    }
+
+    @action
+    public apply(source: any): void {
+        const fieldValue = this.getFieldValue(source)
+        this.field.updateValue(fieldValue)
+    }
+
+    public getFieldValue(source: any) {
+        const value = this.read(source)
+        return this.chain.toView(value)
+    }
+
+    public store(target: any) {
+        if (this.write) {
+            if (this.valid && !this.model.pending) {
+                this.write(target, this.model.value)
+            }
+        }
+    }
+
+    private addOnBlurValidationInterceptor() {
+        const previous = this.field.handleBlur
+
+        this.field.handleBlur = async () => {
+            await this.validateAsync(true)
+            this.chain.applyConversionsToField()
+            previous.call(this.field)
+        }
+    }
+
+    private observeField() {
+        this.clearCustomErrorMessageOnValueChange()
+        Object.defineProperty(this.field, 'valid', { get: () => this.valid })
+        Object.defineProperty(this.field, 'validating', { get: () => this.validating })
+        Object.defineProperty(this.field, 'errorMessage', {
+            get: () => this.errorMessage,
+            set: (customErrorMessage?: string) => (this.customErrorMessage = customErrorMessage),
+        })
+        Object.defineProperty(this.field, 'changed', { get: () => this.changed })
+    }
+
+    private clearCustomErrorMessageOnValueChange() {
+        reaction(
+            () => this.field.value,
+            () => {
+                this.customErrorMessage = undefined
+            },
+        )
+    }
+}
+
+export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult>> {
+    private readOnly = false
+    private required = false
+
+    constructor(
+        private readonly binder: BinderType,
+        private readonly addBinding: (binding: StandardBinding<ValidationResult>) => void,
+        private readonly field: FieldStore<ValueType>,
+        private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context),
+    ) {
+        if (this.field.valueType === 'string') {
+            this.withConverter(new StringConverter() as any)
+        }
+    }
+
+    /**
+     * Add a Converter to the binding chain. Validations added after a conversion have to match with the converted type.
+     *
+     * @param converter
+     */
+    public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
+        return this.addModifier<NextType>(new ConvertingModifier(this.last, this.binder.context, converter))
+    }
+
+    /**
+     * Add a synchronous Validator to the binding chain. Sync validations happen on every value update.
+     * @param validator
+     */
+    public withValidator(validator: Validator<ValidationResult, ValueType>): BindingBuilder<ValidationResult, ValueType, BinderType> {
+        return this.addModifier<ValueType>(new ValidatingModifier(this.last, this.binder.context, validator))
+    }
+
+    /**
+     * Add an asynchronous validator to the binding chain. Async validations happen on submit and - if configured via the options parameter - also on blur.
+     * @param asyncValidator
+     * @param options
+     */
+    @action
+    public withAsyncValidator(
+        asyncValidator: AsyncValidator<ValidationResult, ValueType>,
+        options: { onBlur: boolean } = { onBlur: false },
+    ): BindingBuilder<ValidationResult, ValueType, BinderType> {
+        return this.addModifier<ValueType>(new AsyncValidatingModifier(this.last, this.binder.context, asyncValidator, options))
+    }
+
+    /**
+     * Mark the field as read-only.
+     */
+    public isReadOnly(): BindingBuilder<ValidationResult, ValueType, BinderType> {
+        this.readOnly = true
+        return this
+    }
+
+    /**
+     * Add a "required" validator and mark the field as required.
+     * @param messageKey
+     */
+    public isRequired(messageKey?: string): BindingBuilder<ValidationResult, ValueType, BinderType> {
+        this.required = true
+        return this.withValidator(this.binder.context.requiredValidator(messageKey))
+    }
+
+    /**
+     * Add a value change event handler to the chain - it's only called if previous validations succeed.
+     * @param onChange
+     */
+    public onChange(onChange: (value: ValueType) => any): BindingBuilder<ValidationResult, ValueType, BinderType> {
+        return this.addModifier(new ChangeEventHandler(this.last, this.binder.context, onChange))
+    }
+
+    /**
+     * Finally bind/map the field to a backend object via a simple property named like the field name.
+     * @param name
+     */
+    @action
+    public bind(name?: string): BinderType {
+        const propertyName = name || this.field.name
+
+        return this.bind2((source: any) => source[propertyName], (target: any, value?: ValueType) => (target[propertyName] = value))
+    }
+
+    /**
+     * Finally bind the field to a backend object, using the given read/write functions for loading and storing. If the write method is omitted, the field is
+     * marked as read-only.
+     *
+     * @param read
+     * @param write
+     */
+    @action
+    public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void): BinderType {
+        this.field.readOnly = this.readOnly || !write
+        this.field.required = this.required
+
+        this.addBinding(new StandardBinding(this.binder.context, this.field, this.last, read, this.readOnly ? undefined : write))
+        return this.binder
+    }
+
+    private addModifier<NextType>(modifier: Modifier<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
+        this.last = modifier
+        return this as any
+    }
+}
+
 export class Binder<ValidationResult> {
     /**
      * Indicates if a #submit() operation is currently in progress. This covers async validations happening on submit and also the `onSuccess` operation.
@@ -186,9 +421,7 @@ export class Binder<ValidationResult> {
      */
     @computed
     public get validating(): boolean {
-        return this.bindings
-            .map(binding => !!binding.validating)
-            .every(validating => validating)
+        return this.bindings.map(binding => binding.validating).every(validating => validating)
     }
 
     /**
@@ -196,9 +429,7 @@ export class Binder<ValidationResult> {
      */
     @computed
     public get changed(): boolean {
-        return this.bindings
-            .map(binding => binding.changed)
-            .some(changed => changed)
+        return this.bindings.map(binding => binding.changed).some(changed => changed)
     }
 
     @computed
@@ -226,12 +457,11 @@ export class Binder<ValidationResult> {
      * Please note that async validation results for a value might be cached.
      */
     public async validateAsync(): Promise<void> {
-        await Promise.all(this.bindings.map(binding => binding.validateAsync()))
-            .then(results => {
-                if (!results.every(result => this.context.valid(result))) {
-                    throw new Error()
-                }
-            })
+        await Promise.all(this.bindings.map(binding => binding.validateAsync())).then(results => {
+            if (!results.every(result => this.context.valid(result))) {
+                throw new Error()
+            }
+        })
     }
 
     /**
@@ -245,8 +475,10 @@ export class Binder<ValidationResult> {
      * @param onSuccess
      */
     @action
-    public submit<TargetType = any>(target: Partial<TargetType> = {},
-                                    onSuccess?: (target: TargetType) => Promise<TargetType> | void | undefined): Promise<TargetType> {
+    public submit<TargetType = any>(
+        target: Partial<TargetType> = {},
+        onSuccess?: (target: TargetType) => Promise<TargetType> | void | undefined,
+    ): Promise<TargetType> {
         let promise: Promise<any> = Promise.resolve()
         this.submitting = true
         if (this.valid !== false) {
@@ -256,17 +488,19 @@ export class Binder<ValidationResult> {
                     this.showValidationResults()
                     throw err
                 })
-                .then(action(() => {
-                    const result = this.store(target)
-                    if (onSuccess) {
-                        const newPromise = onSuccess(result as TargetType)
+                .then(
+                    action(() => {
+                        const result = this.store(target)
+                        if (onSuccess) {
+                            const newPromise = onSuccess(result as TargetType)
 
-                        if (newPromise && newPromise.then) {
-                            return newPromise.then(() => result)
+                            if (newPromise && newPromise.then) {
+                                return newPromise.then(() => result)
+                            }
                         }
-                    }
-                    return result
-                }))
+                        return result
+                    }),
+                )
         } else {
             this.showValidationResults()
             const error = new Error() // message empty as it's no global/submission error
@@ -280,7 +514,7 @@ export class Binder<ValidationResult> {
             action(err => {
                 this.submitting = false
                 throw err
-            })
+            }),
         )
     }
 
@@ -301,241 +535,5 @@ export class Binder<ValidationResult> {
     @action
     private addBinding(binding: StandardBinding<ValidationResult>) {
         this._bindings.push(binding)
-    }
-}
-
-export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult>> {
-    private readOnly = false
-    private required = false
-
-    constructor(private readonly binder: BinderType,
-                private readonly addBinding: (binding: StandardBinding<ValidationResult>) => void,
-                private readonly field: FieldStore<ValueType>,
-                private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context)) {
-        if (this.field.valueType === 'string') {
-            this.withConverter(new StringConverter() as any)
-        }
-    }
-
-    /**
-     * Add a Converter to the binding chain. Validations added after a conversion have to match with the converted type.
-     *
-     * @param converter
-     */
-    public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
-        return this.addModifier<NextType>(new ConvertingModifier(this.last, this.binder.context, converter))
-    }
-
-    /**
-     * Add a synchronous Validator to the binding chain. Sync validations happen on every value update.
-     * @param validator
-     */
-    public withValidator(validator: Validator<ValidationResult, ValueType>): BindingBuilder<ValidationResult, ValueType, BinderType> {
-        return this.addModifier<ValueType>(new ValidatingModifier(this.last, this.binder.context, validator))
-    }
-
-    /**
-     * Add an asynchronous validator to the binding chain. Async validations happen on submit and - if configured via the options parameter - also on blur.
-     * @param asyncValidator
-     * @param options
-     */
-    @action
-    public withAsyncValidator(asyncValidator: AsyncValidator<ValidationResult, ValueType>,
-                              options: { onBlur: boolean } = { onBlur: false }): BindingBuilder<ValidationResult, ValueType, BinderType> {
-        return this.addModifier<ValueType>(new AsyncValidatingModifier(this.last, this.binder.context, asyncValidator, options))
-    }
-
-    /**
-     * Mark the field as read-only.
-     */
-    public isReadOnly(): BindingBuilder<ValidationResult, ValueType, BinderType> {
-        this.readOnly = true
-        return this
-    }
-
-    /**
-     * Add a "required" validator and mark the field as required.
-     * @param messageKey
-     */
-    public isRequired(messageKey?: string): BindingBuilder<ValidationResult, ValueType, BinderType> {
-        this.required = true
-        return this.withValidator(this.binder.context.requiredValidator(messageKey))
-    }
-
-    /**
-     * Add a value change event handler to the chain - it's only called if previous validations succeed.
-     * @param onChange
-     */
-    public onChange(onChange: (value: ValueType) => any): BindingBuilder<ValidationResult, ValueType, BinderType> {
-        return this.addModifier(new ChangeEventHandler(this.last, this.binder.context, onChange))
-    }
-
-    /**
-     * Finally bind/map the field to a backend object via a simple property named like the field name.
-     * @param name
-     */
-    @action
-    public bind(name?: string): BinderType {
-        const propertyName = name || this.field.name
-
-        return this.bind2(
-            (source: any) => source[ propertyName ],
-            (target: any, value?: ValueType) => target[ propertyName ] = value
-        )
-    }
-
-    /**
-     * Finally bind the field to a backend object, using the given read/write functions for loading and storing. If the write method is omitted, the field is
-     * marked as read-only.
-     *
-     * @param read
-     * @param write
-     */
-    @action
-    public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void): BinderType {
-        this.field.readOnly = this.readOnly || !write
-        this.field.required = this.required
-
-        this.addBinding(new StandardBinding(this.binder.context, this.field, this.last,
-            read, this.readOnly ? undefined : write
-        ))
-        return this.binder
-    }
-
-    private addModifier<NextType>(modifier: Modifier<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
-        this.last = modifier
-        return this as any
-    }
-}
-
-class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
-    @observable.ref
-    private unchangedValue?: any
-
-    @observable
-    private customErrorMessage?: string
-
-    constructor(private readonly context: Context<ValidationResult>,
-                public readonly field: FieldStore<any>,
-                private readonly chain: Modifier<ValidationResult, any, any>,
-                private read: (source: any) => any,
-                private write?: (target: any, value: any) => void) {
-
-        this.setUnchanged()
-        this.observeField()
-        this.addOnBlurValidationInterceptor()
-    }
-
-    @computed
-    public get changed() {
-        const currentValue = isObservable(this.field.value) ? toJS(this.field.value) : this.field.value
-
-        return !isEqual(currentValue, this.unchangedValue)
-    }
-
-    @computed
-    get validating() {
-        return this.validity.status === 'validating'
-    }
-
-    @computed
-    get model() {
-        return this.chain.data
-    }
-
-    @computed
-    get validity() {
-        const validity = this.chain.validity
-        return validity
-    }
-
-    @computed
-    public get valid(): boolean | undefined {
-        if (this.customErrorMessage) {
-            return false
-        }
-        return this.validity.status === 'validated' ? this.context.valid(this.validity.result!) : undefined
-    }
-
-    @computed
-    get errorMessage() {
-        if (this.customErrorMessage) {
-            return this.customErrorMessage
-        }
-        return this.valid === false ? this.context.translate(this.validity.result!) : undefined
-    }
-
-    @action
-    public setUnchanged() {
-        const fieldValue = this.field.value
-        this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
-    }
-
-    public validate(): ValidationResult {
-        return this.validity.status === 'validated' ? this.validity.result! : this.context.validResult
-    }
-
-    @action
-    public async validateAsync(onBlur = false): Promise<ValidationResult> {
-        await this.chain.validateAsync(onBlur)
-        const validity = this.validity
-        const result = validity.status !== 'validated' ? this.context.validResult : validity.result!
-        return result
-    }
-
-    @action
-    public load(source: any): void {
-        const fieldValue = this.getFieldValue(source)
-        this.field.reset(fieldValue)
-        this.setUnchanged()
-    }
-
-    @action
-    public apply(source: any): void {
-        const fieldValue = this.getFieldValue(source)
-        this.field.updateValue(fieldValue)
-    }
-
-    public getFieldValue(source: any) {
-        const value = this.read(source)
-        return this.chain.toView(value)
-    }
-
-    public store(target: any) {
-        if (this.write) {
-            if (this.valid && !this.model.pending) {
-                this.write(target, this.model.value)
-            }
-        }
-    }
-
-    private addOnBlurValidationInterceptor() {
-        const previous = this.field.handleBlur
-
-        this.field.handleBlur = async () => {
-            await this.validateAsync(true)
-            this.chain.applyConversionsToField()
-            previous.call(this.field)
-        }
-    }
-
-    private observeField() {
-        this.clearCustomErrorMessageOnValueChange()
-        Object.defineProperty(this.field, 'valid', { get: () => this.valid })
-        Object.defineProperty(this.field, 'validating', { get: () => this.validating })
-        Object.defineProperty(this.field, 'errorMessage', {
-            get: () => this.errorMessage,
-            set: (customErrorMessage?: string) => this.customErrorMessage = customErrorMessage,
-        })
-        Object.defineProperty(this.field, 'changed', { get: () => this.changed })
-    }
-
-    private clearCustomErrorMessageOnValueChange() {
-        reaction(
-            () => this.field.value,
-            () => {
-                this.customErrorMessage = undefined
-            }
-        )
     }
 }

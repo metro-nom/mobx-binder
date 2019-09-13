@@ -14,7 +14,9 @@ export interface Modifier<ValidationResult, ViewType, ModelType> {
     field: FieldStore<unknown>
     data: Data<ModelType>
     validity: Validity<ValidationResult>
-    toView(modelValue: any): {
+    toView(
+        modelValue: any,
+    ): {
         value?: ViewType
     }
     isEqual(first: ModelType, second: ModelType): boolean

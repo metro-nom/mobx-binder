@@ -7,7 +7,7 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
     constructor(
         view: Modifier<ValidationResult, any, ViewType>,
         context: Context<ValidationResult>,
-        private converter: Converter<ValidationResult, ViewType, ModelType>
+        private converter: Converter<ValidationResult, ViewType, ModelType>,
     ) {
         super(view, context)
     }

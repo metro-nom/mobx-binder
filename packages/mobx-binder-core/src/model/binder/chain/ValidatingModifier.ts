@@ -7,7 +7,8 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     constructor(
         view: Modifier<ValidationResult, any, ValueType>,
         context: Context<ValidationResult>,
-        private validator: Validator<ValidationResult, ValueType>) {
+        private validator: Validator<ValidationResult, ValueType>,
+    ) {
         super(view, context)
     }
 

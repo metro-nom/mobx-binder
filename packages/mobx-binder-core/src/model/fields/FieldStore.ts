@@ -1,4 +1,3 @@
-
 export interface FieldStore<ValueType> {
     /**
      * The `name` is typically used for the `input` field name.

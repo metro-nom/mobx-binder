@@ -3,9 +3,7 @@ import { Context } from '../Context'
 import { FieldStore } from '../../fields/FieldStore'
 
 export class FieldWrapper<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
-    constructor(public field: FieldStore<ValueType>,
-                private context: Context<ValidationResult>) {
-    }
+    constructor(public field: FieldStore<ValueType>, private context: Context<ValidationResult>) {}
 
     get data() {
         return {

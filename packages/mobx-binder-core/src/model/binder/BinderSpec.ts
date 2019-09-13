@@ -9,10 +9,10 @@ import { Validator } from '../../validation/Validator'
 import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
 import { ComplexField } from '../../test/ComplexField'
 
-const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string> =>
-    (value?: string) => !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
+const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string> => (value?: string) =>
+    !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
 
-const numberValidator = (max: number) => (num?: number) => num !== undefined && num > max ? 'Too much' : undefined
+const numberValidator = (max: number) => (num?: number) => (num !== undefined && num > max ? 'Too much' : undefined)
 
 describe('Binder', () => {
     const sandbox = sinon.createSandbox()
@@ -20,10 +20,12 @@ describe('Binder', () => {
     let myField: FieldStore<string>
     let secondField: FieldStore<string>
 
-    beforeEach(action(() => {
-        myField = new TextField('myField')
-        secondField = new TextField('secondField')
-    }))
+    beforeEach(
+        action(() => {
+            myField = new TextField('myField')
+            secondField = new TextField('secondField')
+        }),
+    )
 
     afterEach(() => {
         sandbox.restore()
@@ -73,8 +75,11 @@ describe('Binder', () => {
             describe('on Binder level', () => {
                 it('should update all field values from a source object', () => {
                     const binder = new SimpleBinder()
-                        .forField(myField).withConverter(new SimpleNumberConverter()).bind()
-                        .forField(secondField).bind()
+                        .forField(myField)
+                        .withConverter(new SimpleNumberConverter())
+                        .bind()
+                        .forField(secondField)
+                        .bind()
                     binder.load({
                         myField: 'my',
                         secondField: 'second',
@@ -90,16 +95,22 @@ describe('Binder', () => {
             })
 
             describe('on Binding level', () => {
-                it('should update a field value from it\'s backend representation via a given source object', () => {
-                    const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                it("should update a field value from it's backend representation via a given source object", () => {
+                    const binder = new SimpleBinder()
+                        .forField(myField)
+                        .withConverter(new SimpleNumberConverter())
+                        .bind()
                     binder.load({ myField: 5 })
                     binder.binding(myField).apply({ myField: 6 })
                     expect(myField.value).to.equal('6')
                     expect(myField.changed).to.be.true
                 })
 
-                it('should not change anything if the backend value didn\'t change', () => {
-                    const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                it("should not change anything if the backend value didn't change", () => {
+                    const binder = new SimpleBinder()
+                        .forField(myField)
+                        .withConverter(new SimpleNumberConverter())
+                        .bind()
                     binder.load({ myField: 5 })
                     binder.binding(myField).apply({ myField: 5 })
                     expect(myField.value).to.equal('5')
@@ -110,7 +121,10 @@ describe('Binder', () => {
 
         describe('getFieldValue', () => {
             it('should return the view representation for the data in the given source object', () => {
-                const binder = new SimpleBinder().forField(myField).withConverter(new SimpleNumberConverter()).bind()
+                const binder = new SimpleBinder()
+                    .forField(myField)
+                    .withConverter(new SimpleNumberConverter())
+                    .bind()
                 expect(binder.binding(myField).getFieldValue({ myField: 6 })).to.equal('6')
             })
         })
@@ -147,10 +161,7 @@ describe('Binder', () => {
             })
 
             it('should allow storing via custom write function', () => {
-                const binder = new SimpleBinder().forField(myField).bind2(
-                    () => '',
-                    (target: any, value?: string) => target.someKey = value
-                )
+                const binder = new SimpleBinder().forField(myField).bind2(() => '', (target: any, value?: string) => (target.someKey = value))
 
                 myField.updateValue('changedValue')
 
@@ -164,12 +175,18 @@ describe('Binder', () => {
             })
 
             it('should allow marking a field as readonly', () => {
-                new SimpleBinder().forField(myField).isReadOnly().bind()
+                new SimpleBinder()
+                    .forField(myField)
+                    .isReadOnly()
+                    .bind()
                 expect(myField.readOnly).to.be.true
             })
 
             it('should not store readonly fields', () => {
-                const binder = new SimpleBinder().forField(myField).isReadOnly().bind()
+                const binder = new SimpleBinder()
+                    .forField(myField)
+                    .isReadOnly()
+                    .bind()
                 myField.updateValue('12345')
 
                 expect(binder.store()).to.deep.equal({})
@@ -182,8 +199,11 @@ describe('Binder', () => {
 
         beforeEach(() => {
             binder = new SimpleBinder()
-                .forField(myField).withValidator(lengthValidator(2, 12)).bind()
-                .forField(secondField).bind()
+                .forField(myField)
+                .withValidator(lengthValidator(2, 12))
+                .bind()
+                .forField(secondField)
+                .bind()
             binder.load({
                 myField: 'my',
                 secondField: 'second',
@@ -211,7 +231,11 @@ describe('Binder', () => {
         let binder: SimpleBinder
 
         beforeEach(() => {
-            binder = new SimpleBinder().forField(myField).isRequired().withValidator(lengthValidator(5, 10)).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withValidator(lengthValidator(5, 10))
+                .bind()
         })
 
         it('should expose the initial validity of a field during binding', () => {
@@ -249,7 +273,10 @@ describe('Binder', () => {
         })
 
         it('should add required validation with custom translation via special isRequired()', () => {
-            binder = new SimpleBinder().forField(myField).isRequired('custom message').bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired('custom message')
+                .bind()
             expect(myField.errorMessage).to.equal('custom message')
         })
 
@@ -307,7 +334,11 @@ describe('Binder', () => {
         })
 
         it('should initially be valid == false because of sync validation', () => {
-            binder = new SimpleBinder().forField(myField).isRequired().withAsyncValidator(validator).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator)
+                .bind()
 
             // TextField <- ViewWrapper <- RequiredValidator <- TrimConverter <- async validator
 
@@ -315,12 +346,19 @@ describe('Binder', () => {
         })
 
         it('should initially be valid == undefined when there are no sync validators at all', () => {
-            binder = new SimpleBinder().forField(myField).withAsyncValidator(validator).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .withAsyncValidator(validator)
+                .bind()
             expect(myField.valid).to.be.undefined
         })
 
         it('should not trigger asynchronous validators on change or blur by default', () => {
-            binder = new SimpleBinder().forField(myField).isRequired().withAsyncValidator(validator).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator)
+                .bind()
 
             myField.updateValue('12345')
             myField.handleBlur()
@@ -329,7 +367,11 @@ describe('Binder', () => {
         })
 
         it('should trigger asynchronous validators on submit', () => {
-            binder = new SimpleBinder().forField(myField).isRequired().withAsyncValidator(validator).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator)
+                .bind()
 
             myField.updateValue('12345')
 
@@ -340,7 +382,11 @@ describe('Binder', () => {
 
         it('should expose asynchronous validation results during submit', () => {
             validator.resolves('my async error')
-            binder = new SimpleBinder().forField(myField).isRequired().withAsyncValidator(validator).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator)
+                .bind()
 
             myField.updateValue('12345')
 
@@ -353,32 +399,47 @@ describe('Binder', () => {
         it('should not call submission function if asynchronous validations fail', () => {
             let called = false
             validator.resolves('my async error')
-            binder = new SimpleBinder().forField(myField).isRequired().withAsyncValidator(validator).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator)
+                .bind()
             myField.updateValue('12345')
 
-            return binder.submit({}, () => {
-                called = true
-            }).should.be.rejected.then(() => {
-                expect(called).to.be.false
-            })
+            return binder
+                .submit({}, () => {
+                    called = true
+                })
+                .should.be.rejected.then(() => {
+                    expect(called).to.be.false
+                })
         })
 
         it('should return promise that resolves with stored values, even if onSubmit returns something else', () => {
-            binder = new SimpleBinder().forField(myField).isRequired().withAsyncValidator(validator).bind()
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator)
+                .bind()
 
             myField.updateValue('12345')
 
-            return binder.submit({} as any, () => {
-                return Promise.resolve('bla')
-            }).then((values: any) => {
-                expect(values).to.deep.equal({ myField: '12345' })
-            })
+            return binder
+                .submit({} as any, () => {
+                    return Promise.resolve('bla')
+                })
+                .then((values: any) => {
+                    expect(values).to.deep.equal({ myField: '12345' })
+                })
         })
 
         it('should trigger asynchronous validators on blur if configured', async () => {
             validator.resolves('my error')
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withAsyncValidator(validator, { onBlur: true }).bind()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator, { onBlur: true })
+                .bind()
 
             myField.updateValue('12345')
             await myField.handleBlur()
@@ -390,7 +451,10 @@ describe('Binder', () => {
 
         it('should respect synchronous validations before asynchronous validators', async () => {
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withAsyncValidator(validator, { onBlur: true }).bind()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator, { onBlur: true })
+                .bind()
 
             myField.updateValue('')
             myField.handleBlur()
@@ -402,14 +466,20 @@ describe('Binder', () => {
         })
 
         it('should respect synchronous validations during ongoing asynchronous validators', async () => {
-            validator = sandbox.spy((value: string) => new Promise(resolve => {
-                setTimeout(() => {
-                    value !== 'async fail' ? resolve() : resolve('async fail')
-                }, 20)
-            }))
+            validator = sandbox.spy(
+                (value: string) =>
+                    new Promise(resolve => {
+                        setTimeout(() => {
+                            value !== 'async fail' ? resolve() : resolve('async fail')
+                        }, 20)
+                    }),
+            )
 
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withAsyncValidator(validator, { onBlur: true }).bind()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator, { onBlur: true })
+                .bind()
             myField.updateValue('validValue')
 
             expect(validator).to.not.have.been.called
@@ -448,10 +518,16 @@ describe('Binder', () => {
 
         it('should toggle validating property during asynchronous validation', () => {
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withAsyncValidator(() => {
-                    expect(myField.validating).to.be.true
-                    return Promise.resolve(undefined)
-                }, { onBlur: true }).bind()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(
+                    () => {
+                        expect(myField.validating).to.be.true
+                        return Promise.resolve(undefined)
+                    },
+                    { onBlur: true },
+                )
+                .bind()
 
             myField.updateValue('12345')
             myField.handleBlur()
@@ -460,12 +536,16 @@ describe('Binder', () => {
             })
         })
 
-        it('should not revalidate if value didn\'t change', () => {
+        it("should not revalidate if value didn't change", () => {
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withAsyncValidator(validator, { onBlur: true }).bind()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator, { onBlur: true })
+                .bind()
 
             myField.updateValue('12345')
-            return binder.validateAsync()
+            return binder
+                .validateAsync()
                 .then(() => binder.validateAsync())
                 .then(() => {
                     expect(validator).to.have.been.calledOnce
@@ -476,7 +556,8 @@ describe('Binder', () => {
             binder = new SimpleBinder()
                 .forField(myField)
                 .isRequired()
-                .withAsyncValidator(() => sleep(100).then(() => 'fail'), { onBlur: true }).bind()
+                .withAsyncValidator(() => sleep(100).then(() => 'fail'), { onBlur: true })
+                .bind()
 
             myField.updateValue('12345')
             const promise = binder.validateAsync().should.be.rejected
@@ -495,8 +576,13 @@ describe('Binder', () => {
         beforeEach(() => {
             validator = sandbox.stub().resolves(undefined)
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withAsyncValidator(validator).bind()
-                .forField(secondField).isRequired().bind()
+                .forField(myField)
+                .isRequired()
+                .withAsyncValidator(validator)
+                .bind()
+                .forField(secondField)
+                .isRequired()
+                .bind()
         })
 
         it('should be valid if no fields are registered', () => {
@@ -577,7 +663,10 @@ describe('Binder', () => {
 
         beforeEach(() => {
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withValidator(lengthValidator(5, 10)).bind()
+                .forField(myField)
+                .isRequired()
+                .withValidator(lengthValidator(5, 10))
+                .bind()
         })
 
         it('should be marked as unchanged before load', () => {
@@ -607,9 +696,9 @@ describe('Binder', () => {
         it('should be marked as unchanged after change back to initial value even on complex values', () => {
             const field = new ComplexField('myComplexField')
             binder = new SimpleBinder().forField(field).bind()
-            binder.load({ myComplexField: [ 'value' ] })
-            field.updateValue([ 'other' ])
-            field.updateValue([ 'value' ])
+            binder.load({ myComplexField: ['value'] })
+            field.updateValue(['other'])
+            field.updateValue(['value'])
             expect(binder.changed).to.be.false
         })
 
@@ -654,7 +743,9 @@ describe('Binder', () => {
             const changeHandlerSpy = sandbox.spy()
 
             binder = new SimpleBinder()
-                .forField(myField).onChange(changeHandlerSpy).bind()
+                .forField(myField)
+                .onChange(changeHandlerSpy)
+                .bind()
             binder.load({ myField: 'value' })
 
             myField.updateValue('oth')
@@ -671,7 +762,10 @@ describe('Binder', () => {
 
         beforeEach(() => {
             binder = new SimpleBinder()
-                .forField(myField).isRequired().withValidator(lengthValidator(5, 10)).bind()
+                .forField(myField)
+                .isRequired()
+                .withValidator(lengthValidator(5, 10))
+                .bind()
         })
 
         it('should reject on field errors', () => {
@@ -711,23 +805,27 @@ describe('Binder', () => {
                 myField.updateValue('12345')
 
                 expect(binder.submitting).to.be.false
-                return binder.submit({}, target => {
-                    expect(target).to.deep.equal({ myField: '12345' })
-                    expect(binder.submitting).to.be.true
-                }).then(() => {
-                    expect(binder.submitting).to.be.false
-                })
+                return binder
+                    .submit({}, target => {
+                        expect(target).to.deep.equal({ myField: '12345' })
+                        expect(binder.submitting).to.be.true
+                    })
+                    .then(() => {
+                        expect(binder.submitting).to.be.false
+                    })
             })
 
             it('should also reject if validation success method rejects', () => {
                 myField.updateValue('12345')
 
-                return binder.submit({}, () => {
-                    throw new Error('submission failed')
-                }).should.be.rejected.then((err: Error) => {
-                    expect(binder.submitting).to.be.false
-                    expect(err.message).to.equal('submission failed')
-                })
+                return binder
+                    .submit({}, () => {
+                        throw new Error('submission failed')
+                    })
+                    .should.be.rejected.then((err: Error) => {
+                        expect(binder.submitting).to.be.false
+                        expect(err.message).to.equal('submission failed')
+                    })
             })
         })
     })
@@ -737,8 +835,12 @@ describe('Binder', () => {
 
         beforeEach(() => {
             binder = new SimpleBinder()
-                .forField(myField).isRequired().bind()
-                .forField(secondField).isRequired().bind()
+                .forField(myField)
+                .isRequired()
+                .bind()
+                .forField(secondField)
+                .isRequired()
+                .bind()
         })
 
         it('should allow removal of an existing field', () => {

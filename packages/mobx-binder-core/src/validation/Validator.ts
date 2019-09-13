@@ -1,4 +1,3 @@
-
 /**
  * Interface to be fulfulled by any validator for use with `withValidator`
  */
