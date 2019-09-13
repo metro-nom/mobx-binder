@@ -1,7 +1,7 @@
 interface Translations {
-    [ translationKey: string ]: string
+    [translationKey: string]: string
 }
 
 export interface Locales {
-    [ languageKey: string ]: Translations
+    [languageKey: string]: Translations
 }

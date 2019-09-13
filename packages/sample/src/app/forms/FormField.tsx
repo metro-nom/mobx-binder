@@ -15,47 +15,47 @@ export default class FormField extends React.Component<FormFieldProps, any> {
 
     public render() {
         const { field } = this.props as any
-        const showValidationResults = (!field.validating && field.showValidationResults)
+        const showValidationResults = !field.validating && field.showValidationResults
         const valid = showValidationResults && field.valid === true
         const invalid = showValidationResults && field.valid === false
         const errorMessage = showValidationResults ? field.errorMessage || null : null
 
         return (
             <FormGroup>
-                { field.valueType === 'string' ? (
+                {field.valueType === 'string' ? (
                     <>
-                        <Label for={ field.name }>{ this.t(`form.fields.${field.name}`) }</Label>
+                        <Label for={field.name}>{this.t(`form.fields.${field.name}`)}</Label>
                         <Input
-                            id={ field.name }
+                            id={field.name}
                             type='text'
-                            name={ field.name }
-                            value={ field.value }
-                            readOnly={ field.readOnly }
-                            valid={ valid }
-                            invalid={ invalid }
-                            onChange={ this.updateTextFieldValue }
-                            onFocus={ this.handleFocus }
-                            onBlur={ this.handleBlur }
+                            name={field.name}
+                            value={field.value}
+                            readOnly={field.readOnly}
+                            valid={valid}
+                            invalid={invalid}
+                            onChange={this.updateTextFieldValue}
+                            onFocus={this.handleFocus}
+                            onBlur={this.handleBlur}
                         />
                     </>
                 ) : (
-                    <Label for={ field.name }>
+                    <Label for={field.name}>
                         <Input
-                            id={ field.name }
+                            id={field.name}
                             type='checkbox'
-                            name={ field.name }
-                            checked={ !!field.value }
-                            readOnly={ field.readOnly }
-                            valid={ valid }
-                            invalid={ invalid }
-                            onChange={ this.updateCheckboxFieldValue }
-                            onFocus={ this.handleFocus }
-                            onBlur={ this.handleBlur }
+                            name={field.name}
+                            checked={!!field.value}
+                            readOnly={field.readOnly}
+                            valid={valid}
+                            invalid={invalid}
+                            onChange={this.updateCheckboxFieldValue}
+                            onFocus={this.handleFocus}
+                            onBlur={this.handleBlur}
                         />
-                        { this.t(`form.fields.${field.name}`) }
+                        {this.t(`form.fields.${field.name}`)}
                     </Label>
                 )}
-                <FormFeedback>{ errorMessage }</FormFeedback>
+                <FormFeedback>{errorMessage}</FormFeedback>
             </FormGroup>
         )
     }

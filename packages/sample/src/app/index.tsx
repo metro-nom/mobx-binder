@@ -5,6 +5,6 @@ import ProfilePage from './pages/profile/ProfilePage'
 // render react DOM
 export const App = () => (
     <Root>
-        <ProfilePage/>
-    </ Root >
+        <ProfilePage />
+    </Root>
 )

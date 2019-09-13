@@ -36,8 +36,8 @@ const stores = { i18n, personStore, profileStore }
 
 // render react DOM
 ReactDOM.render(
-    <Provider { ...stores } >
+    <Provider {...stores}>
         <App />
     </Provider>,
-    document.getElementById('root')
+    document.getElementById('root'),
 )

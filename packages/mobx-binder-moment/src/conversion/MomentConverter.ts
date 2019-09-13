@@ -2,9 +2,7 @@ import moment from 'moment'
 import { BinderValidationResult, Converter, ValidationError } from 'mobx-binder'
 
 export class MomentConverter implements Converter<BinderValidationResult, string, moment.Moment> {
-
-    constructor(private format: string, private errorMessage = 'conversions.error.moment') {
-    }
+    constructor(private format: string, private errorMessage = 'conversions.error.moment') {}
 
     public convertToModel(value?: string): moment.Moment | undefined {
         if (!!value) {

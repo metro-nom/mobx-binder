@@ -24,24 +24,39 @@ export default class ProfileStore {
     constructor(private personStore: PersonStore, private t: TranslateFunction) {
         this.binder = new DefaultBinder({ t })
         this.binder
-            .forField(this.salutation).isRequired().withConverter(trimConverter).bind()
-            .forField(this.fullName).isRequired().withConverter(trimConverter).bind()
-            .forField(this.dateOfBirth).withConverter(trimConverter).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
+            .forField(this.salutation)
+            .isRequired()
+            .withConverter(trimConverter)
+            .bind()
+            .forField(this.fullName)
+            .isRequired()
+            .withConverter(trimConverter)
+            .bind()
+            .forField(this.dateOfBirth)
+            .withConverter(trimConverter)
+            .withConverter(new MomentConverter('DD.MM.YYYY'))
+            .bind()
 
             .forField(this.email)
             .isRequired()
-            .withAsyncValidator(async (value?: string) => {
-                await sleep(1000)
-                return EmailValidator.validate()(value)
-            }, { onBlur: true })
+            .withAsyncValidator(
+                async (value?: string) => {
+                    await sleep(1000)
+                    return EmailValidator.validate()(value)
+                },
+                { onBlur: true },
+            )
             .withConverter(trimConverter)
             .onChange(() => {
                 console.info('Email changed')
             })
             .bind()
 
-            .forField(this.phoneNumber).withConverter(trimConverter).bind()
-            .forField(this.toggle).bind()
+            .forField(this.phoneNumber)
+            .withConverter(trimConverter)
+            .bind()
+            .forField(this.toggle)
+            .bind()
     }
 
     @action
@@ -51,8 +66,8 @@ export default class ProfileStore {
 
     public onSubmit = () => {
         if (!this.binder.submitting) {
-            return this.binder.submit(this.personStore,
-                async data => {
+            return this.binder
+                .submit(this.personStore, async data => {
                     await sleep(1000)
                     if (data.fullName === 'show-submission-error') {
                         throw new Error('wrong-fullName')
