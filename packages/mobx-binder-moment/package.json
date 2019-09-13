@@ -6,7 +6,7 @@
     "scripts": {
         "clean": "rm -Rf lib",
         "build": "tsc",
-        "lint": "tslint -p tsconfig.json 'src/**/*.ts' 'src/**/*.tsx'",
+        "lint": "eslint 'src/**/*.ts*'",
         "lint:fix": "npm run lint -- --fix",
         "test": "_mocha 'src/**/*Spec.ts'",
         "coverage": "nyc npm test",
