@@ -1,13 +1,27 @@
 import { FieldStore } from '../../fields/FieldStore'
 
-export interface Data<ValueType> {
-    pending: boolean
+export type Data<ValueType> = KnownData<ValueType> | UnknownData<ValueType>
+
+export interface KnownData<ValueType> {
+    pending: false
+    value: ValueType
+}
+
+export interface UnknownData<ValueType> {
+    pending: true
     value?: ValueType
 }
 
-export interface Validity<ValidationResult> {
-    status: 'unknown' | 'validating' | 'validated'
+export type Validity<ValidationResult> = KnownValidity<ValidationResult> | UnknownValidity<ValidationResult>
+
+export interface UnknownValidity<ValidationResult> {
+    status: 'unknown' | 'validating'
     result?: ValidationResult
+}
+
+export interface KnownValidity<ValidationResult> {
+    status: 'validated'
+    result: ValidationResult
 }
 
 export interface Modifier<ValidationResult, ViewType, ModelType> {

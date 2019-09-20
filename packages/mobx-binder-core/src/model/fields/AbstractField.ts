@@ -15,7 +15,7 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     public showValidationResults = false
 
     @observable
-    public abstract value?: ValueType
+    public abstract value: ValueType
 
     @observable
     public valid?: boolean = undefined

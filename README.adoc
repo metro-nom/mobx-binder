@@ -328,21 +328,45 @@ Please also see the link:packages/sample/src/app/forms/FormField.tsx[example imp
 
 The project is using https://github.com/lerna/lerna[lerna] for multipackage repository support.
 
-.Initial setup
+=== Initial setup
+
 ----
 npm install
 npm run bootstrap
 ----
 
-.Build
+=== Full Build
+
 ----
-lerna run build
+npm run build
 ----
 
-.Start sample application
+=== Start sample application
+
 ----
 cd packages/sample
 npm start
+----
+
+=== Clean Release (without pull request)
+
+.First merge master into the branch and check that the branch is running fine
+----
+git merge master
+npm run reinitialize
+npm run build
+----
+
+.Merge the branch back into develop
+----
+git checkout master
+git merge <branchName>
+----
+
+.and perform the release
+----
+npm run version
+npm run publish
 ----
 
 == TODOs

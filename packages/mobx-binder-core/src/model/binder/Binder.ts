@@ -112,7 +112,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
         if (this.customErrorMessage) {
             return false
         }
-        return this.validity.status === 'validated' ? this.context.valid(this.validity.result!) : undefined
+        return this.validity.status === 'validated' ? this.context.valid(this.validity.result) : undefined
     }
 
     @computed
@@ -120,7 +120,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
         if (this.customErrorMessage) {
             return this.customErrorMessage
         }
-        return this.valid === false ? this.context.translate(this.validity.result!) : undefined
+        return this.validity.status === 'validated' && !this.context.valid(this.validity.result) ? this.context.translate(this.validity.result) : undefined
     }
 
     @action
@@ -130,15 +130,14 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     }
 
     public validate(): ValidationResult {
-        return this.validity.status === 'validated' ? this.validity.result! : this.context.validResult
+        return this.validity.status === 'validated' ? this.validity.result : this.context.validResult
     }
 
     @action
     public async validateAsync(onBlur = false): Promise<ValidationResult> {
         await this.chain.validateAsync(onBlur)
         const validity = this.validity
-        const result = validity.status !== 'validated' ? this.context.validResult : validity.result!
-        return result
+        return validity.status === 'validated' ? validity.result : this.context.validResult
     }
 
     @action

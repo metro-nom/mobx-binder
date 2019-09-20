@@ -6,7 +6,9 @@
     "reinitialize": "npm run clean && npm run bootstrap",
     "test": "lerna run test:ci",
     "clean": "lerna run clean && lerna clean -y",
-    "release": "lerna publish",
+    "build": "lerna run build && lerna run lint && lerna run test",
+    "version": "lerna version",
+    "publish": "lerna publish from-git",
     "ls": "lerna ls"
   },
   "devDependencies": {

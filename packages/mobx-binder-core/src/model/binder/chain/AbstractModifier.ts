@@ -22,7 +22,7 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
 
     public applyConversionsToField(): void {
         const validity = this.validity
-        if (validity.status === 'validated' && this.context.valid(validity.result!)) {
+        if (validity.status === 'validated' && this.context.valid(validity.result)) {
             this.field.updateValue(this.toView(this.data.value))
         } else {
             this.view.applyConversionsToField()

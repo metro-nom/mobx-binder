@@ -1,6 +1,6 @@
 import { Binder, BindingBuilder, Context, FieldStore } from 'mobx-binder-core'
 import { StringValidators } from '../validation/StringValidators'
-import { BinderValidationResult, BinderValidator } from '../validation/Validation'
+import { BinderValidationResult, BinderValidator, InvalidBinderValidationResult, ValidBinderValidationResult } from '../validation/Validation'
 import { TranslateFunction } from './Translation'
 
 export interface DefaultContextOptions {
@@ -10,14 +10,23 @@ export interface DefaultContextOptions {
 
 export class DefaultContext implements Context<BinderValidationResult> {
     public readonly requiredValidator: () => BinderValidator<any>
-    public readonly validResult = {}
+    public readonly validResult: ValidBinderValidationResult = {}
 
     constructor(private options: DefaultContextOptions) {
         this.requiredValidator = options.requiredValidator || StringValidators.required
     }
 
-    public readonly translate = (result: BinderValidationResult) => this.options.t(result.messageKey!, result.args)
-    public readonly valid = (result: BinderValidationResult) => !result.messageKey
+    public translate(result: BinderValidationResult) {
+        return this.invalid(result) ? this.options.t(result.messageKey, result.args) : ''
+    }
+
+    public valid(result: BinderValidationResult): result is ValidBinderValidationResult {
+        return !!result && !result.hasOwnProperty('messageKey')
+    }
+
+    private invalid(result: BinderValidationResult): result is InvalidBinderValidationResult {
+        return !!result && !this.valid(result)
+    }
 }
 
 export class DefaultBinder extends Binder<BinderValidationResult> {

@@ -23,7 +23,7 @@ export interface FieldStore<ValueType> {
     /**
      * The current value of the form field.
      */
-    value?: ValueType
+    value: ValueType
 
     /**
      * The validity status of a form field. Always set, except for unfinished async validations.

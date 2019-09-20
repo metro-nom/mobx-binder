@@ -5,7 +5,7 @@
     "description": "A frontend boilerplate with React, MobX and Typescript",
     "main": "index.js",
     "scripts": {
-        "lint": "eslint 'src/**/*.ts*'",
+        "lint": "eslint --max-warnings 0 'src/**/*.ts*'",
         "lint:fix": "npm run lint -- --fix",
         "start": "webpack-dev-server --mode development --hot --progress --colors --port 3000 --open",
         "build": "webpack -p --progress --colors",

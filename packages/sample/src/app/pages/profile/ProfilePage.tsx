@@ -20,6 +20,7 @@ export default class ProfilePage extends React.Component<ProfilePageContentProps
     }
 
     public render() {
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const profile = this.props.profileStore!
         const person = this.props.personStore!
         const { changed, validating, valid, submitting } = profile.binder

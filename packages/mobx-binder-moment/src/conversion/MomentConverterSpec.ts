@@ -2,6 +2,8 @@ import { expect } from 'chai'
 import { MomentConverter } from './MomentConverter'
 import moment from 'moment'
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 describe('MomentConverter', () => {
     let converter = new MomentConverter('DD.MM.YYYY')
 
