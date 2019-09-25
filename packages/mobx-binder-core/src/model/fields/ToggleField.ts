@@ -8,7 +8,7 @@ import { AbstractField } from './AbstractField'
  */
 export class ToggleField extends AbstractField<boolean> {
     @observable
-    public value: boolean = false
+    public value = false
 
     public constructor(name: string) {
         super('boolean', name)

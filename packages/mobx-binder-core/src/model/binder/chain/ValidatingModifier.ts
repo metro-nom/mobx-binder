@@ -1,4 +1,4 @@
-import { Modifier, Validity } from './Modifier'
+import { Data, Modifier, Validity } from './Modifier'
 import { Context } from '../Context'
 import { Validator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
@@ -7,11 +7,12 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     constructor(
         view: Modifier<ValidationResult, any, ValueType>,
         context: Context<ValidationResult>,
-        private validator: Validator<ValidationResult, ValueType>) {
+        private validator: Validator<ValidationResult, ValueType>,
+    ) {
         super(view, context)
     }
 
-    get data() {
+    get data(): Data<ValueType> {
         const data = this.view.data
         if (data.pending) {
             return data
@@ -35,12 +36,19 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     }
 
     private calculateValidity(upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> {
-        if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result!)) {
+        if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
             return upstreamValidity
         } else {
-            return {
-                status: 'validated',
-                result: this.validator(this.view.data.value),
+            const data = this.view.data
+            if (data.pending) {
+                return {
+                    status: 'unknown',
+                }
+            } else {
+                return {
+                    status: 'validated',
+                    result: this.validator(data.value),
+                }
             }
         }
     }

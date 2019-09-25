@@ -5,7 +5,7 @@ import { Locales } from './Locales'
 
 export default class I18nStore {
     @observable
-    public locale: string = 'en'
+    public locale = 'en'
 
     public translate: TranslateFunction
 

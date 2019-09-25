@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.0] - 2019-09-20
+
+* Stricter type checking - you are now required to specify nullable types explicitly, like in Field types and in Converters
+* Migration to eslint rule set and prettier code style
+
 ## [0.2.0] - 2019-05-13
 
 * New `TrimConverter` for trimming string based field contents

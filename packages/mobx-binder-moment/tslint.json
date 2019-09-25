@@ -1,9 +1,0 @@
-{
-    "extends": [ "../mobx-binder-core/tslint.json", "tslint-no-circular-imports" ],
-    "linterOptions": {
-        "exclude": [
-            "lib/**/*.d.ts",
-            "lib/**/*.js"
-        ]
-    }
-}

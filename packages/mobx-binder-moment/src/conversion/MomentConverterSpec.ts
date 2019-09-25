@@ -2,6 +2,8 @@ import { expect } from 'chai'
 import { MomentConverter } from './MomentConverter'
 import moment from 'moment'
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 describe('MomentConverter', () => {
     let converter = new MomentConverter('DD.MM.YYYY')
 
@@ -20,8 +22,8 @@ describe('MomentConverter', () => {
             it('should fail with standard message if conversion fails', () => {
                 expect(() => converter.convertToModel('abcde'))
                     .to.throw(Error)
-                    .with.property('validationResult').deep.equals(
-                    {
+                    .with.property('validationResult')
+                    .deep.equals({
                         messageKey: 'conversions.error.moment',
                         args: { value: 'abcde' },
                     })
@@ -31,8 +33,8 @@ describe('MomentConverter', () => {
 
                 expect(() => converter.convertToModel('abcde'))
                     .to.throw(Error)
-                    .with.property('validationResult').deep.equals(
-                    {
+                    .with.property('validationResult')
+                    .deep.equals({
                         messageKey: 'other.key',
                         args: { value: 'abcde' },
                     })

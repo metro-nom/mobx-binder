@@ -1,8 +1,12 @@
 import { Validator } from 'mobx-binder-core'
 
-export interface BinderValidationResult {
-    messageKey?: string
-    args?: { [ s: string ]: any }
+export type BinderValidationResult = InvalidBinderValidationResult | ValidBinderValidationResult
+
+export interface InvalidBinderValidationResult {
+    messageKey: string
+    args?: { [s: string]: any }
 }
+
+export type ValidBinderValidationResult = {}
 
 export type BinderValidator<T> = Validator<BinderValidationResult, T>

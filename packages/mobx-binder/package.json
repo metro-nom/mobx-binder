@@ -6,7 +6,7 @@
     "scripts": {
         "clean": "rm -Rf lib",
         "build": "tsc",
-        "lint": "tslint -p tsconfig.json 'src/**/*.ts' 'src/**/*.tsx'",
+        "lint": "eslint --max-warnings 0 'src/**/*.ts*'",
         "lint:fix": "npm run lint -- --fix",
         "test": "_mocha 'src/**/*Spec.ts'",
         "coverage": "nyc npm test",
@@ -46,6 +46,7 @@
         "chai": "^4.2.0",
         "chai-as-promised": "^7.1.1",
         "data-driven": "^1.4.0",
+        "mobx-binder-utils": "^0.2.8",
         "mocha": "^6.0.1",
         "nyc": "^14.1.1",
         "sinon": "^6.3.4",

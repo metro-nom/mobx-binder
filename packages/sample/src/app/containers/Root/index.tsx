@@ -5,15 +5,15 @@ export class Root extends React.Component<any, any> {
     public renderDevTool() {
         if (process.env.NODE_ENV !== 'production') {
             const DevTools = require('mobx-react-devtools').default
-            return <DevTools/>
+            return <DevTools />
         }
     }
 
     public render() {
         return (
             <Container>
-                { this.props.children }
-                { this.renderDevTool() }
+                {this.props.children}
+                {this.renderDevTool()}
             </Container>
         )
     }

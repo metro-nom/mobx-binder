@@ -56,7 +56,9 @@ describe('ConvertingModifier', () => {
         })
         it('should fail on unexpected errors', () => {
             const error = new Error('fail')
-            converter.convertToModel = () => { throw error }
+            converter.convertToModel = () => {
+                throw error
+            }
             expect(() => modifier.data).to.throw(error)
         })
     })
@@ -95,7 +97,9 @@ describe('ConvertingModifier', () => {
         })
         it('should fail with error on unexpected errors', () => {
             const error = new Error('fail')
-            converter.convertToModel = () => { throw error }
+            converter.convertToModel = () => {
+                throw error
+            }
             expect(() => modifier.validity).to.throw(error)
         })
     })
@@ -133,8 +137,10 @@ describe('ConvertingModifier', () => {
         })
 
         it('should delegate to the converter isEqual method if existing', () => {
-            const stub = converter.isEqual = sandbox.stub()
-            upstream.isEqual = () => { throw new Error('should not be called') }
+            const stub = (converter.isEqual = sandbox.stub())
+            upstream.isEqual = () => {
+                throw new Error('should not be called')
+            }
 
             stub.withArgs(123, 123).returns(true)
             stub.withArgs(123, 456).returns(false)

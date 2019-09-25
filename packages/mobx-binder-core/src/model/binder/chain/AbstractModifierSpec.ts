@@ -51,10 +51,13 @@ describe('AbstractModifier', () => {
 
     describe('validateAsync', () => {
         it('should perform upstream validation and return results', async () => {
-            upstream.validateAsync = sandbox.stub().withArgs(false).resolves({
-                status: 'validated',
-                result: undefined,
-            })
+            upstream.validateAsync = sandbox
+                .stub()
+                .withArgs(false)
+                .resolves({
+                    status: 'validated',
+                    result: undefined,
+                })
             expect(await modifier.validateAsync(false)).to.deep.equal({
                 status: 'validated',
                 result: undefined,
