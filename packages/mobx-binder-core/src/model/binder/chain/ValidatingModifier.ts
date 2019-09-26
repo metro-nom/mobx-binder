@@ -1,4 +1,4 @@
-import { Data, Modifier, Validity } from './Modifier'
+import { Data, Modifier, Validity, ValidValueValidationResult, ValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { Validator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
@@ -51,5 +51,10 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
                 }
             }
         }
+    }
+
+    protected validateValueLocally(viewResult: ValidValueValidationResult<ValueType>): ValueValidationResult<ValueType, ValidationResult> {
+        const result = this.validator(viewResult.value)
+        return this.context.valid(result) ? viewResult : { valid: false, result }
     }
 }

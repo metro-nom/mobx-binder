@@ -11,11 +11,12 @@ import { ChangeEventHandler } from './chain/ChangeEventHandler'
 import { Context } from './Context'
 import { AsyncValidator, Validator } from '../../validation/Validator'
 import isEqual from 'lodash.isequal'
+import { isPromise } from '../../utils/isPromise'
 
 /**
  * API for single field binding
  */
-export interface Binding<ValidationResult> {
+export interface Binding<FieldType, ValidationResult> {
     changed: boolean
     readonly field: FieldStore<any>
 
@@ -61,12 +62,19 @@ export interface Binding<ValidationResult> {
     validateAsync(onBlur?: boolean): Promise<ValidationResult>
 
     /**
+     * Validate a given field value. If there are async operations, it returns a promise.
+     *
+     * @param fieldValue
+     */
+    validateValue(fieldValue: FieldType): ValidationResult | Promise<ValidationResult>
+
+    /**
      * Sets the current field value to be handled as not changed.
      */
     setUnchanged(): void
 }
 
-class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
+class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType, ValidationResult> {
     @observable.ref
     private unchangedValue?: any
 
@@ -127,6 +135,14 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
     public setUnchanged() {
         const fieldValue = this.field.value
         this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
+    }
+
+    public validateValue(fieldValue: FieldType): ValidationResult | Promise<ValidationResult> {
+        const someResult = this.chain.validateValue(fieldValue)
+        if (isPromise(someResult)) {
+            return someResult.then(data => (data.valid ? this.context.validResult : data.result))
+        }
+        return someResult.valid ? this.context.validResult : someResult.result
     }
 
     public validate(): ValidationResult {
@@ -203,7 +219,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
 
     constructor(
         private readonly binder: BinderType,
-        private readonly addBinding: (binding: StandardBinding<ValidationResult>) => void,
+        private readonly addBinding: (binding: StandardBinding<any, ValidationResult>) => void,
         private readonly field: FieldStore<ValueType>,
         private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context),
     ) {
@@ -307,7 +323,7 @@ export class Binder<ValidationResult> {
     @observable
     public submitting?: boolean
 
-    private _bindings: Array<StandardBinding<ValidationResult>> = observable([])
+    private _bindings: Array<StandardBinding<any, ValidationResult>> = observable([])
 
     constructor(public readonly context: Context<ValidationResult>) {
         runInAction(() => {
@@ -315,7 +331,7 @@ export class Binder<ValidationResult> {
         })
     }
 
-    get bindings(): ReadonlyArray<StandardBinding<ValidationResult>> {
+    get bindings(): ReadonlyArray<StandardBinding<any, ValidationResult>> {
         return this._bindings
     }
 
@@ -344,7 +360,7 @@ export class Binder<ValidationResult> {
      * Provides access to a single field `Binding`.
      * @param field
      */
-    public binding(field: FieldStore<any>): Binding<ValidationResult> {
+    public binding<FieldType>(field: FieldStore<FieldType>): Binding<FieldType, ValidationResult> {
         const result = this.bindings.find(binding => binding.field === field)
 
         if (!result) {
@@ -433,7 +449,7 @@ export class Binder<ValidationResult> {
     get changedData(): any {
         return this.bindings
             .filter(binding => binding.changed && binding.valid === true)
-            .reduce((data: any, binding: Binding<ValidationResult>) => {
+            .reduce((data: any, binding: Binding<any, ValidationResult>) => {
                 binding.store(data)
                 return data
             }, {})
@@ -530,7 +546,7 @@ export class Binder<ValidationResult> {
      * @param binding
      */
     @action
-    private addBinding(binding: StandardBinding<ValidationResult>) {
+    private addBinding(binding: StandardBinding<any, ValidationResult>) {
         this._bindings.push(binding)
     }
 }
