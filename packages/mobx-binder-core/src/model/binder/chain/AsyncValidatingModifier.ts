@@ -115,7 +115,7 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
 
     protected validateValueLocally(viewResult: ValidValueValidationResult<ValueType>): Promise<SyncValueValidationResult<ValueType, ValidationResult>> {
         return this.validator(viewResult.value).then((result: ValidationResult) => {
-            return this.context.valid(result) ? viewResult : { valid: false, result } as InvalidValueValidationResult<ValidationResult>
+            return this.context.valid(result) ? viewResult : ({ valid: false, result } as InvalidValueValidationResult<ValidationResult>)
         })
     }
 }
