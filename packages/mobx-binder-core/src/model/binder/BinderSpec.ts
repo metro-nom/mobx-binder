@@ -910,10 +910,31 @@ describe('Binder', () => {
                     .bind()
             })
 
-            it('should report failures synchronously', async () => {
+            it('should report failures asynchronously', async () => {
                 expect(await binder.binding(myField).validateValue('123')).to.equal('Wrong length')
             })
-            it('should report success synchronously', async () => {
+            it('should report success asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+            })
+        })
+
+        describe('with multiple steps', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder()
+                    .forField(myField)
+                    .onChange(() => undefined)
+                    .withAsyncValidator(value => sleep(10).then(() => lengthValidator(5, 10)(value)))
+                    .withConverter(new SimpleNumberConverter())
+                    .bind()
+            })
+
+            it('should report length errors first', async () => {
+                expect(await binder.binding(myField).validateValue('abc')).to.equal('Wrong length')
+            })
+            it('should report conversion errors if length is ok', async () => {
+                expect(await binder.binding(myField).validateValue('abcde')).to.equal('Not a number')
+            })
+            it('should report success asynchronously', async () => {
                 expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
             })
         })
