@@ -373,5 +373,6 @@ npm run publish
 
 == TODOs
 
+* Add coverage to the pipeline
 * Create more re-usable validators
 * Create integration components vor various open source React component libraries (contributions are welcome ;-)
