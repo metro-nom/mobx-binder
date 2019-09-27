@@ -8,7 +8,7 @@
         "lint": "eslint --max-warnings 0 'src/**/*.ts*'",
         "lint:fix": "npm run lint -- --fix",
         "start": "webpack-dev-server --mode development --hot --progress --colors --port 3000 --open",
-        "build": "webpack -p --progress --colors",
+        "build": "mkdir -p dist && webpack -p --progress --colors",
         "create-stats": "NODE_ENV=production webpack --profile --json > webpack-stats.json",
         "show-stats": "webpack-bundle-analyzer webpack-stats.json",
         "prettier": "prettier --write \"src/**/*.{ts,tsx,css}\""

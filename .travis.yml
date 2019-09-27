@@ -8,10 +8,14 @@ install:
   - npm run reinitialize
 jobs:
   include:
-    - stage: "Build"                # naming the Tests stage
+    - stage: build
+      name: "Build"
       script: npm run build
-    - stage: "Tests"                # naming the Tests stage
-      name: "Unit Tests"            # names the first Tests stage job
+    - stage: test
+      name: "Unit Tests"
       script: npm run test
     - name: "Linting"
       script: npm run lint
+stages:
+  - build
+  - test

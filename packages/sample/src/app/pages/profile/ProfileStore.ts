@@ -1,5 +1,5 @@
 import { action, runInAction } from 'mobx'
-import { DefaultBinder, TextField, EmailValidator } from 'mobx-binder'
+import { DefaultBinder, TextField, EmailValidator, ToggleField, TrimConverter } from 'mobx-binder'
 import { MomentConverter } from 'mobx-binder-moment'
 
 // tslint:disable no-submodule-imports
@@ -7,7 +7,6 @@ import { MomentConverter } from 'mobx-binder-moment'
 import PersonStore from '../../domain/PersonStore'
 import sleep from 'mobx-binder/lib/test/sleep'
 import { TranslateFunction } from 'react-mobx-i18n'
-import { ToggleField, TrimConverter } from '../../../../../mobx-binder-core/src'
 
 const trimConverter = new TrimConverter()
 
