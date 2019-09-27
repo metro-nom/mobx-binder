@@ -26,6 +26,10 @@ describe('AsyncValidatingModifier', () => {
             },
             field,
             toView: sandbox.stub(),
+            validateValue: sandbox.stub().callsFake(value => ({
+                valid: true,
+                value,
+            })),
             isEqual: (a: any, b: any) => a === b,
             validateAsync: sandbox.stub().resolves({ status: 'validated', result: undefined }),
         }
@@ -167,6 +171,23 @@ describe('AsyncValidatingModifier', () => {
                     status: 'validated',
                     result: undefined,
                 })
+            })
+        })
+    })
+
+    describe('validateValue', () => {
+        // here I only test cases where the superclass delegates to validateValueLocally()
+
+        it('should accept valid values', async () => {
+            expect(await modifier.validateValue('someValue')).to.deep.equal({
+                valid: true,
+                value: 'someValue',
+            })
+        })
+        it('should return proper validation result on validation errors', async () => {
+            expect(await modifier.validateValue('wrong')).to.deep.equal({
+                valid: false,
+                result: 'fail',
             })
         })
     })
