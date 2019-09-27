@@ -4,9 +4,10 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
     "reinitialize": "npm run clean && npm run bootstrap",
+    "lint": "lerna run lint",
     "test": "lerna run test",
     "clean": "lerna run clean && lerna clean -y",
-    "build": "lerna run build && lerna run lint && lerna run test",
+    "build": "lerna run build",
     "version": "lerna version",
     "publish": "lerna publish from-git",
     "ls": "lerna ls"

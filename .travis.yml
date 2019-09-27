@@ -6,3 +6,7 @@ cache:
 install:
   - npm ci
   - npm run reinitialize
+script:
+  - npm run build
+  - npm run lint
+  - npm run test

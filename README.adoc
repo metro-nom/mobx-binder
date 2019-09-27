@@ -355,6 +355,8 @@ npm start
 git merge master
 npm run reinitialize
 npm run build
+npm run lint
+npm run test
 ----
 
 .Merge the branch back into develop
