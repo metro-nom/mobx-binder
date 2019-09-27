@@ -18,7 +18,7 @@ import { isPromise } from '../../utils/isPromise'
  */
 export interface Binding<FieldType, ValidationResult> {
     changed: boolean
-    readonly field: FieldStore<any>
+    readonly field: FieldStore<FieldType>
 
     /**
      * Load the field value from the source object, treating it as "unchanged" value.
@@ -39,7 +39,7 @@ export interface Binding<FieldType, ValidationResult> {
      *
      * @param source
      */
-    getFieldValue(source: any): any
+    getFieldValue(source: any): FieldType
 
     /**
      * Store the valid field value to the target object
@@ -169,7 +169,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
         this.field.updateValue(fieldValue)
     }
 
-    public getFieldValue(source: any) {
+    public getFieldValue(source: any): FieldType {
         const value = this.read(source)
         return this.chain.toView(value)
     }
@@ -323,7 +323,7 @@ export class Binder<ValidationResult> {
     @observable
     public submitting?: boolean
 
-    private _bindings: Array<StandardBinding<any, ValidationResult>> = observable([])
+    private _bindings: Array<StandardBinding<unknown, ValidationResult>> = observable([])
 
     constructor(public readonly context: Context<ValidationResult>) {
         runInAction(() => {
@@ -331,7 +331,7 @@ export class Binder<ValidationResult> {
         })
     }
 
-    get bindings(): ReadonlyArray<StandardBinding<any, ValidationResult>> {
+    get bindings(): ReadonlyArray<StandardBinding<unknown, ValidationResult>> {
         return this._bindings
     }
 
@@ -351,7 +351,7 @@ export class Binder<ValidationResult> {
      * @param field
      */
     @action
-    public removeBinding(field: FieldStore<any>): void {
+    public removeBinding(field: FieldStore<unknown>): void {
         const index = this.bindings.findIndex(binding => binding.field === field)
         this._bindings.splice(index, 1)
     }
@@ -366,7 +366,7 @@ export class Binder<ValidationResult> {
         if (!result) {
             throw new Error(`Cannot find binding for ${field.name}`)
         }
-        return result
+        return result as StandardBinding<FieldType, ValidationResult>
     }
 
     /**

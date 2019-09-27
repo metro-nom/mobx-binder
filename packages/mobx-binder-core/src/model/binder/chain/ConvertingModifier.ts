@@ -36,7 +36,7 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
         return this.calculateValidity(result)
     }
 
-    public toView(modelValue: any) {
+    public toView(modelValue: any): ViewType {
         return this.view.toView(this.converter.convertToPresentation(modelValue))
     }
 

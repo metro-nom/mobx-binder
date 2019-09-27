@@ -13,7 +13,7 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
         return this.view.validity
     }
 
-    public toView(modelValue: any): { value?: ViewType } {
+    public toView(modelValue: any): ViewType {
         return this.view.toView(modelValue)
     }
 
