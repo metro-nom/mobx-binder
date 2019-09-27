@@ -11,7 +11,7 @@
         "test": "_mocha 'src/**/*Spec.ts'",
         "coverage": "npm run coverage:run && npm run coverage:check",
         "coverage:run": "nyc npm test",
-        "coverage:check": "nyc check-coverage --statements 98 --branches 85 --functions 94 --lines 99",
+        "coverage:check": "nyc check-coverage --statements 98 --branches 99 --functions 94 --lines 99",
         "verify": "npm run build && npm run lint && npm run test"
     },
     "repository": {

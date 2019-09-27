@@ -216,13 +216,14 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
 export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult>> {
     private readOnly = false
     private required = false
+    private last: Modifier<ValidationResult, any, any>
 
     constructor(
         private readonly binder: BinderType,
         private readonly addBinding: (binding: StandardBinding<any, ValidationResult>) => void,
         private readonly field: FieldStore<ValueType>,
-        private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context),
     ) {
+        this.last = new FieldWrapper(field, binder.context)
         if (this.field.valueType === 'string') {
             this.withConverter(new StringConverter() as any)
         }

@@ -13,4 +13,11 @@ describe('Validators', () => {
             args: { value: 'max.mustermann metro.de' },
         })
     })
+
+    it('should reject an invalid email with custom message key', () => {
+        expect(EmailValidator.validate('custom.key')('max.mustermann metro.de')).to.deep.equal({
+            messageKey: 'custom.key',
+            args: { value: 'max.mustermann metro.de' },
+        })
+    })
 })

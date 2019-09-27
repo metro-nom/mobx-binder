@@ -133,6 +133,15 @@ describe('Validators', () => {
                     args: ctx.messageArgs,
                 })
             })
+
+            it('{value} should be incorrect for {method}({args}) returning custom message key', (ctx: any) => {
+                const rule = (StringValidators as any)[ctx.method](...ctx.args, 'custom.key')
+
+                expect(rule(ctx.value)).to.deep.equal({
+                    messageKey: 'custom.key',
+                    args: ctx.messageArgs,
+                })
+            })
         },
     )
 })

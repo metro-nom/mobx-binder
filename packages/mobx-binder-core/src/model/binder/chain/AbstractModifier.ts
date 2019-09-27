@@ -1,9 +1,14 @@
 import { Data, Modifier, Validity, ValidValueValidationResult, ValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { isPromise } from '../../../utils/isPromise'
+import { FieldStore } from '../../..'
 
 export class AbstractModifier<ValidationResult, ViewType, ModelType> implements Modifier<ValidationResult, ViewType, ModelType> {
-    constructor(protected view: Modifier<ValidationResult, any, ViewType>, protected context: Context<ValidationResult>, public field = view.field) {}
+    public field: FieldStore<unknown>
+
+    constructor(protected view: Modifier<ValidationResult, any, ViewType>, protected context: Context<ValidationResult>) {
+        this.field = view.field
+    }
 
     get data() {
         return (this.view.data as any) as Data<ModelType>
