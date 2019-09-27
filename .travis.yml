@@ -1,1 +1,8 @@
 language: node_js
+cache:
+  directories:
+    - "$HOME/.npm"
+    - "node_modules"
+install:
+  - npm run ci
+  - npm run reinitialize
