@@ -6,7 +6,12 @@ cache:
 install:
   - npm ci
   - npm run reinitialize
-script:
-  - npm run build
-  - npm run lint
-  - npm run test
+jobs:
+  include:
+    - stage: "Build"                # naming the Tests stage
+      script: npm run build
+    - stage: "Tests"                # naming the Tests stage
+      name: "Unit Tests"            # names the first Tests stage job
+      script: npm run test
+    - name: "Linting"
+      script: npm run lint
