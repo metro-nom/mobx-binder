@@ -4,5 +4,5 @@ cache:
     - "$HOME/.npm"
     - "node_modules"
 install:
-  - npm run ci
+  - npm ci
   - npm run reinitialize
