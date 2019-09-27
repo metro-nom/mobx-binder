@@ -68,6 +68,12 @@ describe('ValidatingModifier', () => {
                 status: 'unknown',
             })
         })
+        it('should return unknown validity if value is pending', () => {
+            upstream.data.pending = true
+            expect(modifier.validity).to.deep.equal({
+                status: 'unknown',
+            })
+        })
         it('should return upstream validity if still validating', () => {
             upstream.validity = { status: 'validating' }
             expect(modifier.validity).to.deep.equal({
