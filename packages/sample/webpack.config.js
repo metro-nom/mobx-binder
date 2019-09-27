@@ -81,6 +81,9 @@ module.exports = {
             template: 'assets/index.html',
         }),
     ],
+    performance: {
+        hints: false
+    },
     devServer: {
         contentBase: sourcePath,
         hot: true,
