@@ -55,18 +55,18 @@ export interface Binding<FieldType, ValidationResult> {
     validate(): ValidationResult
 
     /**
-     * Trigger asynchronous validation. onBlur indicates the current event - the binding then decides if a validation takes place or not
+     * Trigger asynchronous validation. onBlur indicates the current event - the binding then decides if a validation takes place or not.
      *
      * @param onBlur
      */
-    validateAsync(onBlur?: boolean): Promise<ValidationResult>
+    validateAsync(onBlur?: boolean): Promise<string | undefined>
 
     /**
-     * Validate a given field value. If there are async operations, it returns a promise.
+     * Validate a given field value against the configured validations and conversions. If there are async operations, it returns a promise.
      *
      * @param fieldValue
      */
-    validateValue(fieldValue: FieldType): ValidationResult | Promise<ValidationResult>
+    validateValue(fieldValue: FieldType): string | undefined | Promise<string | undefined>
 
     /**
      * Sets the current field value to be handled as not changed.
@@ -137,12 +137,12 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
         this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
     }
 
-    public validateValue(fieldValue: FieldType): ValidationResult | Promise<ValidationResult> {
+    public validateValue(fieldValue: FieldType): string | undefined | Promise<string | undefined> {
         const someResult = this.chain.validateValue(fieldValue)
         if (isPromise(someResult)) {
-            return someResult.then(data => (data.valid ? this.context.validResult : data.result))
+            return someResult.then(data => this.toErrorMessage(data.valid ? this.context.validResult : data.result))
         }
-        return someResult.valid ? this.context.validResult : someResult.result
+        return this.toErrorMessage(someResult.valid ? this.context.validResult : someResult.result)
     }
 
     public validate(): ValidationResult {
@@ -150,10 +150,11 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     @action
-    public async validateAsync(onBlur = false): Promise<ValidationResult> {
+    public async validateAsync(onBlur = false): Promise<string | undefined> {
         await this.chain.validateAsync(onBlur)
         const validity = this.validity
-        return validity.status === 'validated' ? validity.result : this.context.validResult
+        const validationResult = validity.status === 'validated' ? validity.result : this.context.validResult
+        return this.toErrorMessage(validationResult)
     }
 
     @action
@@ -180,6 +181,10 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
                 this.write(target, this.model.value)
             }
         }
+    }
+
+    private toErrorMessage(validationResult: ValidationResult) {
+        return this.context.valid(validationResult) ? undefined : this.context.translate(validationResult)
     }
 
     private addOnBlurValidationInterceptor() {
@@ -469,10 +474,11 @@ export class Binder<ValidationResult> {
     /**
      * Actively trigger async validation / wait for still ongoing validations.
      * Please note that async validation results for a value might be cached.
+     * If any validation fails, it rejects with an error.
      */
     public async validateAsync(): Promise<void> {
         await Promise.all(this.bindings.map(binding => binding.validateAsync())).then(results => {
-            if (!results.every(result => this.context.valid(result))) {
+            if (results.some(result => !!result)) {
                 throw new Error()
             }
         })
