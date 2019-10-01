@@ -41,6 +41,15 @@ describe('FieldWrapper', () => {
         })
     })
 
+    describe('validateValue', () => {
+        it('should always return the given value of the right type as valid field value', () => {
+            expect(fieldWrapper.validateValue('123')).to.deep.equal({
+                valid: true,
+                value: '123',
+            })
+        })
+    })
+
     it('should not apply anything to field', () => {
         fieldWrapper.applyConversionsToField()
         expect(field.value).to.equal('myValue')

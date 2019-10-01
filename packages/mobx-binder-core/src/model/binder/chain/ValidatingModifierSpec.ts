@@ -28,6 +28,10 @@ describe('ValidatingModifier', () => {
                 status: 'validated',
                 result: undefined,
             }),
+            validateValue: sandbox.stub().callsFake(value => ({
+                valid: true,
+                value,
+            })),
             toView: sandbox.spy((value: any) => value),
         }
         validatorMock = sandbox.stub()
@@ -60,6 +64,12 @@ describe('ValidatingModifier', () => {
     describe('validity', () => {
         it('should return upstream validity if still unknown', () => {
             upstream.validity = { status: 'unknown' }
+            expect(modifier.validity).to.deep.equal({
+                status: 'unknown',
+            })
+        })
+        it('should return unknown validity if value is pending', () => {
+            upstream.data.pending = true
             expect(modifier.validity).to.deep.equal({
                 status: 'unknown',
             })
@@ -109,6 +119,24 @@ describe('ValidatingModifier', () => {
             expect(await modifier.validateAsync(false)).to.deep.equal({
                 status: 'validated',
                 result: 'fail',
+            })
+        })
+    })
+
+    describe('validateValue', () => {
+        // here I only test cases where the superclass delegates to validateValueLocally()
+
+        it('should accept valid values', () => {
+            expect(modifier.validateValue('someValue')).to.deep.equal({
+                valid: true,
+                value: 'someValue',
+            })
+        })
+        it('should return proper validation result on validation errors', () => {
+            validatorMock.withArgs('someValue').returns('failure')
+            expect(modifier.validateValue('someValue')).to.deep.equal({
+                valid: false,
+                result: 'failure',
             })
         })
     })

@@ -26,6 +26,10 @@ describe('ConvertingModifier', () => {
             },
             field,
             toView: sandbox.spy((value: any) => value),
+            validateValue: sandbox.stub().callsFake(value => ({
+                valid: true,
+                value,
+            })),
             validateAsync: sandbox.stub(),
             isEqual: sandbox.stub(),
         }
@@ -149,6 +153,23 @@ describe('ConvertingModifier', () => {
             expect(modifier.isEqual(123, 456)).to.be.false
 
             expect(stub).to.have.been.calledTwice
+        })
+    })
+
+    describe('validateValue', () => {
+        // here I only test cases where the superclass delegates to validateValueLocally()
+
+        it('should accept valid values and return the converted one', () => {
+            expect(modifier.validateValue('123')).to.deep.equal({
+                valid: true,
+                value: 123,
+            })
+        })
+        it('should return proper validation result on validation errors', () => {
+            expect(modifier.validateValue('abc')).to.deep.equal({
+                valid: false,
+                result: 'Not a number',
+            })
         })
     })
 })

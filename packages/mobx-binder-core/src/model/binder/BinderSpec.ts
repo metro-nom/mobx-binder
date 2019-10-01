@@ -856,4 +856,87 @@ describe('Binder', () => {
             expect(() => binder.binding(secondField)).to.throw(Error, 'Cannot find binding for secondField')
         })
     })
+
+    describe('3rd party field value validation', () => {
+        let binder: SimpleBinder
+
+        describe('without chain', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder().forField(myField).bind()
+            })
+
+            it('should always accept a string', () => {
+                expect(binder.binding(myField).validateValue('6')).to.be.undefined
+            })
+        })
+
+        describe('with converter', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder()
+                    .forField(myField)
+                    .withConverter(new SimpleNumberConverter())
+                    .bind()
+            })
+
+            it('should report failures synchronously', () => {
+                expect(binder.binding(myField).validateValue('abc')).to.equal('Not a number')
+            })
+            it('should report success synchronously', () => {
+                expect(binder.binding(myField).validateValue('123')).to.be.undefined
+            })
+        })
+
+        describe('with simple validator', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder()
+                    .forField(myField)
+                    .withValidator(lengthValidator(5, 10))
+                    .bind()
+            })
+
+            it('should report failures synchronously', () => {
+                expect(binder.binding(myField).validateValue('123')).to.equal('Wrong length')
+            })
+            it('should report success synchronously', () => {
+                expect(binder.binding(myField).validateValue('123456')).to.be.undefined
+            })
+        })
+
+        describe('with async validator', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder()
+                    .forField(myField)
+                    .withAsyncValidator(value => sleep(10).then(() => lengthValidator(5, 10)(value)))
+                    .bind()
+            })
+
+            it('should report failures asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('123')).to.equal('Wrong length')
+            })
+            it('should report success asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+            })
+        })
+
+        describe('with multiple steps', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder()
+                    .forField(myField)
+                    .onChange(() => undefined)
+                    .withAsyncValidator(value => sleep(10).then(() => lengthValidator(5, 10)(value)))
+                    .withConverter(new SimpleNumberConverter())
+                    .bind()
+            })
+
+            it('should report length errors first', async () => {
+                expect(await binder.binding(myField).validateValue('abc')).to.equal('Wrong length')
+            })
+            it('should report conversion errors if length is ok', async () => {
+                expect(await binder.binding(myField).validateValue('abcde')).to.equal('Not a number')
+            })
+            it('should report success asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+            })
+        })
+    })
 })

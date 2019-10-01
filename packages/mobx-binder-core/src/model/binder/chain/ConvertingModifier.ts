@@ -1,4 +1,4 @@
-import { Data, Modifier, Validity } from './Modifier'
+import { Data, Modifier, Validity, ValidValueValidationResult, ValueValidationResult } from './Modifier'
 import { Converter } from '../../../conversion/Converter'
 import { Context } from '../Context'
 import { AbstractModifier } from './AbstractModifier'
@@ -36,7 +36,7 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
         return this.calculateValidity(result)
     }
 
-    public toView(modelValue: any) {
+    public toView(modelValue: any): ViewType {
         return this.view.toView(this.converter.convertToPresentation(modelValue))
     }
 
@@ -73,6 +73,21 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
                     }
                 }
                 throw err
+            }
+        }
+    }
+
+    protected validateValueLocally(viewResult: ValidValueValidationResult<ViewType>): ValueValidationResult<ModelType, ValidationResult> {
+        try {
+            const modelValue = this.converter.convertToModel(viewResult.value)
+            return {
+                valid: true,
+                value: modelValue,
+            }
+        } catch (err) {
+            return {
+                valid: false,
+                result: err.validationResult,
             }
         }
     }

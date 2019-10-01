@@ -1,5 +1,5 @@
 import { action, computed, observable, runInAction } from 'mobx'
-import { Data, Modifier, Validity } from './Modifier'
+import { Data, InvalidValueValidationResult, Modifier, SyncValueValidationResult, Validity, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { AsyncValidator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
@@ -111,5 +111,11 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
             }
         })
         return result
+    }
+
+    protected validateValueLocally(viewResult: ValidValueValidationResult<ValueType>): Promise<SyncValueValidationResult<ValueType, ValidationResult>> {
+        return this.validator(viewResult.value).then((result: ValidationResult) => {
+            return this.context.valid(result) ? viewResult : ({ valid: false, result } as InvalidValueValidationResult<ValidationResult>)
+        })
     }
 }

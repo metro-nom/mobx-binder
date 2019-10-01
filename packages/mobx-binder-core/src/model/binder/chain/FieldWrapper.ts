@@ -1,4 +1,4 @@
-import { KnownData, Modifier, Validity } from './Modifier'
+import { KnownData, Modifier, Validity, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { FieldStore } from '../../fields/FieldStore'
 
@@ -21,6 +21,13 @@ export class FieldWrapper<ValidationResult, ValueType> implements Modifier<Valid
 
     public toView(modelValue: any) {
         return modelValue
+    }
+
+    public validateValue(fieldValue: ValueType): ValidValueValidationResult<ValueType> {
+        return {
+            valid: true,
+            value: fieldValue,
+        }
     }
 
     public validateAsync(): Promise<Validity<ValidationResult>> {

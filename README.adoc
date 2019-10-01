@@ -355,6 +355,8 @@ npm start
 git merge master
 npm run reinitialize
 npm run build
+npm run lint
+npm run test
 ----
 
 .Merge the branch back into develop
@@ -371,5 +373,6 @@ npm run publish
 
 == TODOs
 
+* Add coverage to the pipeline
 * Create more re-usable validators
 * Create integration components vor various open source React component libraries (contributions are welcome ;-)

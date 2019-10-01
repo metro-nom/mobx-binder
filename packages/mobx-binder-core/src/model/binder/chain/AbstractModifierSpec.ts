@@ -25,6 +25,7 @@ describe('AbstractModifier', () => {
             },
             field,
             toView: sandbox.stub().returnsArg(0),
+            validateValue: sandbox.stub(),
             applyConversionsToField: sandbox.stub(),
             isEqual: sandbox.stub(),
         }
@@ -69,6 +70,53 @@ describe('AbstractModifier', () => {
         it('should pass unchanged value to upstream.toView()', () => {
             expect(modifier.toView('abc')).to.equal('abc')
             expect(upstream.toView).to.have.been.calledWith('abc')
+        })
+    })
+
+    describe('validateValue', () => {
+        const validResult = {
+            valid: true,
+            value: 'someValue',
+        }
+        const invalidResult = {
+            valid: false,
+            result: 'Some error',
+        }
+        const localStub = () => sandbox.stub(modifier as any, 'validateValueLocally')
+
+        it('should directly return invalid sync view results', () => {
+            const theLocalStub = localStub()
+            upstream.validateValue.withArgs('someValue').returns(invalidResult)
+            expect(modifier.validateValue('someValue')).to.equal(invalidResult)
+            expect(theLocalStub).to.not.have.been.called
+        })
+        it('should directly return invalid async view results', async () => {
+            const theLocalStub = localStub()
+            upstream.validateValue.withArgs('someValue').resolves(invalidResult)
+            expect(await modifier.validateValue('someValue')).to.equal(invalidResult)
+            expect(theLocalStub).to.not.have.been.called
+        })
+        it('should delegate valid sync result to validateValue', () => {
+            upstream.validateValue.withArgs('someValue').returns(validResult)
+            localStub()
+                .withArgs(validResult)
+                .returns(invalidResult)
+            expect(modifier.validateValue('someValue')).to.equal(invalidResult)
+        })
+        it('should delegate valid async result to validateValue', async () => {
+            upstream.validateValue.withArgs('someValue').resolves(validResult)
+            localStub()
+                .withArgs(validResult)
+                .returns(invalidResult)
+            expect(await modifier.validateValue('someValue')).to.equal(invalidResult)
+        })
+        it('should return valid sync view results by default', () => {
+            upstream.validateValue.withArgs('someValue').returns(validResult)
+            expect(modifier.validateValue('someValue')).to.equal(validResult)
+        })
+        it('should return valid async view results by default', async () => {
+            upstream.validateValue.withArgs('someValue').resolves(validResult)
+            expect(await modifier.validateValue('someValue')).to.equal(validResult)
         })
     })
 

@@ -11,13 +11,14 @@ import { ChangeEventHandler } from './chain/ChangeEventHandler'
 import { Context } from './Context'
 import { AsyncValidator, Validator } from '../../validation/Validator'
 import isEqual from 'lodash.isequal'
+import { isPromise } from '../../utils/isPromise'
 
 /**
  * API for single field binding
  */
-export interface Binding<ValidationResult> {
+export interface Binding<FieldType, ValidationResult> {
     changed: boolean
-    readonly field: FieldStore<any>
+    readonly field: FieldStore<FieldType>
 
     /**
      * Load the field value from the source object, treating it as "unchanged" value.
@@ -38,7 +39,7 @@ export interface Binding<ValidationResult> {
      *
      * @param source
      */
-    getFieldValue(source: any): any
+    getFieldValue(source: any): FieldType
 
     /**
      * Store the valid field value to the target object
@@ -54,11 +55,18 @@ export interface Binding<ValidationResult> {
     validate(): ValidationResult
 
     /**
-     * Trigger asynchronous validation. onBlur indicates the current event - the binding then decides if a validation takes place or not
+     * Trigger asynchronous validation. onBlur indicates the current event - the binding then decides if a validation takes place or not.
      *
      * @param onBlur
      */
-    validateAsync(onBlur?: boolean): Promise<ValidationResult>
+    validateAsync(onBlur?: boolean): Promise<string | undefined>
+
+    /**
+     * Validate a given field value against the configured validations and conversions. If there are async operations, it returns a promise.
+     *
+     * @param fieldValue
+     */
+    validateValue(fieldValue: FieldType): string | undefined | Promise<string | undefined>
 
     /**
      * Sets the current field value to be handled as not changed.
@@ -66,7 +74,7 @@ export interface Binding<ValidationResult> {
     setUnchanged(): void
 }
 
-class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
+class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType, ValidationResult> {
     @observable.ref
     private unchangedValue?: any
 
@@ -129,15 +137,24 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
         this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
     }
 
+    public validateValue(fieldValue: FieldType): string | undefined | Promise<string | undefined> {
+        const someResult = this.chain.validateValue(fieldValue)
+        if (isPromise(someResult)) {
+            return someResult.then(data => this.toErrorMessage(data.valid ? this.context.validResult : data.result))
+        }
+        return this.toErrorMessage(someResult.valid ? this.context.validResult : someResult.result)
+    }
+
     public validate(): ValidationResult {
         return this.validity.status === 'validated' ? this.validity.result : this.context.validResult
     }
 
     @action
-    public async validateAsync(onBlur = false): Promise<ValidationResult> {
+    public async validateAsync(onBlur = false): Promise<string | undefined> {
         await this.chain.validateAsync(onBlur)
         const validity = this.validity
-        return validity.status === 'validated' ? validity.result : this.context.validResult
+        const validationResult = validity.status === 'validated' ? validity.result : this.context.validResult
+        return this.toErrorMessage(validationResult)
     }
 
     @action
@@ -153,7 +170,7 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
         this.field.updateValue(fieldValue)
     }
 
-    public getFieldValue(source: any) {
+    public getFieldValue(source: any): FieldType {
         const value = this.read(source)
         return this.chain.toView(value)
     }
@@ -164,6 +181,10 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
                 this.write(target, this.model.value)
             }
         }
+    }
+
+    private toErrorMessage(validationResult: ValidationResult) {
+        return this.context.valid(validationResult) ? undefined : this.context.translate(validationResult)
     }
 
     private addOnBlurValidationInterceptor() {
@@ -200,13 +221,14 @@ class StandardBinding<ValidationResult> implements Binding<ValidationResult> {
 export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult>> {
     private readOnly = false
     private required = false
+    private last: Modifier<ValidationResult, any, any>
 
     constructor(
         private readonly binder: BinderType,
-        private readonly addBinding: (binding: StandardBinding<ValidationResult>) => void,
+        private readonly addBinding: (binding: StandardBinding<any, ValidationResult>) => void,
         private readonly field: FieldStore<ValueType>,
-        private last: Modifier<ValidationResult, any, any> = new FieldWrapper(field, binder.context),
     ) {
+        this.last = new FieldWrapper(field, binder.context)
         if (this.field.valueType === 'string') {
             this.withConverter(new StringConverter() as any)
         }
@@ -307,7 +329,7 @@ export class Binder<ValidationResult> {
     @observable
     public submitting?: boolean
 
-    private _bindings: Array<StandardBinding<ValidationResult>> = observable([])
+    private _bindings: Array<StandardBinding<unknown, ValidationResult>> = observable([])
 
     constructor(public readonly context: Context<ValidationResult>) {
         runInAction(() => {
@@ -315,7 +337,7 @@ export class Binder<ValidationResult> {
         })
     }
 
-    get bindings(): ReadonlyArray<StandardBinding<ValidationResult>> {
+    get bindings(): ReadonlyArray<StandardBinding<unknown, ValidationResult>> {
         return this._bindings
     }
 
@@ -335,7 +357,7 @@ export class Binder<ValidationResult> {
      * @param field
      */
     @action
-    public removeBinding(field: FieldStore<any>): void {
+    public removeBinding(field: FieldStore<unknown>): void {
         const index = this.bindings.findIndex(binding => binding.field === field)
         this._bindings.splice(index, 1)
     }
@@ -344,13 +366,13 @@ export class Binder<ValidationResult> {
      * Provides access to a single field `Binding`.
      * @param field
      */
-    public binding(field: FieldStore<any>): Binding<ValidationResult> {
+    public binding<FieldType>(field: FieldStore<FieldType>): Binding<FieldType, ValidationResult> {
         const result = this.bindings.find(binding => binding.field === field)
 
         if (!result) {
             throw new Error(`Cannot find binding for ${field.name}`)
         }
-        return result
+        return result as StandardBinding<FieldType, ValidationResult>
     }
 
     /**
@@ -433,7 +455,7 @@ export class Binder<ValidationResult> {
     get changedData(): any {
         return this.bindings
             .filter(binding => binding.changed && binding.valid === true)
-            .reduce((data: any, binding: Binding<ValidationResult>) => {
+            .reduce((data: any, binding: Binding<any, ValidationResult>) => {
                 binding.store(data)
                 return data
             }, {})
@@ -452,10 +474,11 @@ export class Binder<ValidationResult> {
     /**
      * Actively trigger async validation / wait for still ongoing validations.
      * Please note that async validation results for a value might be cached.
+     * If any validation fails, it rejects with an error.
      */
     public async validateAsync(): Promise<void> {
         await Promise.all(this.bindings.map(binding => binding.validateAsync())).then(results => {
-            if (!results.every(result => this.context.valid(result))) {
+            if (results.some(result => !!result)) {
                 throw new Error()
             }
         })
@@ -530,7 +553,7 @@ export class Binder<ValidationResult> {
      * @param binding
      */
     @action
-    private addBinding(binding: StandardBinding<ValidationResult>) {
+    private addBinding(binding: StandardBinding<any, ValidationResult>) {
         this._bindings.push(binding)
     }
 }
