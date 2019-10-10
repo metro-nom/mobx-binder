@@ -78,6 +78,10 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         }
     }
 
+    public toView(modelValue: any): ViewType {
+        return this.view.toView(this.converter.convertToPresentation(modelValue))
+    }
+
     public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
         const upstreamValidity = await this.view.validateAsync(blurEvent)
         if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
@@ -154,5 +158,12 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
             }
             throw err
         }
+    }
+
+    public isEqual(first: ModelType, second: ModelType): boolean {
+        if (this.converter.isEqual) {
+            return this.converter.isEqual.call(this.converter, first, second)
+        }
+        return super.isEqual(first, second)
     }
 }
