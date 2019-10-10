@@ -1,4 +1,4 @@
-import { Converter } from '../../conversion/Converter'
+import { Converter, AsyncConverter } from '../../conversion/Converter'
 import { action, computed, isObservable, observable, reaction, runInAction, toJS } from 'mobx'
 import { StringConverter } from '../../conversion/StringConverter'
 import { FieldStore } from '../fields/FieldStore'
@@ -12,6 +12,7 @@ import { Context } from './Context'
 import { AsyncValidator, Validator } from '../../validation/Validator'
 import isEqual from 'lodash.isequal'
 import { isPromise } from '../../utils/isPromise'
+import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
 
 /**
  * API for single field binding
@@ -241,6 +242,19 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      */
     public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
         return this.addModifier<NextType>(new ConvertingModifier(this.last, this.binder.context, converter))
+    }
+
+    /**
+     * Add an asynchronous validator to the binding chain. Async validations happen on submit and - if configured via the options parameter - also on blur.
+     * @param asyncValidator
+     * @param options
+     */
+    @action
+    public withAsyncConverter<NextType>(
+        asyncConverter: AsyncConverter<ValidationResult, ValueType, NextType>,
+        options: { onBlur: boolean } = { onBlur: false },
+    ): BindingBuilder<ValidationResult, NextType, BinderType> {
+        return this.addModifier<NextType>(new AsyncConvertingModifier(this.last, this.binder.context, asyncConverter, options))
     }
 
     /**

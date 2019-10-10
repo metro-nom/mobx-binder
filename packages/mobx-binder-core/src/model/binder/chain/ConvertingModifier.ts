@@ -2,6 +2,7 @@ import { Data, Modifier, Validity, ValidValueValidationResult, ValueValidationRe
 import { Converter } from '../../../conversion/Converter'
 import { Context } from '../Context'
 import { AbstractModifier } from './AbstractModifier'
+import { isValidationError } from '../../../conversion/ValidationError'
 
 export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends AbstractModifier<ValidationResult, ViewType, ModelType> {
     constructor(
@@ -24,7 +25,7 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
                 value,
             }
         } catch (err) {
-            if (err.validationResult) {
+            if (isValidationError(err)) {
                 return { pending: true }
             }
             throw err
@@ -66,7 +67,7 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
                     result: this.context.validResult,
                 }
             } catch (err) {
-                if (err.validationResult) {
+                if (isValidationError<ValidationResult>(err)) {
                     return {
                         status: 'validated',
                         result: err.validationResult,
@@ -85,10 +86,13 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
                 value: modelValue,
             }
         } catch (err) {
-            return {
-                valid: false,
-                result: err.validationResult,
+            if (isValidationError<ValidationResult>(err)) {
+                return {
+                    valid: false,
+                    result: err.validationResult,
+                }
             }
+            throw err
         }
     }
 }

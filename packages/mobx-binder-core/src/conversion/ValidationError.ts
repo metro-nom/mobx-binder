@@ -3,3 +3,7 @@ export class ValidationError<ValidationResult> extends Error {
         super('validation error')
     }
 }
+
+export function isValidationError<ValidationResult = any>(err: Error): err is ValidationError<ValidationResult> {
+    return err.hasOwnProperty('validationResult')
+}
