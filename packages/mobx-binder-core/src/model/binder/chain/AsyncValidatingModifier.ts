@@ -39,7 +39,12 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
 
     get data(): Data<ValueType> {
         const data = this.view.data
-        if (this.info.status === 'validated' && data.value === this.info.validatedValue && this.context.valid(this.info.lastValidationResult)) {
+        if (
+            this.info.status === 'validated' &&
+            !data.pending &&
+            this.view.isEqual(data.value, this.info.validatedValue) &&
+            this.context.valid(this.info.lastValidationResult)
+        ) {
             return data
         }
         return {
@@ -74,7 +79,7 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
             return upstreamValidity
         }
         const upstreamData = this.view.data
-        if (!upstreamData.pending && this.info.status === 'validated' && upstreamData.value === this.info.validatedValue) {
+        if (!upstreamData.pending && this.info.status === 'validated' && this.view.isEqual(upstreamData.value, this.info.validatedValue)) {
             return {
                 status: 'validated',
                 result: this.info.lastValidationResult,
@@ -102,7 +107,7 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
         const result = await this.validator(value)
 
         runInAction(() => {
-            if (this.info.status !== 'initial' && value === this.info.validatedValue) {
+            if (this.info.status !== 'initial' && this.view.isEqual(value, this.info.validatedValue)) {
                 this.info = {
                     status: 'validated',
                     validatedValue: value,

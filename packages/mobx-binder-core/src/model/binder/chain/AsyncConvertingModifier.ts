@@ -6,14 +6,18 @@ import { AsyncConverter } from '../../../conversion/Converter'
 import { isValidationError } from '../../../conversion/ValidationError'
 
 type AsyncConversionInfo<ViewType, ModelType, ValidationResult> =
-    | KnownValidConversionInfo<ViewType, ModelType>
-    | KnownInvalidConversionInfo<ViewType, ValidationResult>
+    | KnownConversionInfo<ViewType, ModelType, ValidationResult>
     | PendingConversionInfo<ViewType>
     | InitialConversionInfo
+
+type KnownConversionInfo<ViewType, ModelType, ValidationResult> =
+    | KnownValidConversionInfo<ViewType, ModelType>
+    | KnownInvalidConversionInfo<ViewType, ValidationResult>
 
 interface KnownValidConversionInfo<ViewType, ModelType> {
     status: 'valid'
     validatedValue: ViewType
+    correctedValue: ViewType
     modelValue: ModelType
 }
 
@@ -46,8 +50,8 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
     }
 
     get data(): Data<ModelType> {
-        const data = this.view.data
-        if (this.info.status === 'valid' && data.value === this.info.validatedValue) {
+        const upstreamData = this.view.data
+        if (this.info.status === 'valid' && !upstreamData.pending && this.isAlreadyValidated(this.info, upstreamData.value)) {
             return {
                 pending: false,
                 value: this.info.modelValue,
@@ -67,7 +71,7 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
             return upstreamValidity
         }
         const data = this.view.data
-        if (!data.pending && (this.info.status === 'valid' || this.info.status === 'invalid') && this.view.isEqual(data.value, this.info.validatedValue)) {
+        if (!data.pending && this.isAlreadyValidated(this.info, data.value)) {
             return {
                 status: 'validated',
                 result: this.info.status === 'valid' ? this.context.validResult : this.info.lastValidationResult,
@@ -88,7 +92,7 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
             return upstreamValidity
         }
         const upstreamData = this.view.data
-        if (!upstreamData.pending && (this.info.status === 'valid' || this.info.status === 'invalid') && upstreamData.value === this.info.validatedValue) {
+        if (!upstreamData.pending && this.isAlreadyValidated(this.info, upstreamData.value)) {
             return {
                 status: 'validated',
                 result: this.info.status === 'valid' ? this.context.validResult : this.info.lastValidationResult,
@@ -114,14 +118,15 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         }
 
         try {
-            const result = await this.converter.convertToModel(value)
+            const modelValue = await this.converter.convertToModel(value)
 
             runInAction(() => {
-                if (this.info.status !== 'initial' && value === this.info.validatedValue) {
+                if (this.info.status !== 'initial' && this.view.isEqual(value, this.info.validatedValue)) {
                     this.info = {
                         status: 'valid',
                         validatedValue: value,
-                        modelValue: result,
+                        correctedValue: this.converter.convertToPresentation(modelValue),
+                        modelValue,
                     }
                 }
             })
@@ -129,7 +134,7 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         } catch (err) {
             if (isValidationError<ValidationResult>(err)) {
                 runInAction(() => {
-                    if (this.info.status !== 'initial' && value === this.info.validatedValue) {
+                    if (this.info.status !== 'initial' && this.view.isEqual(value, this.info.validatedValue)) {
                         this.info = {
                             status: 'invalid',
                             validatedValue: value,
@@ -165,5 +170,17 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
             return this.converter.isEqual.call(this.converter, first, second)
         }
         return super.isEqual(first, second)
+    }
+
+    private isAlreadyValidated(
+        info: AsyncConversionInfo<ViewType, ModelType, ValidationResult>,
+        value: ViewType,
+    ): info is KnownConversionInfo<ViewType, ModelType, ValidationResult> {
+        if (info.status === 'valid') {
+            return this.view.isEqual(value, info.validatedValue) || this.view.isEqual(value, info.correctedValue)
+        } else if (info.status === 'invalid') {
+            return this.view.isEqual(value, info.validatedValue)
+        }
+        return false
     }
 }

@@ -151,11 +151,15 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     @action
-    public async validateAsync(onBlur = false): Promise<string | undefined> {
-        await this.chain.validateAsync(onBlur)
-        const validity = this.validity
-        const validationResult = validity.status === 'validated' ? validity.result : this.context.validResult
-        return this.toErrorMessage(validationResult)
+    public validateAsync(onBlur = false): Promise<string | undefined> {
+        return this.chain.validateAsync(onBlur).then(
+            action(() => {
+                const validity = this.validity
+                const validationResult = validity.status === 'validated' ? validity.result : this.context.validResult
+                this.correctFieldValue()
+                return this.toErrorMessage(validationResult)
+            }),
+        )
     }
 
     @action
@@ -181,6 +185,13 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             if (this.valid && !this.model.pending) {
                 this.write(target, this.model.value)
             }
+        }
+    }
+
+    private correctFieldValue() {
+        if (this.valid && !this.chain.data.pending) {
+            const fieldValue = this.chain.toView(this.chain.data.value)
+            this.field.updateValue(fieldValue)
         }
     }
 

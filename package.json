@@ -11,7 +11,8 @@
     "clean": "lerna run clean && lerna clean -y",
     "version": "lerna version",
     "publish": "lerna publish from-git",
-    "ls": "lerna ls"
+    "ls": "lerna ls",
+    "sample": "lerna run start"
   },
   "devDependencies": {
     "lerna": "^3.13.0"
