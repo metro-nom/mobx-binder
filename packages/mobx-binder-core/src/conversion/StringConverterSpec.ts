@@ -1,8 +1,8 @@
 import { expect } from 'chai'
-import { StringConverter } from './StringConverter'
+import { EmptyStringConverter } from './EmptyStringConverter'
 
-describe('StringConverter', () => {
-    const converter = new StringConverter()
+describe('EmptyStringConverter', () => {
+    const converter = new EmptyStringConverter()
 
     describe('conversion to model', () => {
         it('should pass through strings', () => {

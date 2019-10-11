@@ -1,6 +1,6 @@
 import { Converter, AsyncConverter } from '../../conversion/Converter'
 import { action, computed, isObservable, observable, reaction, runInAction, toJS } from 'mobx'
-import { StringConverter } from '../../conversion/StringConverter'
+import { EmptyStringConverter } from '../../conversion/EmptyStringConverter'
 import { FieldStore } from '../fields/FieldStore'
 import { Modifier } from './chain/Modifier'
 import { FieldWrapper } from './chain/FieldWrapper'
@@ -230,9 +230,23 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
         private readonly field: FieldStore<ValueType>,
     ) {
         this.last = new FieldWrapper(field, binder.context)
+    }
+
+    /**
+     * Adds a converter that converts empty strings to the given value and vice versa.
+     */
+    public withEmptyString<X = undefined>(to: X): BindingBuilder<ValidationResult, string | X, BinderType> {
         if (this.field.valueType === 'string') {
-            this.withConverter(new StringConverter() as any)
+            return (this as BindingBuilder<ValidationResult, unknown, BinderType>).withConverter(new EmptyStringConverter<X>(to))
         }
+        throw new Error('This is not a field of type string')
+    }
+
+    /**
+     * Adds a converter that converts empty strings to `undefined` and vice versa.
+     */
+    public withStringOrUndefined(): BindingBuilder<ValidationResult, string | undefined, BinderType> {
+        return this.withEmptyString(undefined)
     }
 
     /**
@@ -362,6 +376,15 @@ export class Binder<ValidationResult> {
      */
     public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<ValidationResult, ValueType, Binder<ValidationResult>> {
         return new BindingBuilder(this, this.addBinding.bind(this), field)
+    }
+
+    /**
+     * Shortcut for `forField(someField).withStringOrUndefined()`
+     *
+     * @param field
+     */
+    public forStringField(field: FieldStore<string>): BindingBuilder<ValidationResult, string | undefined, Binder<ValidationResult>> {
+        return new BindingBuilder(this, this.addBinding.bind(this), field).withStringOrUndefined()
     }
 
     /**

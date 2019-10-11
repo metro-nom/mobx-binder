@@ -8,8 +8,9 @@ import { action, observable } from 'mobx'
 import { Validator } from '../../validation/Validator'
 import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
 import { ComplexField } from '../../test/ComplexField'
+import { SimpleAsyncNumberConverter } from '../../test/SimpleAsyncNumberConverter'
 
-const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string> => (value?: string) =>
+const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string | undefined> => (value?: string) =>
     !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
 
 const numberValidator = (max: number) => (num?: number) => (num !== undefined && num > max ? 'Too much' : undefined)
@@ -81,14 +82,14 @@ describe('Binder', () => {
                         .forField(secondField)
                         .bind()
                     binder.load({
-                        myField: 'my',
+                        myField: 123,
                         secondField: 'second',
                     })
                     binder.apply({
-                        myField: 'changedValue',
+                        myField: 234,
                         secondField: 'second',
                     })
-                    expect(myField.value).to.equal('changedValue')
+                    expect(myField.value).to.equal('234')
                     expect(myField.changed).to.be.true
                     expect(secondField.changed).to.be.false
                 })
@@ -918,10 +919,27 @@ describe('Binder', () => {
             })
         })
 
+        describe('with async converter', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder()
+                    .forStringField(myField)
+                    .withAsyncConverter(new SimpleAsyncNumberConverter())
+                    .bind()
+            })
+
+            it('should report failures asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('abc')).to.equal('not a number')
+            })
+            it('should report success asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+            })
+        })
+
         describe('with multiple steps', () => {
             beforeEach(() => {
                 binder = new SimpleBinder()
                     .forField(myField)
+                    .withStringOrUndefined()
                     .onChange(() => undefined)
                     .withAsyncValidator(value => sleep(10).then(() => lengthValidator(5, 10)(value)))
                     .withConverter(new SimpleNumberConverter())

@@ -280,7 +280,7 @@ Validators that are added after a converter will act on the already converted va
 
 Converters are bidirectional - that means that on loading values into the form, they are converted back into a string representation.
 
-For every string based field, one default `StringConverter` is added automatically at the beginning of the chain, which converts empty strings to `undefined` and vice versa.
+Please not that by default empty string field values are not any more converted automatically to `undefined`. Instead, one can use `binder.forField().withStringOrUndefined()` or simply `binder.forStringField()` to configure the same behaviour explicitly.
 
 == Conditional visibility
 
@@ -297,7 +297,7 @@ This updates the global validation status based on the fields that are left.
 
 If the submit button of a form is clicked, this may trigger a `binder.submit()` call. Just like `binder.store()`, it stores the form field values into an object, but it also waits for asynchronous validations to be finished and maintains submission state.
 
-[source,js
+[source,js]
 ----
 public handleSubmit() {
     return this.binder.submit()

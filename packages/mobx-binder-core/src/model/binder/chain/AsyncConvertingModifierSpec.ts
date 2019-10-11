@@ -1,37 +1,22 @@
-import { TextField, ValidationError } from '../../..'
+import { TextField } from '../../..'
 import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
 import sleep from '../../../test/sleep'
 import { AsyncConvertingModifier } from './AsyncConvertingModifier'
 import { AsyncConverter } from '../../../conversion/Converter'
+import { SimpleAsyncNumberConverter } from '../../../test/SimpleAsyncNumberConverter'
 import sinon = require('sinon')
-
-class SampleAsyncConverter implements AsyncConverter<ErrorMessage, string, number> {
-    public async convertToModel(value?: string): Promise<number> {
-        await sleep(10)
-
-        const modelValue = Number(value)
-        if (isNaN(modelValue)) {
-            throw new ValidationError('not a number')
-        }
-        return Number(value)
-    }
-
-    public convertToPresentation(data?: number): string {
-        return `${data}`
-    }
-}
 
 describe('AsyncConvertingModifier', () => {
     const sandbox = sinon.createSandbox()
     const context = new SimpleContext()
     let field: TextField
     let upstream: any
-    let converter: AsyncConverter<ErrorMessage, string, number>
-    let modifier: AsyncConvertingModifier<ErrorMessage, string, number>
+    let converter: AsyncConverter<ErrorMessage, string | undefined, number | undefined>
+    let modifier: AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>
 
-    function createConverter(): SampleAsyncConverter {
-        converter = new SampleAsyncConverter()
+    function createConverter(): SimpleAsyncNumberConverter {
+        converter = new SimpleAsyncNumberConverter()
         sandbox.spy(converter, 'convertToModel')
         return converter
     }
@@ -56,7 +41,7 @@ describe('AsyncConvertingModifier', () => {
             isEqual: sandbox.stub().callsFake((a: any, b: any) => a === b),
             validateAsync: sandbox.stub().resolves({ status: 'validated', result: undefined }),
         }
-        modifier = new AsyncConvertingModifier<ErrorMessage, string, number>(upstream, context, createConverter(), { onBlur: false })
+        modifier = new AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>(upstream, context, createConverter(), { onBlur: false })
     })
 
     describe('data', () => {
@@ -184,7 +169,9 @@ describe('AsyncConvertingModifier', () => {
             })
 
             it('should validate on blur if configured', async () => {
-                modifier = new AsyncConvertingModifier<ErrorMessage, string, number>(upstream, context, createConverter(), { onBlur: true })
+                modifier = new AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>(upstream, context, createConverter(), {
+                    onBlur: true,
+                })
                 await modifier.validateAsync(true)
                 expect(modifier.validity).to.deep.equal({
                     status: 'validated',
