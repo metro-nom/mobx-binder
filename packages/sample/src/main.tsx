@@ -8,7 +8,6 @@ import { App } from 'app'
 import 'bootstrap/dist/css/bootstrap.css'
 import { stores } from './stores'
 
-
 // render react DOM
 ReactDOM.render(
     <Provider {...stores}>
