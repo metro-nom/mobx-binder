@@ -395,7 +395,7 @@ export class Binder<ValidationResult> {
      * @param field
      */
     public forStringField(field: FieldStore<string>): BindingBuilder<ValidationResult, string | undefined, Binder<ValidationResult>> {
-        return new BindingBuilder(this, this.addBinding.bind(this), field).withStringOrUndefined()
+        return this.forField(field).withStringOrUndefined()
     }
 
     /**

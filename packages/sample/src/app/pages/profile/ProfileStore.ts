@@ -5,9 +5,9 @@ import { MomentConverter } from 'mobx-binder-moment'
 // tslint:disable no-submodule-imports
 
 import PersonStore from '../../domain/PersonStore'
-import sleep from 'mobx-binder/lib/test/sleep'
 import { TranslateFunction } from 'react-mobx-i18n'
 import { AsyncPhoneNumberConverter } from 'app/domain/AsyncPhoneNumberConverter'
+import sleep from 'app/domain/sleep'
 
 const trimConverter = new TrimConverter()
 

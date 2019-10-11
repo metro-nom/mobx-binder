@@ -1,28 +1,20 @@
-import React from 'react'
-import { inject } from 'mobx-react'
-import ProfileStore from './ProfileStore'
-import { translatable } from 'react-mobx-i18n'
+import React, { useContext, useEffect } from 'react'
 import { Button, Col, Form, Row } from 'reactstrap'
 import FormField from '../../forms/FormField'
 import FieldInfo from '../../forms/FieldInfo'
-import PersonStore from '../../domain/PersonStore'
+import { I18nContext, PersonContext, ProfileContext } from '../../../stores'
+import { useObserver } from 'mobx-react-lite'
 
-export interface ProfilePageContentProps {
-    profileStore?: ProfileStore
-    personStore?: PersonStore
-}
+export default function ProfilePage() {
+    const { translate: t } = useContext(I18nContext)
+    const person = useContext(PersonContext)
+    const profile = useContext(ProfileContext)
 
-@inject('profileStore', 'personStore')
-@translatable
-export default class ProfilePage extends React.Component<ProfilePageContentProps, any> {
-    public componentWillMount() {
-        this.props.profileStore.onEnter()
-    }
+    useEffect(() => {
+        profile.onEnter()
+    }, [])
 
-    public render() {
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
-        const profile = this.props.profileStore!
-        const person = this.props.personStore!
+    return useObserver(() => {
         const { changed, validating, valid, submitting } = profile.binder
         const bool = (it?: boolean) => (it === undefined ? 'undefined' : it ? 'true' : 'false')
 
@@ -80,7 +72,7 @@ export default class ProfilePage extends React.Component<ProfilePageContentProps
                                 disabled={!profile.binder.changed || profile.binder.valid === false}
                                 onClick={profile.onSubmit}
                             >
-                                {this.t('profilePage.saveButton.label')}
+                                {t('profilePage.saveButton.label')}
                             </Button>
                         </Col>
                         <Col>
@@ -114,5 +106,5 @@ export default class ProfilePage extends React.Component<ProfilePageContentProps
                 </Form>
             </div>
         )
-    }
+    })
 }

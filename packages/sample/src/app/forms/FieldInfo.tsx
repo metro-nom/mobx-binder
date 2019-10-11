@@ -1,33 +1,17 @@
 import { FieldStore } from 'mobx-binder'
 import React from 'react'
-import { observer } from 'mobx-react'
+import { FormFieldProps } from 'app/forms/FormField'
+import { useObserver } from 'mobx-react-lite'
 
 export interface FieldInfoProps {
     field: FieldStore<any>
 }
 
-@observer
-export default class FieldInfo extends React.Component<FieldInfoProps, any> {
-    constructor(props: FieldInfoProps, context: any) {
-        super(props, context)
-    }
+export default function FieldInfo({ field }: FormFieldProps) {
+    const bool = (it?: boolean) => (it === undefined ? 'undefined' : it ? 'true' : 'false')
 
-    public render() {
-        const {
-            name,
-            valueType,
-            readOnly,
-            required,
-            value,
-            touched,
-            visited,
-            changed,
-            validating,
-            valid,
-            showValidationResults,
-            errorMessage,
-        } = this.props.field
-        const bool = (it?: boolean) => (it === undefined ? 'undefined' : it ? 'true' : 'false')
+    return useObserver(() => {
+        const { name, valueType, readOnly, required, value, touched, visited, changed, validating, valid, showValidationResults, errorMessage } = field
 
         return (
             <p>
@@ -57,5 +41,5 @@ export default class FieldInfo extends React.Component<FieldInfoProps, any> {
                 <br />
             </p>
         )
-    }
+    })
 }
