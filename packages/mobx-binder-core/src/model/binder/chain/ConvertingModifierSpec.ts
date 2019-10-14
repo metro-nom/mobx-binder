@@ -171,5 +171,8 @@ describe('ConvertingModifier', () => {
                 result: 'Not a number',
             })
         })
+        it('should fail on any unexpected error', () => {
+            expect(() => modifier.validateValue('internal error')).to.throw('fail on internal error')
+        })
     })
 })

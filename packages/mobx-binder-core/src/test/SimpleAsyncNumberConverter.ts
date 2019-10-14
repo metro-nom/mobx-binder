@@ -9,6 +9,9 @@ export class SimpleAsyncNumberConverter implements AsyncConverter<ErrorMessage, 
         if (value === undefined) {
             return undefined
         }
+        if (value === 'internal error') {
+            throw new Error('fail on internal error')
+        }
         const modelValue = Number(value)
         if (isNaN(modelValue)) {
             throw new ValidationError('not a number')

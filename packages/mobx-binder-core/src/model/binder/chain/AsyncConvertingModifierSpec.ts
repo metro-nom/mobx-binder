@@ -119,6 +119,16 @@ describe('AsyncConvertingModifier', () => {
             })
             expect(converter.convertToModel).to.have.been.calledOnce
         })
+        it('should remember last validation result on two consecutive calls', async () => {
+            upstream.data.value = 'wrong'
+            await modifier.validateAsync(false)
+            await modifier.validateAsync(false)
+            expect(modifier.validity).to.deep.equal({
+                status: 'validated',
+                result: 'not a number',
+            })
+            expect(converter.convertToModel).to.have.been.calledOnce
+        })
         it('should start new validation if previous value was different', async () => {
             upstream.data.value = 'wrong'
             const promise = modifier.validateAsync(false)
@@ -149,6 +159,10 @@ describe('AsyncConvertingModifier', () => {
                 status: 'validating',
             })
             await promise // for cleanup
+        })
+        it('should fail on any unexpected error', () => {
+            upstream.data.value = 'internal error'
+            return modifier.validateAsync(false).should.have.been.rejectedWith('fail on internal error')
         })
 
         it('should return pending validity if it is not itself validating but previous validation is still in progress', async () => {
@@ -229,6 +243,9 @@ describe('AsyncConvertingModifier', () => {
                 valid: false,
                 result: 'not a number',
             })
+        })
+        it('should fail on any unexpected error', () => {
+            return modifier.validateValue('internal error').should.have.been.rejectedWith('fail on internal error')
         })
     })
 })

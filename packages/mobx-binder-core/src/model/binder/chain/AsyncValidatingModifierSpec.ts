@@ -35,7 +35,12 @@ describe('AsyncValidatingModifier', () => {
         }
         validatorMock = sandbox.spy(async (value: string) => {
             await sleep(10)
-            return value === 'wrong' ? 'fail' : undefined
+            if (value === 'internal error') {
+                throw new Error('fail on internal error')
+            } else if (value === 'wrong') {
+                return 'fail'
+            }
+            return undefined
         })
         modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock, { onBlur: false })
     })
@@ -189,6 +194,9 @@ describe('AsyncValidatingModifier', () => {
                 valid: false,
                 result: 'fail',
             })
+        })
+        it('should fail on any unexpected error', () => {
+            return modifier.validateValue('internal error').should.have.been.rejectedWith('fail on internal error')
         })
     })
 })

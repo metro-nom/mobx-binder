@@ -50,6 +50,11 @@ describe('ChangeEventHandler', () => {
         it('should not trigger callback if value is pending', () => {
             runInAction(() => {
                 field.touched = true
+                upstream.data.value = 'newValue'
+            })
+            callbackMock.reset()
+            runInAction(() => {
+                field.touched = true
                 upstream.data.pending = true
                 upstream.data.value = 'newValue'
             })
