@@ -5,6 +5,7 @@
     "main": "./lib/index.js",
     "scripts": {
         "clean": "rm -Rf lib",
+        "clean:all": "rm -Rf lib .nyc-output coverage node_modules",
         "build": "tsc",
         "lint": "eslint --max-warnings 0 'src/**/*.ts*'",
         "lint:fix": "npm run lint -- --fix",

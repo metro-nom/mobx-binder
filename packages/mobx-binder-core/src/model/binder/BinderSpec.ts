@@ -8,8 +8,9 @@ import { action, observable } from 'mobx'
 import { Validator } from '../../validation/Validator'
 import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
 import { ComplexField } from '../../test/ComplexField'
+import { SimpleAsyncNumberConverter } from '../../test/SimpleAsyncNumberConverter'
 
-const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string> => (value?: string) =>
+const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string | undefined> => (value?: string) =>
     !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
 
 const numberValidator = (max: number) => (num?: number) => (num !== undefined && num > max ? 'Too much' : undefined)
@@ -46,7 +47,7 @@ describe('Binder', () => {
 
         describe('load', () => {
             it('should clear form (load from empty field)', () => {
-                const binder = new SimpleBinder().forField(myField).bind()
+                const binder = new SimpleBinder().forStringField(myField).bind()
                 myField.updateValue('12345')
                 binder.clear()
                 expect(myField.value).to.equal('')
@@ -81,14 +82,14 @@ describe('Binder', () => {
                         .forField(secondField)
                         .bind()
                     binder.load({
-                        myField: 'my',
+                        myField: 123,
                         secondField: 'second',
                     })
                     binder.apply({
-                        myField: 'changedValue',
+                        myField: 234,
                         secondField: 'second',
                     })
-                    expect(myField.value).to.equal('changedValue')
+                    expect(myField.value).to.equal('234')
                     expect(myField.changed).to.be.true
                     expect(secondField.changed).to.be.false
                 })
@@ -569,6 +570,271 @@ describe('Binder', () => {
         })
     })
 
+    describe('async conversion', () => {
+        let binder: SimpleBinder
+        let converter: SimpleAsyncNumberConverter
+
+        beforeEach(() => {
+            converter = new SimpleAsyncNumberConverter()
+            sandbox.spy(converter, 'convertToModel')
+        })
+
+        it('should initially be valid == false because of sync validation', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+
+            // TextField <- ViewWrapper <- RequiredValidator <- TrimConverter <- async validator
+
+            expect(myField.valid).to.be.false
+        })
+
+        it('should initially be valid == undefined when there are no sync validators at all', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .withAsyncConverter(converter)
+                .bind()
+            expect(myField.valid).to.be.undefined
+        })
+
+        it('should not trigger asynchronous validators on change or blur by default', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+
+            myField.updateValue('12345')
+            myField.handleBlur()
+
+            expect(converter.convertToModel).to.not.have.been.called
+        })
+
+        it('should trigger asynchronous validators on submit', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+
+            myField.updateValue('12345')
+
+            return binder.submit().then(() => {
+                expect(converter.convertToModel).to.have.been.calledWith('12345')
+            })
+        })
+
+        it('should update field value with "corrected" value after async validation', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+
+            myField.updateValue('012345')
+
+            return binder.submit().then(() => {
+                expect(myField.value).to.equal('12345')
+            })
+        })
+
+        it('should not validate corrected field value again on async validation', async () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+
+            myField.updateValue('012345')
+
+            await binder.validateAsync()
+            await binder.validateAsync()
+
+            expect(converter.convertToModel).to.have.been.calledOnce
+        })
+
+        it('should expose asynchronous validation results during submit', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+
+            myField.updateValue('abcde')
+
+            return binder.submit().should.be.rejected.then(() => {
+                expect(myField.valid).to.be.false
+                expect(myField.errorMessage).to.equal('not a number')
+            })
+        })
+
+        it('should not call submission function if asynchronous validations fail', () => {
+            let called = false
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+            myField.updateValue('abcde')
+
+            return binder
+                .submit({}, () => {
+                    called = true
+                })
+                .should.be.rejected.then(() => {
+                    expect(called).to.be.false
+                })
+        })
+
+        it('should return promise that resolves with stored values, even if onSubmit returns something else', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter)
+                .bind()
+
+            myField.updateValue('12345')
+
+            return binder
+                .submit({} as any, () => {
+                    return Promise.resolve('bla')
+                })
+                .then((values: any) => {
+                    expect(values).to.deep.equal({ myField: 12345 })
+                })
+        })
+
+        it('should trigger asynchronous validators on blur if configured', async () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter, { onBlur: true })
+                .bind()
+
+            myField.updateValue('abcde')
+            await myField.handleBlur()
+
+            expect(myField.valid).to.be.false
+            expect(myField.errorMessage).to.equal('not a number')
+            expect(converter.convertToModel).to.have.been.calledWith('abcde')
+        })
+
+        it('should respect synchronous validations before asynchronous validators', async () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter, { onBlur: true })
+                .bind()
+
+            myField.updateValue('')
+            myField.handleBlur()
+
+            await sleep(10)
+
+            expect(binder.valid).to.be.false
+            expect(converter.convertToModel).to.not.have.been.called
+        })
+
+        it('should respect synchronous validations during ongoing asynchronous validators', async () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter, { onBlur: true })
+                .bind()
+            myField.updateValue('12345')
+
+            expect(converter.convertToModel).to.not.have.been.called
+
+            // myField.handleBlur()
+            const promise = binder.binding(myField).validateAsync(true)
+
+            // during async validation
+            await sleep(5)
+
+            expect(binder.valid).to.be.undefined
+            expect(binder.validating).to.be.true
+            expect(myField.validating).to.be.true
+            expect(myField.valid).to.be.undefined
+            expect(converter.convertToModel).to.have.been.calledOnce
+
+            // after change and synchronous error
+            myField.updateValue('')
+            expect(binder.valid).to.be.false
+            expect(myField.validating).to.be.false
+            expect(myField.valid).to.be.false
+            expect(myField.errorMessage).to.equal('Please enter a value')
+
+            // there shoul
+            await sleep(15)
+            await promise
+            expect(myField.validating).to.be.false
+            expect(binder.valid).to.be.false
+            expect(myField.valid).to.be.false
+
+            await sleep(10)
+            expect(binder.valid).to.be.false
+            expect(myField.valid).to.be.false
+            expect(converter.convertToModel).to.have.been.calledOnce
+        })
+
+        it('should toggle validating property during asynchronous validation', async () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(
+                    {
+                        convertToModel: async () => {
+                            await sleep(10)
+                            expect(myField.validating).to.be.true
+                            return Promise.resolve(12345)
+                        },
+                        convertToPresentation: () => '',
+                    },
+                    { onBlur: true },
+                )
+                .bind()
+
+            myField.updateValue('12345')
+            await binder.validateAsync()
+
+            expect(myField.validating).to.be.false
+        })
+
+        it("should not revalidate if value didn't change", () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter, { onBlur: true })
+                .bind()
+
+            myField.updateValue('12345')
+            return binder
+                .validateAsync()
+                .then(() => binder.validateAsync())
+                .then(() => {
+                    expect(converter.convertToModel).to.have.been.calledOnce
+                })
+        })
+
+        it('should not show success if asynchronous validation has not been done for that value', async () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withAsyncConverter(converter, { onBlur: true })
+                .bind()
+
+            myField.updateValue('abcde')
+            const promise = binder.validateAsync().should.be.rejected
+            await sleep(20)
+            await promise
+
+            myField.updateValue('123456')
+            expect(myField.valid).to.be.undefined
+        })
+    })
+
     describe('global validity', () => {
         let binder: SimpleBinder
         let validator: any
@@ -633,6 +899,32 @@ describe('Binder', () => {
             binder.load({ myField: 5 })
 
             expect(myField.value).to.equal('5')
+        })
+
+        it('should not update field value with "corrected" value on regular changes', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withConverter(new SimpleNumberConverter())
+                .bind()
+
+            myField.updateValue('012345')
+
+            expect(myField.value).to.equal('012345')
+        })
+
+        it('should update field value with "corrected" value on explicit validation', () => {
+            binder = new SimpleBinder()
+                .forStringField(myField)
+                .isRequired()
+                .withConverter(new SimpleNumberConverter())
+                .bind()
+
+            myField.updateValue('012345')
+
+            return binder.submit().then(() => {
+                expect(myField.value).to.equal('12345')
+            })
         })
 
         it('should handle conversion errors like validation errors', () => {
@@ -912,6 +1204,22 @@ describe('Binder', () => {
 
             it('should report failures asynchronously', async () => {
                 expect(await binder.binding(myField).validateValue('123')).to.equal('Wrong length')
+            })
+            it('should report success asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+            })
+        })
+
+        describe('with async converter', () => {
+            beforeEach(() => {
+                binder = new SimpleBinder()
+                    .forStringField(myField)
+                    .withAsyncConverter(new SimpleAsyncNumberConverter())
+                    .bind()
+            })
+
+            it('should report failures asynchronously', async () => {
+                expect(await binder.binding(myField).validateValue('abc')).to.equal('not a number')
             })
             it('should report success asynchronously', async () => {
                 expect(await binder.binding(myField).validateValue('123456')).to.be.undefined

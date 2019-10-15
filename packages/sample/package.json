@@ -20,7 +20,7 @@
         "mobx": "^4.0.0 || ^5.0.0",
         "mobx-binder": "^0.3.1",
         "mobx-binder-moment": "^0.3.1",
-        "mobx-react": "^5.0.0",
+        "mobx-react-lite": "^1.4.1",
         "moment": ">=2.0.0",
         "react": "^16.5.2",
         "react-dom": "^16.5.2",

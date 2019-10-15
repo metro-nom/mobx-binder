@@ -36,7 +36,7 @@ describe('FieldWrapper', () => {
     })
 
     describe('toView', () => {
-        it('should return unchanged model value', () => {
+        it('should return unchanged model value by default', () => {
             expect(fieldWrapper.toView('abc')).to.equal('abc')
         })
     })

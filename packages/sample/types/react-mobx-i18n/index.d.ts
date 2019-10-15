@@ -4,7 +4,9 @@ declare module 'react-mobx-i18n' {
     namespace Main {
         export function translatable<T extends IReactComponent>(target: T): T
 
-        export function init(cb: () => void): {
+        export function init(
+            cb: () => void,
+        ): {
             i18n: any
         }
 

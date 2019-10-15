@@ -1,56 +1,55 @@
 import { TextField } from '../../..'
 import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
-import { AsyncValidatingModifier } from './AsyncValidatingModifier'
 import sleep from '../../../test/sleep'
+import { AsyncConvertingModifier } from './AsyncConvertingModifier'
+import { AsyncConverter } from '../../../conversion/Converter'
+import { SimpleAsyncNumberConverter } from '../../../test/SimpleAsyncNumberConverter'
 import sinon = require('sinon')
 
-describe('AsyncValidatingModifier', () => {
+describe('AsyncConvertingModifier', () => {
     const sandbox = sinon.createSandbox()
     const context = new SimpleContext()
     let field: TextField
     let upstream: any
-    let validatorMock: any
-    let modifier: AsyncValidatingModifier<ErrorMessage, string>
+    let converter: AsyncConverter<ErrorMessage, string | undefined, number | undefined>
+    let modifier: AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>
+
+    function createConverter(): SimpleAsyncNumberConverter {
+        converter = new SimpleAsyncNumberConverter()
+        sandbox.spy(converter, 'convertToModel')
+        return converter
+    }
 
     beforeEach(() => {
         field = new TextField('myField')
         upstream = {
             data: {
                 pending: false,
-                value: 'myValue',
+                value: '123',
             },
             validity: {
                 status: 'validated',
                 result: undefined,
             },
             field,
-            toView: sandbox.stub(),
+            toView: sandbox.spy((value: any) => value),
             validateValue: sandbox.stub().callsFake(value => ({
                 valid: true,
                 value,
             })),
-            isEqual: (a: any, b: any) => a === b,
+            isEqual: sandbox.stub().callsFake((a: any, b: any) => a === b),
             validateAsync: sandbox.stub().resolves({ status: 'validated', result: undefined }),
         }
-        validatorMock = sandbox.spy(async (value: string) => {
-            await sleep(10)
-            if (value === 'internal error') {
-                throw new Error('fail on internal error')
-            } else if (value === 'wrong') {
-                return 'fail'
-            }
-            return undefined
-        })
-        modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock, { onBlur: false })
+        modifier = new AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>(upstream, context, createConverter(), { onBlur: false })
     })
 
     describe('data', () => {
-        it('should pass through valid upstream data', async () => {
+        it('should convert valid upstream data', async () => {
             await modifier.validateAsync(false)
             expect(modifier.data).to.deep.equal({
                 pending: false,
-                value: 'myValue',
+                value: 123,
             })
         })
         it('should pass through upstream data of unknown/pending validity as pending', () => {
@@ -100,7 +99,7 @@ describe('AsyncValidatingModifier', () => {
             await modifier.validateAsync(false)
             expect(modifier.validity).to.deep.equal({
                 status: 'validated',
-                result: 'fail',
+                result: 'not a number',
             })
         })
         it('should ignore previous async validation for different values', async () => {
@@ -118,14 +117,24 @@ describe('AsyncValidatingModifier', () => {
                 status: 'validated',
                 result: undefined,
             })
-            expect(validatorMock).to.have.been.calledOnce
+            expect(converter.convertToModel).to.have.been.calledOnce
+        })
+        it('should remember last validation result on two consecutive calls', async () => {
+            upstream.data.value = 'wrong'
+            await modifier.validateAsync(false)
+            await modifier.validateAsync(false)
+            expect(modifier.validity).to.deep.equal({
+                status: 'validated',
+                result: 'not a number',
+            })
+            expect(converter.convertToModel).to.have.been.calledOnce
         })
         it('should start new validation if previous value was different', async () => {
             upstream.data.value = 'wrong'
             const promise = modifier.validateAsync(false)
             upstream.data.value = 'ok'
             await modifier.validateAsync(false)
-            expect(validatorMock).to.have.been.calledTwice
+            expect(converter.convertToModel).to.have.been.calledTwice
             await promise // cleanup
         })
         it('should not apply validation results if value changed before validation finished', async () => {
@@ -151,6 +160,10 @@ describe('AsyncValidatingModifier', () => {
             })
             await promise // for cleanup
         })
+        it('should fail on any unexpected error', () => {
+            upstream.data.value = 'internal error'
+            return modifier.validateAsync(false).should.have.been.rejectedWith('fail on internal error')
+        })
 
         it('should return pending validity if it is not itself validating but previous validation is still in progress', async () => {
             const promise = modifier.validateAsync(false)
@@ -170,7 +183,9 @@ describe('AsyncValidatingModifier', () => {
             })
 
             it('should validate on blur if configured', async () => {
-                modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock, { onBlur: true })
+                modifier = new AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>(upstream, context, createConverter(), {
+                    onBlur: true,
+                })
                 await modifier.validateAsync(true)
                 expect(modifier.validity).to.deep.equal({
                     status: 'validated',
@@ -180,19 +195,53 @@ describe('AsyncValidatingModifier', () => {
         })
     })
 
+    describe('toView', () => {
+        it('should pass converted presentation value to upstream.toView()', () => {
+            expect(modifier.toView(123)).to.equal('123')
+            expect(upstream.toView).to.have.been.calledWith('123')
+        })
+    })
+
+    describe('isEqual', () => {
+        it('should just delegate to the upstream modifier by default', () => {
+            upstream.isEqual.withArgs(123, 123).returns(true)
+            upstream.isEqual.withArgs(123, 456).returns(false)
+
+            expect(modifier.isEqual(123, 123)).to.be.true
+            expect(modifier.isEqual(123, 456)).to.be.false
+
+            expect(upstream.isEqual).to.have.been.calledTwice
+        })
+
+        it('should delegate to the converter isEqual method if existing', () => {
+            const stub = (converter.isEqual = sandbox.stub())
+            upstream.isEqual = () => {
+                throw new Error('should not be called')
+            }
+
+            stub.withArgs(123, 123).returns(true)
+            stub.withArgs(123, 456).returns(false)
+
+            expect(modifier.isEqual(123, 123)).to.be.true
+            expect(modifier.isEqual(123, 456)).to.be.false
+
+            expect(stub).to.have.been.calledTwice
+        })
+    })
+
     describe('validateValue', () => {
         // here I only test cases where the superclass delegates to validateValueLocally()
 
         it('should accept valid values', async () => {
-            expect(await modifier.validateValue('someValue')).to.deep.equal({
+            expect(await modifier.validateValue('123')).to.deep.equal({
                 valid: true,
-                value: 'someValue',
+                value: 123,
             })
         })
         it('should return proper validation result on validation errors', async () => {
             expect(await modifier.validateValue('wrong')).to.deep.equal({
                 valid: false,
-                result: 'fail',
+                result: 'not a number',
             })
         })
         it('should fail on any unexpected error', () => {

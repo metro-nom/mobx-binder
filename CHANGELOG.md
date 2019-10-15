@@ -1,4 +1,8 @@
-# Changelog
+# Changelog (breaking changes)
+
+## [0.4.0] - 2019-10-11
+
+* Removing automatism of converting empty strings to `undefined`. Instead, one can use `binder.forField().withStringOrUndefined()` or simply `binder.forStringField()` to configure the same behaviour explicitly. 
 
 ## [0.3.0] - 2019-09-20
 

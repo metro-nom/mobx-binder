@@ -1,6 +1,6 @@
-import { Converter } from '../../conversion/Converter'
+import { Converter, AsyncConverter } from '../../conversion/Converter'
 import { action, computed, isObservable, observable, reaction, runInAction, toJS } from 'mobx'
-import { StringConverter } from '../../conversion/StringConverter'
+import { EmptyStringConverter } from '../../conversion/EmptyStringConverter'
 import { FieldStore } from '../fields/FieldStore'
 import { Modifier } from './chain/Modifier'
 import { FieldWrapper } from './chain/FieldWrapper'
@@ -12,6 +12,7 @@ import { Context } from './Context'
 import { AsyncValidator, Validator } from '../../validation/Validator'
 import isEqual from 'lodash.isequal'
 import { isPromise } from '../../utils/isPromise'
+import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
 
 /**
  * API for single field binding
@@ -150,11 +151,15 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     @action
-    public async validateAsync(onBlur = false): Promise<string | undefined> {
-        await this.chain.validateAsync(onBlur)
-        const validity = this.validity
-        const validationResult = validity.status === 'validated' ? validity.result : this.context.validResult
-        return this.toErrorMessage(validationResult)
+    public validateAsync(onBlur = false): Promise<string | undefined> {
+        return this.chain.validateAsync(onBlur).then(
+            action(() => {
+                const validity = this.validity
+                const validationResult = validity.status === 'validated' ? validity.result : this.context.validResult
+                this.correctFieldValue()
+                return this.toErrorMessage(validationResult)
+            }),
+        )
     }
 
     @action
@@ -180,6 +185,13 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             if (this.valid && !this.model.pending) {
                 this.write(target, this.model.value)
             }
+        }
+    }
+
+    private correctFieldValue() {
+        if (this.valid && !this.chain.data.pending) {
+            const fieldValue = this.chain.toView(this.chain.data.value)
+            this.field.updateValue(fieldValue)
         }
     }
 
@@ -229,9 +241,23 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
         private readonly field: FieldStore<ValueType>,
     ) {
         this.last = new FieldWrapper(field, binder.context)
+    }
+
+    /**
+     * Adds a converter that converts empty strings to the given value and vice versa.
+     */
+    public withEmptyString<X = undefined>(to: X): BindingBuilder<ValidationResult, string | X, BinderType> {
         if (this.field.valueType === 'string') {
-            this.withConverter(new StringConverter() as any)
+            return (this as BindingBuilder<ValidationResult, unknown, BinderType>).withConverter(new EmptyStringConverter<X>(to))
         }
+        throw new Error('This is not a field of type string')
+    }
+
+    /**
+     * Adds a converter that converts empty strings to `undefined` and vice versa.
+     */
+    public withStringOrUndefined(): BindingBuilder<ValidationResult, string | undefined, BinderType> {
+        return this.withEmptyString(undefined)
     }
 
     /**
@@ -241,6 +267,19 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      */
     public withConverter<NextType>(converter: Converter<ValidationResult, ValueType, NextType>): BindingBuilder<ValidationResult, NextType, BinderType> {
         return this.addModifier<NextType>(new ConvertingModifier(this.last, this.binder.context, converter))
+    }
+
+    /**
+     * Add an asynchronous validator to the binding chain. Async validations happen on submit and - if configured via the options parameter - also on blur.
+     * @param asyncValidator
+     * @param options
+     */
+    @action
+    public withAsyncConverter<NextType>(
+        asyncConverter: AsyncConverter<ValidationResult, ValueType, NextType>,
+        options: { onBlur: boolean } = { onBlur: false },
+    ): BindingBuilder<ValidationResult, NextType, BinderType> {
+        return this.addModifier<NextType>(new AsyncConvertingModifier(this.last, this.binder.context, asyncConverter, options))
     }
 
     /**
@@ -348,6 +387,15 @@ export class Binder<ValidationResult> {
      */
     public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<ValidationResult, ValueType, Binder<ValidationResult>> {
         return new BindingBuilder(this, this.addBinding.bind(this), field)
+    }
+
+    /**
+     * Shortcut for `forField(someField).withStringOrUndefined()`
+     *
+     * @param field
+     */
+    public forStringField(field: FieldStore<string>): BindingBuilder<ValidationResult, string | undefined, Binder<ValidationResult>> {
+        return this.forField(field).withStringOrUndefined()
     }
 
     /**

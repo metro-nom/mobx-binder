@@ -34,12 +34,12 @@ export default class ProfileStore {
 
         this.binder = new DefaultBinder({ t }) // <2>
         this.binder
-            .forField(this.salutation).isRequired().bind() <3>
-            .forField(this.fullName).isRequired().bind()
+            .forStringField(this.salutation).isRequired().bind() <3>
+            .forStringField(this.fullName).isRequired().bind()
 
-            .forField(this.dateOfBirth).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
+            .forStringField(this.dateOfBirth).withConverter(new MomentConverter('DD.MM.YYYY')).bind()
 
-            .forField(this.email)
+            .forStringField(this.email)
                 .isRequired()
                 .withAsyncValidator(
                     (value) => sleep(1000).then(() => EmailValidator.validate()(value)),
@@ -184,8 +184,8 @@ public fullName = new TextField('fullName')
 public email = new TextField('email')
 ...
 binder
-    .forField(fullName).bind()
-    .forField(email).bind()
+    .forStringField(fullName).bind()
+    .forStringField(email).bind()
 
 // loading from object
 binder.load({
@@ -226,19 +226,19 @@ If validation incurs expensive calculations or a backend request, it's possible 
 [source,js]
 ----
 binder
-    .forField(fullName)
+    .forStringField(fullName)
     .withAsyncValidator((value) => sleep(1000).then(() => EmailValidator.validate()(value)))
     .bind()
 ----
 
 In contrast to synchronous validation, the async validation expects to get back a `Promise` of the validation result. As this is a more expensive validation, it does not happen on every change of the field value, but only on submission. If you want an additional check on blur, you can configure this like so:
 
-Only field values where asynchronous validation has been successfully finished are written to an object via `binder.store()`.
-
 [source,js]
 ----
 .withAsyncValidator(myAsyncValidator, { onBlur: true })
 ----
+
+Only field values where asynchronous validation has been successfully finished are written to an object via `binder.store()`.
 
 === Conditional validation
 
@@ -250,7 +250,7 @@ public salutation = new TextField('salutation') // <1>
 public fullName = new TextField('fullName')
 
 binder
-    .forField(salutation)
+    .forStringField(salutation)
         .onChange(() => binder.getBinding(fullName).validate()
     .forField(fullName)
         .withValidator(someValidatorDependingOnValueOf(salutation))
@@ -267,20 +267,68 @@ As with validators, converters can also be added to the binding chain:
 ----
 import { MomentConverter, MomentValidators } from 'mobx-binder-moment'
 ...
-binder.forField(fullName)
+binder.forStringField(fullName)
     .isRequired()
     .withConverter(new MomentConverter('DD.MM.YYYY'))
     .withValidator(Validators.dayInPast())
     .bind()
 ----
 
+Converters have to fullfill the following interface:
+
+[source,js]
+----
+interface Converter<_ValidationResult, ViewType, ModelType> {
+    convertToModel(value: ViewType): ModelType
+    convertToPresentation(data: ModelType): ViewType
+    isEqual?(first: ModelType, second: ModelType): boolean
+}
+----
+
 A conversion is only tried if previous validations succeeded. A converter may fail if the value is not convertible, which means that Converters also act as validators.
 
 Validators that are added after a converter will act on the already converted value. The API of Binder makes use of TypeScript generics to make sure that a Validator can only be applied to a matching data type.
 
-Converters are bidirectional - that means that on loading values into the form, they are converted back into a string representation.
+Converters are bidirectional - that means that on loading values into the form, they are converted back into a string representation. Also, when a to-model conversion has been successful, the resulting value is passed back to `convertToPresentation` and the rendered field value is updated.
 
-For every string based field, one default `StringConverter` is added automatically at the beginning of the chain, which converts empty strings to `undefined` and vice versa.
+When a simple equality check via `===` for the converted ModelType is not sufficient, the converter also has to implement `isEqual`. This is required for the `changed` property and other internal optimizations.
+
+Please not that by default empty string field values are not any more converted automatically to `undefined`. Instead, one can use `binder.forField().withStringOrUndefined()` or simply `binder.forStringField()` to configure the same behaviour explicitly.
+
+=== Asynchronous conversion
+
+As for the async validation, there might be cases where a conversion is done remotely and needs to be asynchronous. One example could be to contact some external service that validates phone numbers and also brings these numbers into some common format.
+
+[source,js]
+----
+binder
+    .forStringField(fullName)
+    .withAsyncConverter(verifyAndPrettifyPhoneNumberConverter)
+    .bind()
+----
+
+Asynchronous converters have to fullfill the following interface:
+
+[source,js]
+[subs="verbatim,quotes"]
+----
+interface AsyncConverter<_ValidationResult, ViewType, ModelType> {
+    convertToModel(value: ViewType): *Promise<ModelType>*
+    convertToPresentation(data: ModelType): ViewType
+    isEqual?(first: ModelType, second: ModelType): boolean
+}
+----
+
+The `convertToModel` method then is expected to return the validation result or reject with a `ValidationError`. As with the async validation, this does not happen on every change of the field value, but only on submission. If you want an additional check on blur, you can configure this like so:
+
+[source,js]
+----
+.withAsyncValidator(myAsyncValidator, { onBlur: true })
+----
+
+When the conversion has been successful, the resulting value is passed back to `convertToPresentation` and the rendered field value is updated.
+
+Only field values where asynchronous conversion has been successfully finished are written to an object via `binder.store()`.
 
 == Conditional visibility
 
@@ -297,7 +345,7 @@ This updates the global validation status based on the fields that are left.
 
 If the submit button of a form is clicked, this may trigger a `binder.submit()` call. Just like `binder.store()`, it stores the form field values into an object, but it also waits for asynchronous validations to be finished and maintains submission state.
 
-[source,js
+[source,js]
 ----
 public handleSubmit() {
     return this.binder.submit()

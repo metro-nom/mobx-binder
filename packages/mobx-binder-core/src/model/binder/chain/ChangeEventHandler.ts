@@ -1,4 +1,4 @@
-import { Data, Modifier } from './Modifier'
+import { KnownData, Modifier } from './Modifier'
 import { reaction } from 'mobx'
 import { AbstractModifier } from './AbstractModifier'
 import { Context } from '../Context'
@@ -15,8 +15,8 @@ export class ChangeEventHandler<ValidationResult, ValueType> extends AbstractMod
         )
     }
 
-    private handleChange = (data?: Data<ValueType>) => {
-        if (data && !data.pending) {
+    private handleChange = (data?: KnownData<ValueType>) => {
+        if (data) {
             this.callback(data.value)
         }
     }

@@ -3,15 +3,18 @@
   "private": true,
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
-    "reinitialize": "npm run clean && npm run bootstrap",
+    "all": "npm run reinitialize && npm run build && npm run lint && npm run test && npm run coverage",
+    "reinitialize": "npm run clean:all && npm install && npm run bootstrap",
     "build": "lerna run build",
     "lint": "lerna run lint",
     "test": "lerna run test",
     "coverage": "lerna run coverage",
     "clean": "lerna run clean && lerna clean -y",
+    "clean:all": "lerna run clean:all && lerna clean -y && rm -Rf node_modules",
     "version": "lerna version",
     "publish": "lerna publish from-git",
-    "ls": "lerna ls"
+    "ls": "lerna ls",
+    "sample": "lerna run start"
   },
   "devDependencies": {
     "lerna": "^3.13.0"
