@@ -336,7 +336,10 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
     public bind(name?: string): BinderType {
         const propertyName = name || this.field.name
 
-        return this.bind2((source: any) => source[propertyName], (target: any, value?: ValueType) => (target[propertyName] = value))
+        return this.bind2(
+            (source: any) => source[propertyName],
+            (target: any, value?: ValueType) => (target[propertyName] = value),
+        )
     }
 
     /**

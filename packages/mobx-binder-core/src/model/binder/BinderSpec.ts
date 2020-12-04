@@ -162,7 +162,10 @@ describe('Binder', () => {
             })
 
             it('should allow storing via custom write function', () => {
-                const binder = new SimpleBinder().forField(myField).bind2(() => '', (target: any, value?: string) => (target.someKey = value))
+                const binder = new SimpleBinder().forField(myField).bind2(
+                    () => '',
+                    (target: any, value?: string) => (target.someKey = value),
+                )
 
                 myField.updateValue('changedValue')
 

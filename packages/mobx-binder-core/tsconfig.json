@@ -10,7 +10,7 @@
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "lib": [
-            "es6", "dom"
+            "es2018", "esnext", "dom"
         ]
     },
     "include": [

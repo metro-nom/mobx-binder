@@ -379,6 +379,7 @@ The project is using https://github.com/lerna/lerna[lerna] for multipackage repo
 === Initial setup
 
 ----
+npm -g install lerna
 npm install
 npm run bootstrap
 ----

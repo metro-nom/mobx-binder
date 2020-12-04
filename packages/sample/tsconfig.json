@@ -15,7 +15,9 @@
     "removeComments": true,
     "strictNullChecks": false,
     "outDir": "build",
-    "lib": ["es6", "dom"],
+    "lib": [
+      "es2018", "esnext", "dom"
+    ],
     "baseUrl": "src",
     "paths": {
       "app/*": ["./app/*"]
