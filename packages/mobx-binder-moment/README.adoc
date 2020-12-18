@@ -15,12 +15,12 @@ Validators for moment values have to be added to the binding chain after the con
 .Example
 [source,js]
 ----
-import { MomentConverter, MomentValidators } from 'mobx-binder-moment'
+import { MomentConverter, DayjsValidators } from 'mobx-binder-moment'
 ...
 binder.forField(fullName)
     .isRequired()
     .withConverter(new MomentConverter('DD.MM.YYYY'))
-    .withValidator(Validators.dayInPast())
+    .withValidator(DayjsValidators.dayInPast())
     .bind()
 ----
 

@@ -1,0 +1,59 @@
+{
+    "name": "mobx-binder-dayjs",
+    "version": "0.4.0",
+    "description": "Day.js conversion and validation support for mobx-binder",
+    "main": "./lib/index.js",
+    "scripts": {
+        "clean": "rm -Rf lib",
+        "clean:all": "rm -Rf lib .nyc-output coverage node_modules",
+        "build": "tsc",
+        "lint": "eslint --max-warnings 0 'src/**/*.ts*'",
+        "lint:fix": "npm run lint -- --fix",
+        "test": "_mocha 'src/**/*Spec.ts'",
+        "coverage": "npm run coverage:run && npm run coverage:check",
+        "coverage:run": "nyc npm test",
+        "coverage:check": "nyc check-coverage --statements 98 --branches 99 --functions 94 --lines 99",
+        "verify": "npm run build && npm run lint && npm run test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/metro-nom/mobx-binder.git"
+    },
+    "keywords": [
+        "mobx",
+        "react",
+        "forms"
+    ],
+    "author": "Carsten Rohrbach <carsten.rohrbach@codecentric.de>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/metro-nom/mobx-binder/issues"
+    },
+    "homepage": "https://github.com/metro-nom/mobx-binder#readme",
+    "dependencies": {
+        "mobx-binder": "^0.4.0",
+        "dayjs": "^1.9.0"
+    },
+    "devDependencies": {
+        "@istanbuljs/nyc-config-typescript": "^0.1.3",
+        "@types/chai": "^4.1.7",
+        "@types/chai-as-promised": "^7.1.0",
+        "@types/data-driven": "0.0.30",
+        "@types/mocha": "^5.2.6",
+        "@types/sinon": "^5.0.2",
+        "@types/sinon-chai": "^3.2.0",
+        "chai": "^4.2.0",
+        "chai-as-promised": "^7.1.1",
+        "data-driven": "^1.4.0",
+        "mocha": "^6.0.1",
+        "nyc": "^14.1.1",
+        "sinon": "^6.3.4",
+        "sinon-chai": "^3.2.0",
+        "source-map-support": "^0.5.12",
+        "ts-node": "^7.0.1",
+        "tslint": "^5.12.1",
+        "tslint-no-circular-imports": "^0.6.2",
+        "typescript": "^4.0.2"
+    },
+    "gitHead": "29f34a6aff98c342fc2a5cff826479f20fb2f57f"
+}

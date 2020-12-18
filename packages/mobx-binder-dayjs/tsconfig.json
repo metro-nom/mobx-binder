@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": true,
+        "outDir": "./lib",
+        "strict": true,
+        "noImplicitReturns": false,
+        "noUnusedLocals": true,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "lib": [
+            "es2018", "esnext", "dom"
+        ]
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}

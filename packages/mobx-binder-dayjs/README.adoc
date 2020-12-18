@@ -1,0 +1,38 @@
+= mobx-binder-dayjs
+
+Converters and validators for https://day.js.org[Day.js] to integrate with the DefaultBinder of link:../..[mobx-binder].
+
+== Prerequisites
+
+The module needs the https://day.js.org/docs/en/plugin/custom-parse-format[customParseFormat] dayjs plugin to be installed
+
+[source,js]
+----
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+dayjs.extend(customParseFormat)
+----
+
+== Conversion
+
+The Day.js converter takes a https://day.js.org/docs/en/parse/string-format[format string] and converts displayed strings to Dayjs instances and vice versa.
+
+If parsing fails, the validation fails with `conversions.error.dayjs` message key.
+
+== Validation
+
+Validators for Dayjs values have to be added to the binding chain after the converter.
+
+.Example
+[source,js]
+----
+import { DayjsConverter, DayjsValidators } from 'mobx-binder-dayjs'
+...
+binder.forField(fullName)
+    .isRequired()
+    .withConverter(new DayjsConverter('DD.MM.YYYY'))
+    .withValidator(DayjsValidators.dayInPast())
+    .bind()
+----
+
+Please check for supported validators and default error message keys link:src/validation/DayjsValidators.ts[here].

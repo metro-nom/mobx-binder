@@ -1,0 +1,8 @@
+*Spec.*
+*.map
+/*
+!LICENSE
+!lib/
+lib/test/
+.nyc_output
+coverage
