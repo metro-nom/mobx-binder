@@ -17,6 +17,6 @@
     "sample": "lerna run start"
   },
   "devDependencies": {
-    "lerna": "^3.13.0"
+    "lerna": "^3.22.1"
   }
 }
