@@ -1,9 +1,10 @@
 import { action, computed, observable, runInAction } from 'mobx'
-import { Data, Modifier, SyncValueValidationResult, Validity, ValidValueValidationResult } from './Modifier'
+import { Data, Modifier, SyncValueValidationResult, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { AbstractModifier } from './AbstractModifier'
 import { AsyncConverter } from '../../../conversion/Converter'
 import { isValidationError } from '../../../conversion/ValidationError'
+import { Validity } from '../../../validation/Validity'
 
 type AsyncConversionInfo<ViewType, ModelType, ValidationResult> =
     | KnownConversionInfo<ViewType, ModelType, ValidationResult>

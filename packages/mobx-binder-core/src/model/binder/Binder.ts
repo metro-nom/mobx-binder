@@ -13,6 +13,7 @@ import { AsyncValidator, Validator } from '../../validation/Validator'
 import isEqual from 'lodash.isequal'
 import { isPromise } from '../../utils/isPromise'
 import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
+import { Validity } from '../../validation/Validity'
 
 /**
  * API for single field binding
@@ -20,6 +21,11 @@ import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
 export interface Binding<FieldType, ValidationResult> {
     changed: boolean
     readonly field: FieldStore<FieldType>
+
+    /**
+     * The validation status of the current binding.
+     */
+    readonly validity: Validity<ValidationResult>
 
     /**
      * Load the field value from the source object, treating it as "unchanged" value.
@@ -48,12 +54,6 @@ export interface Binding<FieldType, ValidationResult> {
      * @param target
      */
     store(target: any): void
-
-    /**
-     * Perform synchronous validation
-     * @deprecated triggers nothing as validity is pure computed state now
-     */
-    validate(): ValidationResult
 
     /**
      * Trigger asynchronous validation. onBlur indicates the current event - the binding then decides if a validation takes place or not.
@@ -112,7 +112,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     @computed
-    get validity() {
+    get validity(): Validity<ValidationResult> {
         return this.chain.validity
     }
 
@@ -144,10 +144,6 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             return someResult.then(data => this.toErrorMessage(data.valid ? this.context.validResult : data.result))
         }
         return this.toErrorMessage(someResult.valid ? this.context.validResult : someResult.result)
-    }
-
-    public validate(): ValidationResult {
-        return this.validity.status === 'validated' ? this.validity.result : this.context.validResult
     }
 
     @action

@@ -2,13 +2,15 @@
     "extends": "@istanbuljs/nyc-config-typescript",
     "all": true,
     "reporter": [
-        "lcov",
+        "html",
         "text"
     ],
     "include": [
         "src/**/*.ts"
     ],
     "exclude": [
+        "src/index.ts",
+        "src/validation/Validator.ts",
         "src/**/*Spec.ts",
         "src/test/**/*.ts"
     ]

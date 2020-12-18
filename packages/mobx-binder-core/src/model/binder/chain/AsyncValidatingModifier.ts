@@ -1,8 +1,9 @@
 import { action, computed, observable, runInAction } from 'mobx'
-import { Data, InvalidValueValidationResult, Modifier, SyncValueValidationResult, Validity, ValidValueValidationResult } from './Modifier'
+import { Data, InvalidValueValidationResult, Modifier, SyncValueValidationResult, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { AsyncValidator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
+import { Validity } from '../../../validation/Validity'
 
 type AsyncValidationInfo<ValueType, ValidationResult> =
     | KnownValidationInfo<ValueType, ValidationResult>

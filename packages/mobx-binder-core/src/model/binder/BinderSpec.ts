@@ -1,11 +1,10 @@
-import { expect } from 'chai'
-import { FieldStore } from '../fields/FieldStore'
-import { TextField } from '../fields/TextField'
-import sinon from 'sinon'
-import sleep from '../../test/sleep'
-import { ErrorMessage, SimpleBinder } from './SimpleBinder'
+import { FieldStore, TextField, ToggleField, Validator, ErrorMessage, SimpleBinder } from '../..'
 import { action, observable } from 'mobx'
-import { Validator } from '../../validation/Validator'
+
+import { expect } from 'chai'
+import sinon from 'sinon'
+
+import sleep from '../../test/sleep'
 import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
 import { ComplexField } from '../../test/ComplexField'
 import { SimpleAsyncNumberConverter } from '../../test/SimpleAsyncNumberConverter'
@@ -20,11 +19,13 @@ describe('Binder', () => {
 
     let myField: FieldStore<string>
     let secondField: FieldStore<string>
+    let toggleField: ToggleField
 
     beforeEach(
         action(() => {
             myField = new TextField('myField')
             secondField = new TextField('secondField')
+            toggleField = new ToggleField('toggleField')
         }),
     )
 
@@ -172,28 +173,72 @@ describe('Binder', () => {
                 expect(binder.store()).to.deep.equal({ someKey: 'changedValue' })
             })
 
-            it('should mark field as readonly if no storage function is given', () => {
-                new SimpleBinder().forField(myField).bind2(() => '')
+            describe('readonly', () => {
+                it('should mark field as readonly if no storage function is given', () => {
+                    new SimpleBinder().forField(myField).bind2(() => '')
 
-                expect(myField.readOnly).to.be.true
+                    expect(myField.readOnly).to.be.true
+                })
+
+                it('should allow marking a field as readonly', () => {
+                    new SimpleBinder()
+                        .forField(myField)
+                        .isReadOnly()
+                        .bind()
+                    expect(myField.readOnly).to.be.true
+                })
+
+                it('should not store readonly fields', () => {
+                    const binder = new SimpleBinder()
+                        .forField(myField)
+                        .isReadOnly()
+                        .bind()
+                    myField.updateValue('12345')
+
+                    expect(binder.store()).to.deep.equal({})
+                })
             })
 
-            it('should allow marking a field as readonly', () => {
-                new SimpleBinder()
-                    .forField(myField)
-                    .isReadOnly()
-                    .bind()
-                expect(myField.readOnly).to.be.true
-            })
+            describe('empty strings', () => {
+                it('should store empty field values as empty strings by default', () => {
+                    const binder = new SimpleBinder().forField(myField).bind()
+                    const target = binder.store()
 
-            it('should not store readonly fields', () => {
-                const binder = new SimpleBinder()
-                    .forField(myField)
-                    .isReadOnly()
-                    .bind()
-                myField.updateValue('12345')
+                    expect(target).to.deep.equal({
+                        myField: '',
+                    })
+                })
 
-                expect(binder.store()).to.deep.equal({})
+                it('should support storing empty strings as undefined', () => {
+                    const binder = new SimpleBinder()
+                        .forField(myField)
+                        .withStringOrUndefined()
+                        .bind()
+                    const target = binder.store()
+
+                    expect(target).to.deep.equal({
+                        myField: undefined,
+                    })
+                })
+
+                it('should support storing empty strings as arbitrary values', () => {
+                    const binder = new SimpleBinder()
+                        .forField(myField)
+                        .withEmptyString('[empty]')
+                        .bind()
+                    const target = binder.store()
+
+                    expect(target).to.deep.equal({
+                        myField: '[empty]',
+                    })
+                })
+
+                it('should not allow calls to withEmptyString for non-string fields', () => {
+                    expect(() => new SimpleBinder().forField(toggleField).withEmptyString(undefined)).to.throw('This is not a field of type string')
+                })
+                it('should not allow calls to withStringOrUndefined for non-string fields', () => {
+                    expect(() => new SimpleBinder().forField(toggleField).withStringOrUndefined()).to.throw('This is not a field of type string')
+                })
             })
         })
     })
@@ -244,7 +289,12 @@ describe('Binder', () => {
 
         it('should expose the initial validity of a field during binding', () => {
             expect(myField.valid).to.be.false
-            expect(myField.errorMessage).to.be.ok
+            expect(myField.errorMessage).to.equal('Please enter a value')
+
+            expect(binder.binding(myField).validity).to.deep.equal({
+                status: 'validated',
+                result: 'Please enter a value',
+            })
         })
 
         it('should mark fields without validators as valid', () => {
@@ -252,6 +302,11 @@ describe('Binder', () => {
 
             expect(myField.valid).to.be.true
             expect(myField.errorMessage).to.be.undefined
+
+            expect(binder.binding(myField).validity).to.deep.equal({
+                status: 'validated',
+                result: undefined /* only for simple ValidationResult */,
+            })
         })
 
         it('should update of single field when loaded', () => {
@@ -284,7 +339,7 @@ describe('Binder', () => {
             expect(myField.errorMessage).to.equal('custom message')
         })
 
-        it('should return positive validation results on validate()', () => {
+        it('should return positive validation results', () => {
             myField.updateValue('12345')
             expect(myField.errorMessage).to.be.undefined
         })
@@ -355,6 +410,10 @@ describe('Binder', () => {
                 .withAsyncValidator(validator)
                 .bind()
             expect(myField.valid).to.be.undefined
+
+            expect(binder.binding(myField).validity).to.deep.equal({
+                status: 'unknown',
+            })
         })
 
         it('should not trigger asynchronous validators on change or blur by default', () => {
@@ -368,6 +427,9 @@ describe('Binder', () => {
             myField.handleBlur()
 
             expect(validator).to.not.have.been.called
+            expect(binder.binding(myField).validity).to.deep.equal({
+                status: 'unknown',
+            })
         })
 
         it('should trigger asynchronous validators on submit', () => {
@@ -397,6 +459,11 @@ describe('Binder', () => {
             return binder.submit().should.be.rejected.then(() => {
                 expect(myField.valid).to.be.false
                 expect(myField.errorMessage).to.equal('my async error')
+
+                expect(binder.binding(myField).validity).to.deep.equal({
+                    status: 'validated',
+                    result: 'my async error',
+                })
             })
         })
 
@@ -496,8 +563,12 @@ describe('Binder', () => {
 
             expect(binder.valid).to.be.undefined
             expect(binder.validating).to.be.true
+
             expect(myField.validating).to.be.true
             expect(myField.valid).to.be.undefined
+            expect(binder.binding(myField).validity).to.deep.equal({
+                status: 'validating',
+            })
             expect(validator).to.have.been.calledOnce
 
             // after change and synchronous error
@@ -506,6 +577,10 @@ describe('Binder', () => {
             expect(myField.validating).to.be.false
             expect(myField.valid).to.be.false
             expect(myField.errorMessage).to.equal('Please enter a value')
+            expect(binder.binding(myField).validity).to.deep.equal({
+                status: 'validated',
+                result: 'Please enter a value',
+            })
 
             // there shoul
             await sleep(15)
@@ -600,6 +675,9 @@ describe('Binder', () => {
                 .withAsyncConverter(converter)
                 .bind()
             expect(myField.valid).to.be.undefined
+            expect(binder.binding(myField).validity).to.deep.equal({
+                status: 'unknown',
+            })
         })
 
         it('should not trigger asynchronous validators on change or blur by default', () => {

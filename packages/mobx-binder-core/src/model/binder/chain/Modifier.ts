@@ -1,4 +1,5 @@
 import { FieldStore } from '../../fields/FieldStore'
+import { Validity } from '../../../validation/Validity'
 
 export type Data<ValueType> = KnownData<ValueType> | UnknownData<ValueType>
 
@@ -10,18 +11,6 @@ export interface KnownData<ValueType> {
 export interface UnknownData<ValueType> {
     pending: true
     value?: ValueType
-}
-
-export type Validity<ValidationResult> = KnownValidity<ValidationResult> | UnknownValidity<ValidationResult>
-
-export interface UnknownValidity<ValidationResult> {
-    status: 'unknown' | 'validating'
-    result?: ValidationResult
-}
-
-export interface KnownValidity<ValidationResult> {
-    status: 'validated'
-    result: ValidationResult
 }
 
 export type SyncValueValidationResult<ViewType, ValidationResult> = ValidValueValidationResult<ViewType> | InvalidValueValidationResult<ValidationResult>

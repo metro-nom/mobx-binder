@@ -1,7 +1,7 @@
-import { Data, Modifier, Validity, ValidValueValidationResult, ValueValidationResult } from './Modifier'
+import { Data, Modifier, ValidValueValidationResult, ValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { isPromise } from '../../../utils/isPromise'
-import { FieldStore } from '../../..'
+import { FieldStore, Validity } from '../../..'
 
 export class AbstractModifier<ValidationResult, ViewType, ModelType> implements Modifier<ValidationResult, ViewType, ModelType> {
     public field: FieldStore<unknown>

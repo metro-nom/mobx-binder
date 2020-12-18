@@ -1,7 +1,8 @@
-import { Data, Modifier, Validity, ValidValueValidationResult, ValueValidationResult } from './Modifier'
+import { Data, Modifier, ValidValueValidationResult, ValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { Validator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
+import { Validity } from '../../../validation/Validity'
 
 export class ValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     constructor(

@@ -1,8 +1,9 @@
-import { Data, Modifier, Validity, ValidValueValidationResult, ValueValidationResult } from './Modifier'
+import { Data, Modifier, ValidValueValidationResult, ValueValidationResult } from './Modifier'
 import { Converter } from '../../../conversion/Converter'
 import { Context } from '../Context'
 import { AbstractModifier } from './AbstractModifier'
 import { isValidationError } from '../../../conversion/ValidationError'
+import { Validity } from '../../../validation/Validity'
 
 export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends AbstractModifier<ValidationResult, ViewType, ModelType> {
     constructor(

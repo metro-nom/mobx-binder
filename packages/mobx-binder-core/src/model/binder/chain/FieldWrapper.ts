@@ -1,6 +1,7 @@
-import { KnownData, Modifier, Validity, ValidValueValidationResult } from './Modifier'
+import { KnownData, Modifier, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { FieldStore } from '../../fields/FieldStore'
+import { Validity } from '../../../validation/Validity'
 
 export class FieldWrapper<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
     constructor(public field: FieldStore<ValueType>, private context: Context<ValidationResult>) {}

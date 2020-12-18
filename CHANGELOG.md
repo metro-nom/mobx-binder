@@ -1,5 +1,10 @@
 # Changelog (breaking changes)
 
+## [0.5.0] - 2020-12-18
+
+* Remove the deprecated and non-validating `Binding.validate()` - the computed property `validationResult` now gives synchronous access to the `ValidationResult`
+* Various updates to the sample implementation
+
 ## [0.4.0] - 2019-10-11
 
 * Removing automatism of converting empty strings to `undefined`. Instead, one can use `binder.forField().withStringOrUndefined()` or simply `binder.forStringField()` to configure the same behaviour explicitly. 
