@@ -271,7 +271,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
 
     /**
      * Add an asynchronous validator to the binding chain. Async validations happen on submit and - if configured via the options parameter - also on blur.
-     * @param asyncValidator
+     * @param asyncConverter
      * @param options
      */
     @action
@@ -473,7 +473,7 @@ export class Binder<ValidationResult> {
      * The global form validation status.
      * - `true`: all async validations are done and all fields are valid
      * - `false`: any sync or async validation failed
-     * - `undefined`: all sync validations are successfull, async validations are not yet performed
+     * - `undefined`: all sync validations are successful, async validations are not yet performed
      */
     @computed
     public get valid(): boolean | undefined {

@@ -474,7 +474,7 @@ describe('Binder', () => {
                 (value: string) =>
                     new Promise(resolve => {
                         setTimeout(() => {
-                            value !== 'async fail' ? resolve() : resolve('async fail')
+                            value !== 'async fail' ? resolve(undefined) : resolve('async fail')
                         }, 20)
                     }),
             )

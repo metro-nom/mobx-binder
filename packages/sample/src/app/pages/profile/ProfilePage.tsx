@@ -1,112 +1,87 @@
 import React, { useEffect } from 'react'
+import { FieldStore } from 'mobx-binder'
 import { Button, Col, Form, Row } from 'reactstrap'
-import FormField from '../../forms/FormField'
-import FieldInfo from '../../forms/FieldInfo'
+import { FormField } from '../../forms/FormField'
+import { FieldInfo } from '../../forms/FieldInfo'
 import { useStores } from '../../../stores'
-import { useObserver } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite'
+import { bool } from '../../utils/bool'
 
-export default function ProfilePage() {
+const FieldRow = ({ field }: { field: FieldStore<any> }) => (
+    <Row>
+        <Col>
+            <FormField field={field} />
+        </Col>
+        <Col>
+            <FieldInfo field={field} />
+        </Col>
+    </Row>
+)
+
+const StoredPersonProperties = observer(() => {
+    const { personStore } = useStores()
+
+    return (
+        <p>
+            <strong>salutation</strong>: {personStore.salutation}
+            <br />
+            <strong>fullName</strong>: {personStore.fullName}
+            <br />
+            <strong>dateOfBirth</strong>: {personStore.dateOfBirth.format()}
+            <br />
+            <strong>email</strong>: {personStore.email}
+            <br />
+            <strong>phoneNumber</strong>: {personStore.phoneNumber}
+            <br />
+            <strong>toggle</strong>: {bool(personStore.toggle)}
+            <br />
+        </p>
+    )
+})
+
+export const ProfilePage = observer(() => {
     const {
         i18n: { translate: t },
-        personStore,
-        profileStore,
+        profileStore: { binder, dateOfBirth, email, fullName, onEnter, onSubmit, phoneNumber, toggle },
     } = useStores()
+    const { changed, validating, valid, submitting } = binder
 
     useEffect(() => {
-        profileStore.onEnter()
+        onEnter()
     }, [])
 
-    return useObserver(() => {
-        const { changed, validating, valid, submitting } = profileStore.binder
-        const bool = (it?: boolean) => (it === undefined ? 'undefined' : it ? 'true' : 'false')
+    return (
+        <div className='profile-page'>
+            <h1>Your profile</h1>
 
-        return (
-            <div className='profile-page'>
-                <h1>Your profile</h1>
-
-                <Form>
-                    <Row>
-                        <Col>
-                            <FormField field={profileStore.fullName} />
-                        </Col>
-                        <Col>
-                            <FieldInfo field={profileStore.fullName} />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <FormField field={profileStore.dateOfBirth} />
-                        </Col>
-                        <Col>
-                            <FieldInfo field={profileStore.dateOfBirth} />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <FormField field={profileStore.phoneNumber} />
-                        </Col>
-                        <Col>
-                            <FieldInfo field={profileStore.phoneNumber} />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <FormField field={profileStore.email} />
-                        </Col>
-                        <Col>
-                            <FieldInfo field={profileStore.email} />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <FormField field={profileStore.toggle} />
-                        </Col>
-                        <Col>
-                            <FieldInfo field={profileStore.toggle} />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <Button
-                                name='save'
-                                kind='primary'
-                                active={profileStore.binder.submitting}
-                                disabled={!profileStore.binder.changed || profileStore.binder.valid === false}
-                                onClick={profileStore.onSubmit}
-                            >
-                                {t('profilePage.saveButton.label')}
-                            </Button>
-                        </Col>
-                        <Col>
-                            <p>
-                                <strong>changed</strong>: {bool(changed)}
-                                <br />
-                                <strong>validating</strong>: {bool(validating)}
-                                <br />
-                                <strong>valid</strong>: {bool(valid)}
-                                <br />
-                                <strong>submitting</strong>: {bool(submitting)}
-                                <br />
-                            </p>
-                        </Col>
-                    </Row>
-                    <h3>Persisted values</h3>
-                    <p>
-                        <strong>salutation</strong>: {personStore.salutation}
-                        <br />
-                        <strong>fullName</strong>: {personStore.fullName}
-                        <br />
-                        <strong>dateOfBirth</strong>: {personStore.dateOfBirth.format()}
-                        <br />
-                        <strong>email</strong>: {personStore.email}
-                        <br />
-                        <strong>phoneNumber</strong>: {personStore.phoneNumber}
-                        <br />
-                        <strong>toggle</strong>: {bool(personStore.toggle)}
-                        <br />
-                    </p>
-                </Form>
-            </div>
-        )
-    })
-}
+            <Form>
+                <FieldRow field={fullName} />
+                <FieldRow field={dateOfBirth} />
+                <FieldRow field={phoneNumber} />
+                <FieldRow field={email} />
+                <FieldRow field={toggle} />
+                <Row>
+                    <Col>
+                        <Button name='save' kind='primary' active={submitting} disabled={!changed || valid === false} onClick={onSubmit}>
+                            {t('profilePage.saveButton.label')}
+                        </Button>
+                    </Col>
+                    <Col>
+                        <p>
+                            <strong>changed</strong>: {bool(changed)}
+                            <br />
+                            <strong>validating</strong>: {bool(validating)}
+                            <br />
+                            <strong>valid</strong>: {bool(valid)}
+                            <br />
+                            <strong>submitting</strong>: {bool(submitting)}
+                            <br />
+                        </p>
+                    </Col>
+                </Row>
+                <h3>Persisted values</h3>
+                <StoredPersonProperties />
+            </Form>
+        </div>
+    )
+})

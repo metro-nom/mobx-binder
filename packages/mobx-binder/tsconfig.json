@@ -6,6 +6,7 @@
         "declaration": true,
         "outDir": "./lib",
         "strict": true,
+        "noImplicitReturns": false,
         "noUnusedLocals": true,
         "experimentalDecorators": true,
         "esModuleInterop": true,
