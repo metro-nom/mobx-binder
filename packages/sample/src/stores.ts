@@ -7,6 +7,7 @@ import * as React from 'react'
 // enable MobX strict mode
 configure({ enforceActions: 'observed' })
 
+// prepare MobX stores
 const i18n = new I18nStore('en', {
     en: {
         'form.fields.fullName': 'Full name',
@@ -21,13 +22,13 @@ const i18n = new I18nStore('en', {
         'conversions.error.moment': 'Please enter a valid date',
     },
 })
-
-// prepare MobX stores
 const personStore = new PersonStore()
 const profileStore = new ProfileStore(personStore, i18n.translate)
 
 export const stores = { i18n, personStore, profileStore }
 
-export const I18nContext = React.createContext(i18n)
-export const PersonContext = React.createContext(personStore)
-export const ProfileContext = React.createContext(profileStore)
+const StoresContext = React.createContext(stores)
+
+// Expose stores
+export const StoresProvider = StoresContext.Provider
+export const useStores = () => React.useContext(StoresContext)

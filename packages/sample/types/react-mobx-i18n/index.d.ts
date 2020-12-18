@@ -1,8 +1,6 @@
 declare module 'react-mobx-i18n' {
-    import { IReactComponent } from 'mobx-react'
-
     namespace Main {
-        export function translatable<T extends IReactComponent>(target: T): T
+        export function translatable<T extends React.Component<any, any, any>>(target: T): T
 
         export function init(
             cb: () => void,

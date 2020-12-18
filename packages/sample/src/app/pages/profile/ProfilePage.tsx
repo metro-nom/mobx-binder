@@ -1,21 +1,23 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Button, Col, Form, Row } from 'reactstrap'
 import FormField from '../../forms/FormField'
 import FieldInfo from '../../forms/FieldInfo'
-import { I18nContext, PersonContext, ProfileContext } from '../../../stores'
+import { useStores } from '../../../stores'
 import { useObserver } from 'mobx-react-lite'
 
 export default function ProfilePage() {
-    const { translate: t } = useContext(I18nContext)
-    const person = useContext(PersonContext)
-    const profile = useContext(ProfileContext)
+    const {
+        i18n: { translate: t },
+        personStore,
+        profileStore,
+    } = useStores()
 
     useEffect(() => {
-        profile.onEnter()
+        profileStore.onEnter()
     }, [])
 
     return useObserver(() => {
-        const { changed, validating, valid, submitting } = profile.binder
+        const { changed, validating, valid, submitting } = profileStore.binder
         const bool = (it?: boolean) => (it === undefined ? 'undefined' : it ? 'true' : 'false')
 
         return (
@@ -25,42 +27,42 @@ export default function ProfilePage() {
                 <Form>
                     <Row>
                         <Col>
-                            <FormField field={profile.fullName} />
+                            <FormField field={profileStore.fullName} />
                         </Col>
                         <Col>
-                            <FieldInfo field={profile.fullName} />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <FormField field={profile.dateOfBirth} />
-                        </Col>
-                        <Col>
-                            <FieldInfo field={profile.dateOfBirth} />
+                            <FieldInfo field={profileStore.fullName} />
                         </Col>
                     </Row>
                     <Row>
                         <Col>
-                            <FormField field={profile.phoneNumber} />
+                            <FormField field={profileStore.dateOfBirth} />
                         </Col>
                         <Col>
-                            <FieldInfo field={profile.phoneNumber} />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <FormField field={profile.email} />
-                        </Col>
-                        <Col>
-                            <FieldInfo field={profile.email} />
+                            <FieldInfo field={profileStore.dateOfBirth} />
                         </Col>
                     </Row>
                     <Row>
                         <Col>
-                            <FormField field={profile.toggle} />
+                            <FormField field={profileStore.phoneNumber} />
                         </Col>
                         <Col>
-                            <FieldInfo field={profile.toggle} />
+                            <FieldInfo field={profileStore.phoneNumber} />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <FormField field={profileStore.email} />
+                        </Col>
+                        <Col>
+                            <FieldInfo field={profileStore.email} />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <FormField field={profileStore.toggle} />
+                        </Col>
+                        <Col>
+                            <FieldInfo field={profileStore.toggle} />
                         </Col>
                     </Row>
                     <Row>
@@ -68,9 +70,9 @@ export default function ProfilePage() {
                             <Button
                                 name='save'
                                 kind='primary'
-                                active={profile.binder.submitting}
-                                disabled={!profile.binder.changed || profile.binder.valid === false}
-                                onClick={profile.onSubmit}
+                                active={profileStore.binder.submitting}
+                                disabled={!profileStore.binder.changed || profileStore.binder.valid === false}
+                                onClick={profileStore.onSubmit}
                             >
                                 {t('profilePage.saveButton.label')}
                             </Button>
@@ -90,17 +92,17 @@ export default function ProfilePage() {
                     </Row>
                     <h3>Persisted values</h3>
                     <p>
-                        <strong>salutation</strong>: {person.salutation}
+                        <strong>salutation</strong>: {personStore.salutation}
                         <br />
-                        <strong>fullName</strong>: {person.fullName}
+                        <strong>fullName</strong>: {personStore.fullName}
                         <br />
-                        <strong>dateOfBirth</strong>: {person.dateOfBirth.format()}
+                        <strong>dateOfBirth</strong>: {personStore.dateOfBirth.format()}
                         <br />
-                        <strong>email</strong>: {person.email}
+                        <strong>email</strong>: {personStore.email}
                         <br />
-                        <strong>phoneNumber</strong>: {person.phoneNumber}
+                        <strong>phoneNumber</strong>: {personStore.phoneNumber}
                         <br />
-                        <strong>toggle</strong>: {bool(person.toggle)}
+                        <strong>toggle</strong>: {bool(personStore.toggle)}
                         <br />
                     </p>
                 </Form>

@@ -1,15 +1,17 @@
 import { FormFeedback, FormGroup, Input, Label } from 'reactstrap'
 import { FieldStore } from 'mobx-binder'
-import React, { useContext } from 'react'
-import { I18nContext } from '../../stores'
+import React from 'react'
 import { useObserver } from 'mobx-react-lite'
+import { useStores } from '../../stores'
 
 export interface FormFieldProps {
     field: FieldStore<any>
 }
 
 export default function FormField({ field }: FormFieldProps) {
-    const { translate: t } = useContext(I18nContext)
+    const {
+        i18n: { translate: t },
+    } = useStores()
 
     const handleBlur = () => {
         field.handleBlur()
