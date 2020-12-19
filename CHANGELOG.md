@@ -2,8 +2,9 @@
 
 ## [0.5.0] - 2020-12-18
 
-* Remove the deprecated and non-validating `Binding.validate()` - the computed property `validationResult` now gives synchronous access to the `ValidationResult`
-* Various updates to the sample implementation
+* Remove the deprecated and non-validating `Binding.validate()` - the computed property `validaty` now gives synchronous access to the validation status and result
+* New module `mobx-binder-dayjs` with validation and conversion support comparable to that of `mobx-binder-moment`.
+* Various updates to the sample implementation code
 
 ## [0.4.0] - 2019-10-11
 
