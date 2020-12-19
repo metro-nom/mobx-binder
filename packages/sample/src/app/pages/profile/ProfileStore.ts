@@ -8,6 +8,7 @@ import PersonStore from '../../domain/PersonStore'
 import { TranslateFunction } from 'react-mobx-i18n'
 import { AsyncPhoneNumberConverter } from 'app/domain/AsyncPhoneNumberConverter'
 import sleep from 'app/domain/sleep'
+import { DayjsConverter } from 'mobx-binder-dayjs'
 
 const trimConverter = new TrimConverter()
 
@@ -15,6 +16,7 @@ export default class ProfileStore {
     public salutation = new TextField('salutation')
     public fullName = new TextField('fullName')
     public dateOfBirth = new TextField('dateOfBirth')
+    public anotherDate = new TextField('anotherDate')
     public email = new TextField('email')
     public phoneNumber = new TextField('phoneNumber')
     public toggle = new ToggleField('toggle')
@@ -35,6 +37,10 @@ export default class ProfileStore {
             .forStringField(this.dateOfBirth)
             .withConverter(trimConverter)
             .withConverter(new MomentConverter('DD.MM.YYYY'))
+            .bind()
+            .forStringField(this.anotherDate)
+            .withConverter(trimConverter)
+            .withConverter(new DayjsConverter('DD.MM.YYYY', undefined, true))
             .bind()
 
             .forStringField(this.email)

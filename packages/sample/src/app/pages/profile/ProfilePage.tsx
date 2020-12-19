@@ -29,6 +29,8 @@ const StoredPersonProperties = observer(() => {
             <br />
             <strong>dateOfBirth</strong>: {personStore.dateOfBirth.format()}
             <br />
+            <strong>anotherDate</strong>: {personStore.anotherDate.format()}
+            <br />
             <strong>email</strong>: {personStore.email}
             <br />
             <strong>phoneNumber</strong>: {personStore.phoneNumber}
@@ -42,7 +44,7 @@ const StoredPersonProperties = observer(() => {
 export const ProfilePage = observer(() => {
     const {
         i18n: { translate: t },
-        profileStore: { binder, dateOfBirth, email, fullName, onEnter, onSubmit, phoneNumber, toggle },
+        profileStore: { binder, dateOfBirth, anotherDate, email, fullName, onEnter, onSubmit, phoneNumber, toggle },
     } = useStores()
     const { changed, validating, valid, submitting } = binder
 
@@ -57,6 +59,7 @@ export const ProfilePage = observer(() => {
             <Form>
                 <FieldRow field={fullName} />
                 <FieldRow field={dateOfBirth} />
+                <FieldRow field={anotherDate} />
                 <FieldRow field={phoneNumber} />
                 <FieldRow field={email} />
                 <FieldRow field={toggle} />
