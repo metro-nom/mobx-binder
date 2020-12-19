@@ -8,6 +8,17 @@ The API roughly reflects the great https://vaadin.com/docs/v10/flow/binding-data
 
 It is written in https://www.typescriptlang.org/[TypeScript] and has first class support for TypeScript code, but should also work in _ES 5_+ environments.
 
+.Features
+* Built for https://reactjs.org[React]
+* Widget framework agnostic
+** Example implementation for https://reactstrap.github.io[reactstrap] in the sample app
+* Supports MobX 4.x and 5.x (6.x is planned for 1.x)
+* Chaining Concept for validations and conversions
+* Localization support for error messages
+* Async field validation and conversion
+** Validators and converters for https://momentjs.com[Moment.js] and https://day.js.org[Day.js]
+* Promise based API
+
 toc::[]
 
 == Concept
