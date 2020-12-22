@@ -3,6 +3,7 @@ import { Context } from '../Context'
 import { Validator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
 import { Validity } from '../../../validation/Validity'
+import { isWrapper } from '../../../validation/WrappedValidator'
 
 export class ValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     constructor(
@@ -28,6 +29,10 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
         }
     }
 
+    get required() {
+        return isWrapper(this.validator) && this.validator.required ? this.validator.required() : this.view.required
+    }
+
     get validity() {
         return this.calculateValidity(this.view.validity)
     }
@@ -38,6 +43,8 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
 
     private calculateValidity(upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> {
         if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
+            return upstreamValidity
+        } else if (isWrapper(this.validator) && this.validator.required && !this.validator.required()) {
             return upstreamValidity
         } else {
             const data = this.view.data

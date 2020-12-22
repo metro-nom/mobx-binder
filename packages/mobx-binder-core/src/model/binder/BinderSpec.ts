@@ -361,6 +361,30 @@ describe('Binder', () => {
             expect(binder.valid).to.be.false
         })
 
+        describe('conditional required validation', () => {
+            let condition: any
+
+            beforeEach(() => {
+                condition = sinon.stub().returns(true)
+
+                binder = new SimpleBinder()
+                    .forField(myField)
+                    .isRequired('custom message', condition)
+                    .bind()
+            })
+
+            it('should return required property based on isRequired condition', () => {
+                expect(myField.required).to.be.true
+                expect(myField.valid).to.be.false
+                expect(myField.errorMessage).to.equal('custom message')
+
+                condition.returns(false)
+                expect(myField.required).to.be.false
+                expect(myField.valid).to.be.true
+                expect(myField.errorMessage).to.be.undefined
+            })
+        })
+
         describe('custom error message', () => {
             it('should allow setting a custom error message', () => {
                 myField.errorMessage = 'My custom error message'

@@ -3,6 +3,7 @@ import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
 import { ValidatingModifier } from './ValidatingModifier'
 import sinon = require('sinon')
+import { wrapRequiredValidator } from '../../../validation/WrappedValidator'
 
 describe('ValidatingModifier', () => {
     const sandbox = sinon.createSandbox()
@@ -19,6 +20,7 @@ describe('ValidatingModifier', () => {
                 pending: false,
                 value: 'myValue',
             },
+            required: false,
             validity: {
                 status: 'validated',
                 result: undefined,
@@ -61,6 +63,37 @@ describe('ValidatingModifier', () => {
         })
     })
 
+    describe('required', () => {
+        it('should return upstream required by default', () => {
+            expect(modifier.required).to.be.false
+        })
+
+        it('should mark a field as required if the RequiredValidator is active', () => {
+            modifier = new ValidatingModifier<ErrorMessage, string>(
+                upstream,
+                context,
+                wrapRequiredValidator(
+                    () => 'abc',
+                    () => true,
+                ),
+            )
+            expect(modifier.required).to.be.true
+        })
+
+        it('should not mark a field as required if the RequiredValidator is inactive', () => {
+            upstream.required = true
+            modifier = new ValidatingModifier<ErrorMessage, string>(
+                upstream,
+                context,
+                wrapRequiredValidator(
+                    () => 'abc',
+                    () => false,
+                ),
+            )
+            expect(modifier.required).to.be.false
+        })
+    })
+
     describe('validity', () => {
         it('should return upstream validity if still unknown', () => {
             upstream.validity = { status: 'unknown' }
@@ -88,6 +121,33 @@ describe('ValidatingModifier', () => {
         })
         it('should return non-pending error message if invalid', () => {
             validatorMock.withArgs('myValue').returns('fail')
+            expect(modifier.validity).to.deep.equal({
+                status: 'validated',
+                result: 'fail',
+            })
+        })
+        it('should not validate a field if the RequiredValidator is inactive', () => {
+            upstream.required = true
+            modifier = new ValidatingModifier<ErrorMessage, string>(
+                upstream,
+                context,
+                wrapRequiredValidator(
+                    () => 'fail',
+                    () => false,
+                ),
+            )
+            expect(modifier.validity).to.deep.equal({
+                status: 'validated',
+                result: undefined,
+            })
+        })
+        it('should handle missing required condition as trueish', () => {
+            upstream.required = false
+            modifier = new ValidatingModifier<ErrorMessage, string>(
+                upstream,
+                context,
+                wrapRequiredValidator(() => 'fail'),
+            )
             expect(modifier.validity).to.deep.equal({
                 status: 'validated',
                 result: 'fail',

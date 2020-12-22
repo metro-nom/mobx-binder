@@ -14,6 +14,7 @@ import isEqual from 'lodash.isequal'
 import { isPromise } from '../../utils/isPromise'
 import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
 import { Validity } from '../../validation/Validity'
+import { wrapRequiredValidator } from '../../validation/WrappedValidator'
 
 /**
  * API for single field binding
@@ -109,6 +110,11 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     @computed
     get model() {
         return this.chain.data
+    }
+
+    @computed
+    get required() {
+        return this.chain.required
     }
 
     @computed
@@ -208,6 +214,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     private observeField() {
         this.clearCustomErrorMessageOnValueChange()
         Object.defineProperty(this.field, 'valid', { get: () => this.valid })
+        Object.defineProperty(this.field, 'required', { get: () => this.required })
         Object.defineProperty(this.field, 'validating', { get: () => this.validating })
         Object.defineProperty(this.field, 'errorMessage', {
             get: () => this.errorMessage,
@@ -228,7 +235,6 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
 
 export class BindingBuilder<ValidationResult, ValueType, BinderType extends Binder<ValidationResult>> {
     private readOnly = false
-    private required = false
     private last: Modifier<ValidationResult, any, any>
 
     constructor(
@@ -311,9 +317,8 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
      * Add a "required" validator and mark the field as required.
      * @param messageKey
      */
-    public isRequired(messageKey?: string): BindingBuilder<ValidationResult, ValueType, BinderType> {
-        this.required = true
-        return this.withValidator(this.binder.context.requiredValidator(messageKey))
+    public isRequired(messageKey?: string, condition: () => boolean = () => true): BindingBuilder<ValidationResult, ValueType, BinderType> {
+        return this.withValidator(wrapRequiredValidator(this.binder.context.requiredValidator(messageKey), condition))
     }
 
     /**
@@ -348,7 +353,6 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
     @action
     public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void): BinderType {
         this.field.readOnly = this.readOnly || !write
-        this.field.required = this.required
 
         this.addBinding(new StandardBinding(this.binder.context, this.field, this.last, read, this.readOnly ? undefined : write))
         return this.binder

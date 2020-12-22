@@ -28,6 +28,10 @@ describe('FieldWrapper', () => {
         })
     })
 
+    it('should be always optional', () => {
+        expect(fieldWrapper.required).to.be.false
+    })
+
     it('should return validity as async result', async () => {
         expect(await fieldWrapper.validateAsync()).to.deep.equal({
             status: 'validated',

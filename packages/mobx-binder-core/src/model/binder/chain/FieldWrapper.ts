@@ -13,6 +13,10 @@ export class FieldWrapper<ValidationResult, ValueType> implements Modifier<Valid
         }
     }
 
+    get required() {
+        return false
+    }
+
     get validity(): Validity<ValidationResult> {
         return {
             status: 'validated',

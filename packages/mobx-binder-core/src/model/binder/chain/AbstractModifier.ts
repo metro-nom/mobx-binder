@@ -14,6 +14,10 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
         return (this.view.data as any) as Data<ModelType>
     }
 
+    get required() {
+        return this.view.required
+    }
+
     get validity() {
         return this.view.validity
     }

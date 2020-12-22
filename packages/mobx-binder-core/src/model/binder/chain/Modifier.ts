@@ -33,9 +33,12 @@ export interface Modifier<ValidationResult, ViewType, ModelType> {
     field: FieldStore<unknown>
     data: Data<ModelType>
     validity: Validity<ValidationResult>
+    required: boolean
     toView(modelValue: any): ViewType
     isEqual(first: ModelType, second: ModelType): boolean
     applyConversionsToField(): void
     validateValue(fieldValue: any): ValueValidationResult<ModelType, ValidationResult>
     validateAsync(onBlur: boolean): Promise<Validity<ValidationResult>>
 }
+
+// TextField <-> Entry(RequiredValidator, Condition) <-> Entry(Converter, Condition) <-> Entry(MomentValidator, Condition) <-> BindingBuilder
