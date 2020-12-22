@@ -41,6 +41,16 @@ describe('AbstractModifier', () => {
         })
     })
 
+    describe('required', () => {
+        it('should pass through the required status', () => {
+            upstream.required = true
+            expect(modifier.required).to.be.true
+
+            upstream.required = false
+            expect(modifier.required).to.be.false
+        })
+    })
+
     describe('validity', () => {
         it('should pass through any validity', () => {
             expect(modifier.validity).to.deep.equal({
