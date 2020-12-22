@@ -432,11 +432,9 @@ npm start
 .First merge master into the branch and check that the branch is running fine
 ----
 git merge master
-npm run reinitialize
-npm run build
-npm run lint
-npm run test
+npm run full-build
 ----
+
 
 .Merge the branch back into develop
 ----
