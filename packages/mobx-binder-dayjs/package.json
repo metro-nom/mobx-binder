@@ -1,6 +1,6 @@
 {
     "name": "mobx-binder-dayjs",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "description": "Day.js conversion and validation support for mobx-binder",
     "main": "./lib/index.js",
     "scripts": {
@@ -32,7 +32,7 @@
     "homepage": "https://github.com/metro-nom/mobx-binder#readme",
     "dependencies": {
         "dayjs": "^1.9.0",
-        "mobx-binder": "^0.6.0"
+        "mobx-binder": "^0.6.1"
     },
     "devDependencies": {
         "@istanbuljs/nyc-config-typescript": "^0.1.3",
