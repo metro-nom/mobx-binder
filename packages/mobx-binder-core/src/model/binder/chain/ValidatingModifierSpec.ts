@@ -47,6 +47,20 @@ describe('ValidatingModifier', () => {
                 value: 'myValue',
             })
         })
+        it('should pass through valid upstream data when the own validation is disabled', () => {
+            modifier = new ValidatingModifier<ErrorMessage, string>(
+                upstream,
+                context,
+                wrapRequiredValidator(
+                    () => 'abc',
+                    () => false,
+                ),
+            )
+            expect(modifier.data).to.deep.equal({
+                pending: false,
+                value: 'myValue',
+            })
+        })
         it('should pass through pending upstream data', () => {
             upstream.data = {
                 pending: true,

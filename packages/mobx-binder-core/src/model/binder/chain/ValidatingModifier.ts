@@ -4,6 +4,7 @@ import { Validator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
 import { Validity } from '../../../validation/Validity'
 import { isWrapper } from '../../../validation/WrappedValidator'
+import { computed } from 'mobx'
 
 export class ValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     constructor(
@@ -16,7 +17,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
 
     get data(): Data<ValueType> {
         const data = this.view.data
-        if (data.pending) {
+        if (data.pending || this.isDisabled) {
             return data
         } else {
             const result = this.validator(data.value)
@@ -37,6 +38,11 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
         return this.calculateValidity(this.view.validity)
     }
 
+    @computed
+    private get isDisabled() {
+        return isWrapper(this.validator) && this.validator.required && !this.validator.required()
+    }
+
     public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
         return this.calculateValidity(await this.view.validateAsync(blurEvent))
     }
@@ -44,7 +50,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     private calculateValidity(upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> {
         if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
             return upstreamValidity
-        } else if (isWrapper(this.validator) && this.validator.required && !this.validator.required()) {
+        } else if (this.isDisabled) {
             return upstreamValidity
         } else {
             const data = this.view.data

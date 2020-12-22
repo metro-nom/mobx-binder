@@ -1179,9 +1179,17 @@ describe('Binder', () => {
                 .bind()
                 .forField(secondField)
                 .isRequired(undefined, () => myField.value === 'A')
+                // needed to also test for data propagation correctness
+                .withValidator(value => (!!value && value.length > 5 ? 'error' : undefined))
                 .bind()
 
+            binder.load({
+                myField: 'B',
+                secondField: '',
+            })
+
             expect(secondField.required).to.be.false
+            expect(secondField.valid).to.be.true
 
             const requiredObserverStub = sinon.stub()
             const validObserverStub = sinon.stub()
@@ -1192,6 +1200,9 @@ describe('Binder', () => {
 
             expect(requiredObserverStub).to.have.been.calledWith(true)
             expect(validObserverStub).to.have.been.calledWith(false)
+
+            expect(secondField.required).to.be.true
+            expect(secondField.valid).to.be.false
         })
     })
 
