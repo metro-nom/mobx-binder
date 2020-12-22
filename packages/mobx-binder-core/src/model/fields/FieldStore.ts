@@ -60,6 +60,7 @@ export interface FieldStore<ValueType> {
 
     /**
      * Indicates if the field is a mandatory field.
+     * This property is replaced by a getter on bind.
      */
     required: boolean
 

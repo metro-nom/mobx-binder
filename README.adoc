@@ -227,6 +227,7 @@ Validations are processed in order of method calls - so in this example, it is f
 To see the list of already supported validations, take a look into the `mobx-binder/src/validation/` folder. You can also easily define your own custom validator, as long as it implements the `Validator` type.
 
 The `isRequired()` validation has the special side effect that the `required` property is set on the field, so that the rendering component can highlight it.
+Also, the `isRequired()` validation can be active or inactive based on a condition that can be passed as an optional argument.
 
 Only valid field values are written to an object via `binder.store()`.
 
@@ -253,7 +254,7 @@ Only field values where asynchronous validation has been successfully finished a
 
 === Conditional validation
 
-Sometimes, the validation of one field depends on the value of another field. In this case, we can trigger the validation via an `onChange` event handler of that other field.
+Sometimes, the validation of one field depends on the value of another field. Given the data used to evaluate the condition is observable, there is not much to do:
 
 [source,js]
 ----
@@ -262,13 +263,32 @@ public fullName = new TextField('fullName')
 
 binder
     .forStringField(salutation)
-        .onChange(() => binder.getBinding(fullName).validate()
+    .bind()
     .forField(fullName)
         .withValidator(someValidatorDependingOnValueOf(salutation))
     .bind()
 ----
 
-`onChange` events will only be fired if all validators specified before have been succeeding.
+In this example, changes to the value of the `salutation` field will automatically trigger a re-evaluation of the validity of the `fullName`.
+
+=== Change events
+
+Usually, to get aware of changes to field values, you might just want to observe them by yourself via the standard MobX mechanisms. But in some scenarios it might also be helpful to use the onChange() method.
+
+[source,js]
+----
+public salutation = new TextField('salutation') // <1>
+public fullName = new TextField('fullName')
+
+binder
+    .forStringField(salutation)
+    .isRequired()
+    .withConverter(new MomentConverter('DD.MM.YYYY'))
+    .onChange(moment => console.log(moment.format()))
+    .bind()
+----
+
+`onChange` events will only be fired if all validators specified before have been succeeding. It will pass a valid value of a type depending on the position of the `onChange()` call in the chain.
 
 === Conversion
 

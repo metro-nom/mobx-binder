@@ -1,5 +1,5 @@
-import { FieldStore, TextField, ToggleField, Validator, ErrorMessage, SimpleBinder } from '../..'
-import { action, observable } from 'mobx'
+import { ErrorMessage, FieldStore, SimpleBinder, TextField, ToggleField, Validator } from '../..'
+import { action, observable, reaction } from 'mobx'
 
 import { expect } from 'chai'
 import sinon from 'sinon'
@@ -1151,6 +1151,47 @@ describe('Binder', () => {
             expect(changeHandlerSpy).to.have.been.calledTwice
             expect(changeHandlerSpy).to.have.been.calledWith('oth')
             expect(changeHandlerSpy).to.have.been.calledWith('other')
+        })
+
+        it('should allow to grab intermediate results on Change', () => {
+            const changeHandlerSpy = sandbox.spy()
+
+            binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .withConverter(new SimpleNumberConverter())
+                .onChange(changeHandlerSpy)
+                .bind()
+            binder.load({ myField: 7 })
+
+            myField.updateValue('4')
+            myField.updateValue('wrong')
+            myField.updateValue('8')
+
+            expect(changeHandlerSpy).to.have.been.calledTwice
+            expect(changeHandlerSpy.firstCall.args[0]).to.equal(4)
+            expect(changeHandlerSpy.secondCall.args[0]).to.equal(8)
+        })
+
+        it('should support conditional validation without using onChange()', () => {
+            binder = new SimpleBinder()
+                .forField(myField)
+                .bind()
+                .forField(secondField)
+                .isRequired(undefined, () => myField.value === 'A')
+                .bind()
+
+            expect(secondField.required).to.be.false
+
+            const requiredObserverStub = sinon.stub()
+            const validObserverStub = sinon.stub()
+            reaction(() => secondField.required, requiredObserverStub)
+            reaction(() => secondField.valid, validObserverStub)
+
+            myField.updateValue('A')
+
+            expect(requiredObserverStub).to.have.been.calledWith(true)
+            expect(validObserverStub).to.have.been.calledWith(false)
         })
     })
 

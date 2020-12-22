@@ -315,7 +315,10 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
 
     /**
      * Add a "required" validator and mark the field as required.
+     *
      * @param messageKey
+     * @param condition the validation will only be applied if this method returns true.
+     *      Also the `required` FieldStore property will be dynamically set based on this.
      */
     public isRequired(messageKey?: string, condition: () => boolean = () => true): BindingBuilder<ValidationResult, ValueType, BinderType> {
         return this.withValidator(wrapRequiredValidator(this.binder.context.requiredValidator(messageKey), condition))
