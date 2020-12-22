@@ -1,5 +1,10 @@
 # Changelog (breaking changes)
 
+## [0.6.0] - 2020-12-22
+
+* Condition "required" status and validation using `isRequired(key, condition)`.
+* Some more docs incl. corrections about conditional validation.
+
 ## [0.5.0] - 2020-12-19
 
 * Remove the deprecated and non-validating `Binding.validate()` - the computed property `validaty` now gives synchronous access to the validation status and result
