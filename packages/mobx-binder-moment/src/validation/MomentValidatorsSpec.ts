@@ -88,4 +88,10 @@ describe('MomentValidators', () => {
             })
         },
     )
+
+    it('should validate "today" correctly', () => {
+        sandbox.restore()
+        expect(MomentValidators.todayOrInFuture()(moment())).to.deep.equal({})
+        expect(MomentValidators.todayOrInPast()(moment())).to.deep.equal({})
+    })
 })

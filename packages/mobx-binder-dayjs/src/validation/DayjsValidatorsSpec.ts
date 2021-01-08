@@ -88,4 +88,10 @@ describe('DayjsValidators', () => {
             })
         },
     )
+
+    it('should validate "today" correctly', () => {
+        sandbox.restore()
+        expect(DayjsValidators.todayOrInFuture()(dayjs())).to.deep.equal({})
+        expect(DayjsValidators.todayOrInPast()(dayjs())).to.deep.equal({})
+    })
 })
