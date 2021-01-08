@@ -2,7 +2,7 @@
 
 ## [1.0.0] - 2021-01-08
 
-* Upgrade to MobX 6
+* Upgrade to MobX 6 and removal of internal decorator usage
 
 ### Steps to migrate from mobx-binder 0.x / MobX 4/5
 

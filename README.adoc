@@ -12,7 +12,9 @@ It is written in https://www.typescriptlang.org/[TypeScript] and has first class
 * Built for https://reactjs.org[React]
 * Widget framework agnostic
 ** Example implementation for https://reactstrap.github.io[reactstrap] in the sample app
-* Supports MobX 4.x and 5.x (6.x is planned for 1.x)
+* Supports various MobX versions
+** *v1.x:* supports MobX 6
+** *v0.x:* supports MobX 4 and 5
 * Chaining Concept for validations and conversions
 * Localization support for error messages
 * Async field validation and conversion
@@ -62,12 +64,18 @@ export default class ProfileStore {
 
             .forField(this.phoneNumber).bind()
 
+        binder.load({ // <4>
+            fullName: 'Max Mustermann',
+            email: 'max.mustermann@no-reply.com',
+            dateOfBirth: moment('1995-06-11')
+        })
     }
 }
 ----
-<1> These fields store all state needed to render the corresponding field view. All the properties are observable.
+<1> These fields store all state needed to render the corresponding field view. All the properties are observable or computed.
 <2> The Binder needs a translation function. We are using https://github.com/jverhoelen/react-mobx-i18n[react-mobx-i18n] which provides a compatible implementation.
 <3> Each field get's registered with the Binder, configuring the validator and converter chain as neccessary.
+<4> Load initial values via simple object properties (see <<bind-load>>)
 
 == Getting Started
 
@@ -83,6 +91,45 @@ DefaultBinder::
     The _DefaultBinder_ already makes assumptions about the translation library, which should support ES2015 templating style keys and named arguments, like https://www.npmjs.com/package/i18n-harmony[i18n-harmony] and https://github.com/jverhoelen/react-mobx-i18n[react-mobx-i18n]. For that scenario, it already provides a set of ready-to-use Validators and Converters. All this is part of the _mobx-binder_ module.
 
 To illustrate the power of the framework, most examples in this documentation are using the _DefaultBinder_.
+
+=== Packages
+
+Depending on your needs, you might want to install from the following packages:
+
+|===
+| Package name | Description
+
+| mobx-binder
+| Contains the DefaultBinder. Also re-exports `mob-binder-core`, so if you want to use the Default Binder, there is no need to additionally depend on it.
+
+| mobx-binder-core
+| Core package containing Binder and SimpleBinder.
+
+| mobx-binder-moment
+| Converters and validators for DefaultBinder supporting https://momentjs.com[Moment.js]
+
+| mobx-binder-dayjs
+| Converters and validators for DefaultBinder supporting https://day.js.org[Day.js]
+
+|===
+
+.Sample install using NPM:
+[source,bash]
+----
+npm install --save mobx-binder mobx-binder-dayjs
+----
+
+.Sample install using YARN
+[source,bash]
+----
+yarn add mobx-binder mobx-binder-dayjs
+----
+
+=== MobX Configuration
+
+In general, _mobx-binder_ should work flawlessly with all kinds https://mobx.js.org/configuration.html[MobX configuration settings].
+
+Please note that - depending on your actual use case - you will get warnings in the browser console when setting `reactionRequiresObservable` to `true`, as some computed properties and actions just might not need to access observable state. We recommend disabling that setting (which corressponds to the default) in productive environments.
 
 == API
 
@@ -132,6 +179,7 @@ binder
     .forField(email).bind()
 ----
 
+[[bind-load]]
 === Loading and storing field values
 
 ==== ...using bind()

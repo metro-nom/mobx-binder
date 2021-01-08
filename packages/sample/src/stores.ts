@@ -6,7 +6,8 @@ import * as React from 'react'
 
 // enable MobX strict mode
 configure({
-    enforceActions: 'observed',
+    enforceActions: 'always',
+    useProxies: 'never',
     computedRequiresReaction: true,
     reactionRequiresObservable: true,
     observableRequiresReaction: true,
