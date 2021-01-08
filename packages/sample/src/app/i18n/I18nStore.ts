@@ -1,10 +1,9 @@
-import { observable } from 'mobx'
+import { makeObservable, observable } from 'mobx'
 import { init, tFactory, TranslateFunction } from 'react-mobx-i18n'
 import i18n from 'i18n-harmony'
 import { Locales } from './Locales'
 
 export default class I18nStore {
-    @observable
     public locale = 'en'
 
     public translate: TranslateFunction
@@ -16,5 +15,9 @@ export default class I18nStore {
         init(() => ({ i18n: this }))
 
         this.translate = tFactory(this)
+
+        makeObservable(this, {
+            locale: observable,
+        })
     }
 }

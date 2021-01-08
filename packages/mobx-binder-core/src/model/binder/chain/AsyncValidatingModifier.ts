@@ -1,4 +1,4 @@
-import { action, computed, observable, runInAction } from 'mobx'
+import { action, computed, makeObservable, observable, runInAction } from 'mobx'
 import { Data, InvalidValueValidationResult, Modifier, SyncValueValidationResult, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { AsyncValidator } from '../../../validation/Validator'
@@ -26,7 +26,6 @@ interface InitialValidationInfo {
 }
 
 export class AsyncValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
-    @observable
     private info: AsyncValidationInfo<ValueType, ValidationResult> = { status: 'initial' }
 
     constructor(
@@ -36,6 +35,12 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
         private options: { onBlur: boolean },
     ) {
         super(view, context)
+
+        makeObservable<AsyncValidatingModifier<ValidationResult, ValueType>, 'info' | 'startNewValidation'>(this, {
+            info: observable,
+            validity: computed,
+            startNewValidation: action,
+        })
     }
 
     get data(): Data<ValueType> {
@@ -53,7 +58,6 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
         }
     }
 
-    @computed
     get validity(): Validity<ValidationResult> {
         const upstreamValidity = this.view.validity
         const status = this.info.status
@@ -74,31 +78,32 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
         }
     }
 
-    public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
-        const upstreamValidity = await this.view.validateAsync(blurEvent)
-        if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
-            return upstreamValidity
-        }
-        const upstreamData = this.view.data
-        if (!upstreamData.pending && this.info.status === 'validated' && this.view.isEqual(upstreamData.value, this.info.validatedValue)) {
-            return {
-                status: 'validated',
-                result: this.info.lastValidationResult,
-            }
-        }
-        if (!upstreamData.pending && (!blurEvent || this.options.onBlur)) {
-            const result = await this.startNewValidation(upstreamData.value)
-            return {
-                status: 'validated',
-                result,
-            }
-        }
-        return {
-            status: this.info.status === 'validating' ? 'validating' : 'unknown',
-        }
+    public validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
+        return this.view.validateAsync(blurEvent).then(
+            action((upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> | Promise<Validity<ValidationResult>> => {
+                if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
+                    return upstreamValidity
+                }
+                const upstreamData = this.view.data
+                if (!upstreamData.pending && this.info.status === 'validated' && this.view.isEqual(upstreamData.value, this.info.validatedValue)) {
+                    return {
+                        status: 'validated',
+                        result: this.info.lastValidationResult,
+                    }
+                }
+                if (!upstreamData.pending && (!blurEvent || this.options.onBlur)) {
+                    return this.startNewValidation(upstreamData.value).then(result => ({
+                        status: 'validated',
+                        result,
+                    }))
+                }
+                return {
+                    status: this.info.status === 'validating' ? 'validating' : 'unknown',
+                }
+            }),
+        )
     }
 
-    @action
     private async startNewValidation(value: ValueType): Promise<ValidationResult> {
         this.info = {
             status: 'validating',

@@ -1,9 +1,8 @@
-import { action, runInAction } from 'mobx'
-import { DefaultBinder, TextField, EmailValidator, ToggleField, TrimConverter } from 'mobx-binder'
+import { action, makeObservable, runInAction } from 'mobx'
+import { DefaultBinder, EmailValidator, TextField, ToggleField, TrimConverter } from 'mobx-binder'
 import { MomentConverter } from 'mobx-binder-moment'
 
 // tslint:disable no-submodule-imports
-
 import PersonStore from '../../domain/PersonStore'
 import { TranslateFunction } from 'react-mobx-i18n'
 import { AsyncPhoneNumberConverter } from 'app/domain/AsyncPhoneNumberConverter'
@@ -24,6 +23,11 @@ export default class ProfileStore {
     public binder: DefaultBinder
 
     constructor(private personStore: PersonStore, private t: TranslateFunction) {
+        makeObservable(this, {
+            onEnter: action,
+            onSubmit: action,
+        })
+
         this.binder = new DefaultBinder({ t })
         this.binder
             .forStringField(this.salutation)
@@ -66,7 +70,6 @@ export default class ProfileStore {
             .bind()
     }
 
-    @action
     public onEnter = () => {
         this.binder.load(this.personStore)
     }
@@ -76,23 +79,26 @@ export default class ProfileStore {
             return this.binder
                 .submit(this.personStore, async data => {
                     await sleep(1000)
-                    if (data.fullName === 'show-submission-error') {
-                        throw new Error('wrong-fullName')
-                    }
+                    runInAction(() => {
+                        // needed because of strict mobx configuration
+                        if (data.fullName === 'show-submission-error') {
+                            throw new Error('wrong-fullName')
+                        }
+                    })
                     this.binder.setUnchanged()
                     return data
                 })
                 .then(values => {
                     console.info('Submission successful', values)
                 })
-                .catch((err: Error) => {
-                    console.info(`Submit validation failed: ${err.message}`)
-                    if (err.message === 'wrong-fullName') {
-                        runInAction(() => {
+                .catch(
+                    action((err: Error) => {
+                        console.info(`Submit validation failed: ${err.message}`)
+                        if (err.message === 'wrong-fullName') {
                             this.fullName.errorMessage = this.t('validations.fullName.submissionError')
-                        })
-                    }
-                })
+                        }
+                    }),
+                )
         }
     }
 }

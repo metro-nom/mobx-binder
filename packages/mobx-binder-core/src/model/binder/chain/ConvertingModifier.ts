@@ -4,6 +4,7 @@ import { Context } from '../Context'
 import { AbstractModifier } from './AbstractModifier'
 import { isValidationError } from '../../../conversion/ValidationError'
 import { Validity } from '../../../validation/Validity'
+import { action, makeObservable } from 'mobx'
 
 export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends AbstractModifier<ValidationResult, ViewType, ModelType> {
     constructor(
@@ -12,6 +13,9 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
         private converter: Converter<ValidationResult, ViewType, ModelType>,
     ) {
         super(view, context)
+        makeObservable<ConvertingModifier<ValidationResult, ViewType, ModelType>, 'calculateValidity'>(this, {
+            calculateValidity: action,
+        })
     }
 
     get data(): Data<ModelType> {

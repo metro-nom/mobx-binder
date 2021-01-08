@@ -1,5 +1,14 @@
 # Changelog (breaking changes)
 
+## [1.0.0] - 2021-01-08
+
+* Upgrade to MobX 6
+
+### Steps to migrate from mobx-binder 0.x / MobX 4/5
+
+* Please check the https://mobx.js.org/migrating-from-4-or-5.html[MobX migration guide] for general changes
+* mobx-binder 1.x does not rely on experimentalDecorators any more by itself
+
 ## [0.6.0] - 2020-12-22
 
 * Condition "required" status and validation using `isRequired(key, condition)`.

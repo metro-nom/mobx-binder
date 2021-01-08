@@ -5,13 +5,20 @@ import I18nStore from './app/i18n/I18nStore'
 import * as React from 'react'
 
 // enable MobX strict mode
-configure({ enforceActions: 'observed' })
+configure({
+    enforceActions: 'observed',
+    computedRequiresReaction: true,
+    reactionRequiresObservable: true,
+    observableRequiresReaction: true,
+    disableErrorBoundaries: true,
+})
 
 // prepare MobX stores
 const i18n = new I18nStore('en', {
     en: {
         'form.fields.fullName': 'Full name',
         'form.fields.dateOfBirth': 'Date of birth',
+        'form.fields.anotherDate': 'Another date',
         'form.fields.phoneNumber': 'Phone number',
         'form.fields.email': 'E-mail',
         'form.fields.toggle': 'Please toggle',

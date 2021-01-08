@@ -4,7 +4,7 @@ import { Validator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
 import { Validity } from '../../../validation/Validity'
 import { isWrapper } from '../../../validation/WrappedValidator'
-import { computed } from 'mobx'
+import { computed, makeObservable, runInAction } from 'mobx'
 
 export class ValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     constructor(
@@ -13,6 +13,10 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
         private validator: Validator<ValidationResult, ValueType>,
     ) {
         super(view, context)
+
+        makeObservable<ValidatingModifier<ValidationResult, ValueType>, 'isDisabled'>(this, {
+            isDisabled: computed,
+        })
     }
 
     get data(): Data<ValueType> {
@@ -38,13 +42,14 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
         return this.calculateValidity(this.view.validity)
     }
 
-    @computed
     private get isDisabled() {
         return isWrapper(this.validator) && this.validator.required && !this.validator.required()
     }
 
     public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
-        return this.calculateValidity(await this.view.validateAsync(blurEvent))
+        const upstreamValidity = await this.view.validateAsync(blurEvent)
+        // run in action here to remove warnings
+        return runInAction(() => this.calculateValidity(upstreamValidity))
     }
 
     private calculateValidity(upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> {

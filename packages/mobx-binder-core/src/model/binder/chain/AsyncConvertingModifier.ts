@@ -1,4 +1,4 @@
-import { action, computed, observable, runInAction } from 'mobx'
+import { action, computed, makeObservable, observable, runInAction } from 'mobx'
 import { Data, Modifier, SyncValueValidationResult, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { AbstractModifier } from './AbstractModifier'
@@ -38,7 +38,6 @@ interface InitialConversionInfo {
 }
 
 export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> extends AbstractModifier<ValidationResult, ViewType, ModelType> {
-    @observable
     private info: AsyncConversionInfo<ViewType, ModelType, ValidationResult> = { status: 'initial' }
 
     constructor(
@@ -48,6 +47,11 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         private options: { onBlur: boolean },
     ) {
         super(view, context)
+        makeObservable<AsyncConvertingModifier<ValidationResult, ViewType, ModelType>, 'info' | 'startNewConversion'>(this, {
+            info: observable,
+            validity: computed,
+            startNewConversion: action,
+        })
     }
 
     get data(): Data<ModelType> {
@@ -63,7 +67,6 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         }
     }
 
-    @computed
     get validity(): Validity<ValidationResult> {
         const upstreamValidity = this.view.validity
         const status = this.info.status
@@ -87,31 +90,34 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         return this.view.toView(this.converter.convertToPresentation(modelValue))
     }
 
-    public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
-        const upstreamValidity = await this.view.validateAsync(blurEvent)
-        if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
-            return upstreamValidity
-        }
-        const upstreamData = this.view.data
-        if (!upstreamData.pending && this.isAlreadyValidated(this.info, upstreamData.value)) {
-            return {
-                status: 'validated',
-                result: this.info.status === 'valid' ? this.context.validResult : this.info.lastValidationResult,
-            }
-        }
-        if (!upstreamData.pending && (!blurEvent || this.options.onBlur)) {
-            const result = await this.startNewConversion(upstreamData.value)
-            return {
-                status: 'validated',
-                result,
-            }
-        }
-        return {
-            status: this.info.status === 'validating' ? 'validating' : 'unknown',
-        }
+    public validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {
+        return this.view.validateAsync(blurEvent).then(
+            action((upstreamValidity: Validity<ValidationResult>): Validity<ValidationResult> | Promise<Validity<ValidationResult>> => {
+                if (upstreamValidity.status !== 'validated' || !this.context.valid(upstreamValidity.result)) {
+                    return upstreamValidity
+                }
+                const upstreamData = this.view.data
+                if (!upstreamData.pending && this.isAlreadyValidated(this.info, upstreamData.value)) {
+                    return {
+                        status: 'validated',
+                        result: this.info.status === 'valid' ? this.context.validResult : this.info.lastValidationResult,
+                    }
+                }
+                if (!upstreamData.pending && (!blurEvent || this.options.onBlur)) {
+                    return this.startNewConversion(upstreamData.value).then(
+                        (result): Validity<ValidationResult> => ({
+                            status: 'validated',
+                            result,
+                        }),
+                    )
+                }
+                return {
+                    status: this.info.status === 'validating' ? 'validating' : 'unknown',
+                }
+            }),
+        )
     }
 
-    @action
     private async startNewConversion(value: ViewType): Promise<ValidationResult> {
         this.info = {
             status: 'validating',

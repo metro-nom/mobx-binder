@@ -32,11 +32,11 @@
     "homepage": "https://github.com/metro-nom/mobx-binder#readme",
     "dependencies": {
         "email-validator": "^2.0.0",
-        "mobx": "^4.0.0 || ^5.0.0",
+        "mobx": "^6.0.0",
         "mobx-binder-core": "^0.6.1"
     },
     "peerDependencies": {
-        "mobx": "^4.0.0 || ^5.0.0"
+        "mobx": "^6.0.0"
     },
     "devDependencies": {
         "@istanbuljs/nyc-config-typescript": "^0.1.3",
