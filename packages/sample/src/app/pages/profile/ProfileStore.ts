@@ -34,14 +34,17 @@ export default class ProfileStore {
             .isRequired()
             .withConverter(trimConverter)
             .bind()
+
             .forStringField(this.fullName)
             .isRequired()
             .withConverter(trimConverter)
             .bind()
+
             .forStringField(this.dateOfBirth)
             .withConverter(trimConverter)
             .withConverter(new MomentConverter('DD.MM.YYYY'))
             .bind()
+
             .forStringField(this.anotherDate)
             .withConverter(trimConverter)
             .withConverter(new DayjsConverter('DD.MM.YYYY', undefined, true))
@@ -66,6 +69,7 @@ export default class ProfileStore {
             .withConverter(trimConverter)
             .withAsyncConverter(new AsyncPhoneNumberConverter(), { onBlur: true })
             .bind()
+
             .forField(this.toggle)
             .bind()
     }

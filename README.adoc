@@ -77,6 +77,8 @@ export default class ProfileStore {
 <3> Each field get's registered with the Binder, configuring the validator and converter chain as neccessary.
 <4> Load initial values via simple object properties (see <<bind-load>>)
 
+A simple link:packages/sample/src/app/forms/FormField.tsx[example] of how to render such fields can be found in the link:packages/sample[sample code].
+
 == Getting Started
 
 If you decide for using mobx-binder, there are some flavors to choose from:
