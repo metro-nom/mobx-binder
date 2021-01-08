@@ -1,5 +1,6 @@
 .idea
 .vscode
+.docz/
 .autoenv.zsh
 *.iml
 .nyc_output/

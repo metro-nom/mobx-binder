@@ -1,0 +1,28 @@
+---
+name: Submission
+route: /usage/submission
+menu: Usage
+---
+
+# Submission
+
+If the submit button of a form is clicked, this may trigger a `binder.submit()` call. Just like `binder.store()`, it stores the form field values into an object, but it also waits for asynchronous validations to be finished and maintains submission state.
+
+``` typescript
+public handleSubmit() {
+    return this.binder.submit()
+        .then(() => /* success */)
+        .catch(() => /* validation error */)
+}
+```
+
+The submit() methods maintains a `binder.submitting` property, indicating that submission of the form is still in progress. To make use of it, asynchronous follow actions have to be specified as parameter, so that the binder can still indicate submission as long as the server request is still ongoing.
+
+``` typescript
+public handleSubmit() {
+    return this.binder.submit({}, results => this.sendResultsToServer(results))
+        .catch(() => /* validation or other submission error */)
+}
+```
+
+If a field related validation error occurs, the `err.message` is empty, es it may contain some "global" error message.

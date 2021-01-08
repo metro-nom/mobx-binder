@@ -1,0 +1,51 @@
+---
+name: Development
+route: /development
+---
+
+# Development
+
+The project is using [lerna](https://github.com/lerna/lerna) for multipackage repository support.
+
+## Initial setup
+
+```
+npm install
+npm run bootstrap
+```
+
+## Full Build
+
+```
+npm run build
+```
+
+## Start sample application
+
+```
+cd packages/sample
+npm start
+```
+
+## Clean Release (without pull request)
+
+**First merge master into the branch and check that the branch is running fine**
+
+```
+git merge master
+npm run full-build
+```
+
+**Merge the branch back into develop**
+
+```
+git checkout master
+git merge <branchName>
+```
+
+**and perform the release**
+
+```
+npm run version
+npm run publish
+```

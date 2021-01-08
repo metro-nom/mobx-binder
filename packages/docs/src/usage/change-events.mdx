@@ -1,0 +1,23 @@
+---
+name: Change Events
+route: /usage/change-events
+menu: Usage
+---
+
+# Change events
+
+Usually, to get aware of changes to field values, you might just want to observe them by yourself via the standard MobX mechanisms. But in some scenarios it might also be helpful to use the onChange() method.
+
+``` typescript
+public salutation = new TextField('salutation')
+public fullName = new TextField('fullName')
+
+binder
+    .forStringField(salutation)
+    .isRequired()
+    .withConverter(new MomentConverter('DD.MM.YYYY'))
+    .onChange(moment => console.log(moment.format()))
+    .bind()
+```
+
+`onChange` events will only be fired if all validators specified before have been succeeding. It will pass a valid value of a type depending on the position of the `onChange()` call in the chain.

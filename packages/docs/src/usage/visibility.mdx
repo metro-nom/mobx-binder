@@ -1,0 +1,18 @@
+---
+name: Conditional Visibility
+route: /usage/visibility
+menu: Usage
+---
+
+# Conditional visibility
+
+If a field should be hidden as part of a value change of a different field, it may become necessary to remove that field from the Binder completely, especially if it’s value is currently invalid and would prevent a form submission:
+
+``` typescript
+binder.removeBinding(fullName)
+```
+
+This updates the global validation status based on the fields that are left.
+
+
+{/* TODO add support to re-adding bindings without having to re-build them */}
