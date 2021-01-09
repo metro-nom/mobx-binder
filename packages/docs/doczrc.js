@@ -1,5 +1,6 @@
 export default {
     typescript: true,
+    title: 'mobx-binder',
     menu: [
         'Overview',
         'Getting Started',
