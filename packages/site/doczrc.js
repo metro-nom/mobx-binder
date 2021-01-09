@@ -1,6 +1,7 @@
 export default {
     typescript: true,
     title: 'mobx-binder',
+    repository: 'https://github.com/metro-nom/mobx-binder',
     menu: [
         'Overview',
         'Getting Started',
@@ -20,6 +21,10 @@ export default {
             ]
         },
         'TODOs',
-        'Development'
-    ]
+        'Development',
+        'License'
+    ],
+    themeConfig: {
+        mode: 'dark',
+    },
 }
