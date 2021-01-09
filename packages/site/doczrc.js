@@ -24,6 +24,9 @@ export default {
         'Development',
         'License'
     ],
+    ignore: [
+        'README.md'
+    ],
     themeConfig: {
         mode: 'dark',
     },
