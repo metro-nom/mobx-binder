@@ -3,6 +3,8 @@ name: Overview
 route: /
 ---
 
+import SrcLink from './SrcLink'
+
 # Overview
 
 This library provides a convenient way of handling form state in a [React](https://reactjs.org/) + [MobX](https://mobx.js.org/) web app.
@@ -24,9 +26,9 @@ It is written in [TypeScript](https://www.typescriptlang.org/) and has first cla
 - Promise based API
 
 
-# Basic Example
+## Basic Example
 
-A [Binder](https://github.com/metro-nom/mobx-binder/tree/master/packages/mobx-binder-core/src/model/binder/Binder.ts) manages form state for a set of fields represented by "dumb" observable field instances implementing the [FieldStore](https://github.com/metro-nom/mobx-binder/tree/master/packages/mobx-binder-core/src/model/fields/FieldStore.ts) interface. It is configured via a fluent api like this:
+<p>A <SrcLink to="mobx-binder-core/src/model/binder/Binder.ts">Binder</SrcLink> manages form state for a set of fields represented by "dumb" observable field instances implementing the <SrcLink to="mobx-binder-core/src/model/fields/FieldStore.ts">FieldStore</SrcLink> interface. It is configured via a fluent api like this:</p>
 
 ``` typescript
 import { DefaultBinder, TextField, EmailValidator } from 'mobx-binder'
@@ -77,4 +79,5 @@ export default class ProfileStore {
 -   The Binder needs a translation function. We are using [react-mobx-i18n](https://github.com/jverhoelen/react-mobx-i18n) which provides a compatible implementation.
 -   Each field gets registered with the Binder, configuring the validator and converter chain as neccessary.
 -   Load initial values via simple object properties (see [Loading and storing field values](#bind-load))
-A simple [example](https://github.com/metro-nom/mobx-binder/tree/master/packages/sample/src/app/forms/FormField.tsx) of how to render such fields can be found in the [sample code](https://github.com/metro-nom/mobx-binder/tree/master/packages/sample).
+
+<p>A simple <SrcLink to="sample/src/app/forms/FormField.tsx">example</SrcLink> of how to render such fields can be found in the <SrcLink to="sample">sample code</SrcLink>.</p>

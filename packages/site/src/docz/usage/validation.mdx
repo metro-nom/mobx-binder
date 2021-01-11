@@ -11,7 +11,15 @@ menu: Usage
 For every field, we can specify validations to be done:
 
 ``` typescript
-binder.forField(fullName).isRequired().withValidator(EmailValidator.validate()).bind()
+// for SimpleBinder
+const minLength = (min: number) => (value?: string) =>
+    !!value && value.length < min ? `Please enter at least ${min} characters` : undefined
+
+// or for DefaultBinder
+const minLength = (min: number) => (value?: string) =>
+    !!value && value.length < min ? { messageKey: `validation.minLength', args: { value, min } } : {}
+
+binder.forField(fullName).isRequired().withValidator(minLength(5)).bind()
 ```
 
 Validations are processed in order of method calls - so in this example, it is first checked if the `required` validation fails, and if it does, no further validation will happen.
@@ -27,16 +35,24 @@ Only valid field values are written to an object via `binder.store()`.
 If validation incurs expensive calculations or a backend request, it’s possible to do it asynchronously:
 
 ``` typescript
+// for SimpleBinder
+const uniqueTaxNumber = (value?: string) => request.get(`/check/taxnumber/${value}`)
+    .then(response => response.body.conflict ? 'Your company is aready registered' : undefined)
+
+// or for DefaultBinder
+const uniqueTaxNumber = (value?: string) => request.get(`/check/taxnumber/${value}`)
+    .then(response => response.body.conflict ? { messageKey: `validation.taxNumber.conflict', args: { value } } : {})
+
 binder
-    .forStringField(fullName)
-    .withAsyncValidator((value) => sleep(1000).then(() => EmailValidator.validate()(value)))
+    .forStringField(taxNumber)
+    .withAsyncValidator(uniqueTaxNumber)
     .bind()
 ```
 
 In contrast to synchronous validation, the async validation expects to get back a `Promise` of the validation result. As this is a more expensive validation, it does not happen on every change of the field value, but only on submission. If you want an additional check on blur, you can configure this like so:
 
 ``` typescript
-.withAsyncValidator(myAsyncValidator, { onBlur: true })
+.withAsyncValidator(uniqueTaxNumber, { onBlur: true })
 ```
 
 Only field values where asynchronous validation has been successfully finished are written to an object via `binder.store()`.
