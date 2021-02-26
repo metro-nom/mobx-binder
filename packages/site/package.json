@@ -11,6 +11,7 @@
     "develop": "gatsby develop",
     "start": "gatsby develop",
     "build": "gatsby build",
+    "deploy": "gh-pages -d public",
     "serve": "gatsby serve",
     "clean": "gatsby clean"
   },
@@ -23,6 +24,7 @@
     "gatsby-plugin-mdx": "^1.8.0",
     "gatsby-source-filesystem": "^2.9.0",
     "gatsby-theme-docz": "^2.3.1",
+    "gh-pages": "^3.1.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }
