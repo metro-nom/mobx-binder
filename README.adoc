@@ -27,13 +27,13 @@ toc::[]
 
 A link:packages/mobx-binder-core/src/model/binder/Binder.ts[Binder] manages form state for a set of fields represented by "dumb" observable field instances implementing the link:packages/mobx-binder-core/src/model/fields/FieldStore.ts[FieldStore] interface. It is configured via a fluent api like this:
 
-[source,js]
+[source,typescript]
 ----
 import { DefaultBinder, TextField, EmailValidator } from 'mobx-binder'
 import { MomentConverter } from 'mobx-binder-moment'
 import { TranslateFunction } from 'react-mobx-i18n'
 
-export default class ProfileStore {
+export class ProfileStore {
     public salutation = new TextField('salutation') // <1>
     public fullName = new TextField('fullName')
     public dateOfBirth = new TextField('dateOfBirth')
