@@ -82,6 +82,9 @@ describe('DayjsConverter', () => {
         it('should optionally except a locale', () => {
             converter = new DayjsConverter('YYYY MMMM DD', 'es', true)
             dayjs('2018 Enero 15', 'YYYY MMMM DD', 'es')
+
+            // TODO: DayJs is complaning that it's a invalid date
+            // see https://day.js.org/docs/en/i18n/instance-locale
             expect(converter.convertToModel('2018 Enero 15')!.format('YYYY-MM-DD')).to.equal('2018-01-15')
         })
     })
