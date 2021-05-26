@@ -25,14 +25,14 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     protected constructor(public readonly valueType: string, public readonly name: string) {
         makeObservable(this, {
             readOnly: observable,
-            required: observable,
-            changed: observable,
+            // required: observable,
+            // changed: observable,
             showValidationResults: observable,
-            valid: observable,
-            validating: observable,
+            // valid: observable,
+            // validating: observable,
             touched: observable,
             visited: observable,
-            errorMessage: observable,
+            // errorMessage: observable,
 
             updateValue: action,
             handleFocus: action,
@@ -62,11 +62,11 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
 
     public reset(value: ValueType) {
         this.value = value
-        this.changed = false
+        // this.changed = false
         this.touched = false
         this.visited = false
         this.showValidationResults = false
-        this.valid = undefined
+        // this.valid = undefined
         this.errorMessage = undefined
     }
 }
