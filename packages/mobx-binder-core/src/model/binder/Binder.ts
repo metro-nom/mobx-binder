@@ -20,8 +20,13 @@ import { wrapRequiredValidator } from '../../validation/WrappedValidator'
  * API for single field binding
  */
 export interface Binding<FieldType, ValidationResult> {
-    changed: boolean
+    readonly changed: boolean
+    readonly required: boolean
+    readonly validating: boolean
+    readonly errorMessage?: string
+    readonly valid?: boolean
     readonly field: FieldStore<FieldType>
+    customErrorMessage?: string
 
     /**
      * The validation status of the current binding.
@@ -77,9 +82,9 @@ export interface Binding<FieldType, ValidationResult> {
 }
 
 class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType, ValidationResult> {
-    private unchangedValue?: any
+    public customErrorMessage?: string
 
-    private customErrorMessage?: string
+    private unchangedValue?: any
 
     constructor(
         private readonly context: Context<ValidationResult>,
@@ -222,14 +227,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
 
     private observeField() {
         this.clearCustomErrorMessageOnValueChange()
-        Object.defineProperty(this.field, 'valid', { get: () => this.valid })
-        Object.defineProperty(this.field, 'required', { get: () => this.required })
-        Object.defineProperty(this.field, 'validating', { get: () => this.validating })
-        Object.defineProperty(this.field, 'errorMessage', {
-            get: () => this.errorMessage,
-            set: (customErrorMessage?: string) => (this.customErrorMessage = customErrorMessage),
-        })
-        Object.defineProperty(this.field, 'changed', { get: () => this.changed })
+        this.field.bind(this)
     }
 
     private clearCustomErrorMessageOnValueChange() {
