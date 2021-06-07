@@ -2,6 +2,9 @@ import { expect } from 'chai'
 import { TextField } from './TextField'
 import sinon from 'sinon'
 import * as mobx from 'mobx'
+import dataDriven from 'data-driven'
+import { FieldStore } from './FieldStore'
+import { Binding } from '../binder/Binder'
 
 describe('TextField', () => {
     const sandbox = sinon.createSandbox()
@@ -71,14 +74,58 @@ describe('TextField', () => {
         })
     })
 
-    describe('reset', () => {
-        it('should reset validation state', () => {
-            textField.reset('abcde')
-            expect(textField.value).to.equal('abcde')
-            expect(textField.showValidationResults).to.be.false
-            expect(textField.visited).to.be.false
-            expect(textField.valid).to.be.undefined
-            expect(textField.errorMessage).to.be.undefined
+    describe('when unbound', () => {
+        dataDriven<{ property: keyof FieldStore<unknown> }>(
+            [{ property: 'valid' }, { property: 'validating' }, { property: 'errorMessage' }, { property: 'changed' }, { property: 'required' }],
+            () => {
+                it('should fail when accessing the {property} property', (ctx: any) => {
+                    expect(() => (textField as any)[ctx.property]).to.throw('Trying to use an unbound field')
+                })
+
+                it('should fail on reset()', () => {
+                    expect(() => textField.reset('abcde')).to.throw('Trying to use an unbound field')
+                })
+            },
+        )
+    })
+
+    describe('when bound', () => {
+        let binding: any
+
+        beforeEach(() => {
+            binding = {
+                changed: false,
+                valid: true,
+                errorMessage: undefined,
+                required: false,
+                validating: false,
+                setUnchanged: sinon.stub(),
+            } as Partial<Binding<unknown, unknown>>
+
+            textField.bind(binding)
+        })
+
+        dataDriven<{ property: keyof FieldStore<unknown> }>(
+            [{ property: 'valid' }, { property: 'validating' }, { property: 'errorMessage' }, { property: 'changed' }, { property: 'required' }],
+            () => {
+                it('should return bound property values', () => {
+                    expect(textField.changed).to.be.false
+                    expect(textField.valid).to.be.true
+                    expect(textField.errorMessage).to.be.undefined
+                    expect(textField.required).to.be.false
+                    expect(textField.validating).to.be.false
+                })
+            },
+        )
+
+        describe('reset', () => {
+            it('should reset validation state', () => {
+                textField.reset('abcde')
+                expect(textField.value).to.equal('abcde')
+                expect(textField.showValidationResults).to.be.false
+                expect(textField.visited).to.be.false
+                expect(binding.setUnchanged).to.have.been.called
+            })
         })
     })
 })
