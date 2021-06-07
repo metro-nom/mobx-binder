@@ -1,6 +1,6 @@
 import { action, autorun, makeObservable, observable, runInAction } from 'mobx'
 import { FieldStore } from './FieldStore'
-import {Binding} from "../binder/Binder";
+import { Binding } from '../binder/Binder'
 
 export abstract class AbstractField<ValueType> implements FieldStore<ValueType> {
     public readOnly = false

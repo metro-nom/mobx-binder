@@ -108,7 +108,7 @@ describe('TextField', () => {
         dataDriven<{ property: keyof FieldStore<unknown> }>(
             [{ property: 'valid' }, { property: 'validating' }, { property: 'errorMessage' }, { property: 'changed' }, { property: 'required' }],
             () => {
-                it('should return bound property values', (ctx: any) => {
+                it('should return bound property values', () => {
                     expect(textField.changed).to.be.false
                     expect(textField.valid).to.be.true
                     expect(textField.errorMessage).to.be.undefined

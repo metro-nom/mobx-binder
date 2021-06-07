@@ -1,4 +1,4 @@
-import {Binding} from "../binder/Binder";
+import { Binding } from '../binder/Binder'
 
 export interface FieldStore<ValueType> {
     /**
