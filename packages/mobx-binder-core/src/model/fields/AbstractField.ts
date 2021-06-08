@@ -84,6 +84,7 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
         this.assertBound(this.binding)
         this.value = value
         this.binding.setUnchanged()
+        this.binding.customErrorMessage = undefined
         this.touched = false
         this.visited = false
         this.showValidationResults = false

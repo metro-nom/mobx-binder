@@ -96,6 +96,7 @@ describe('TextField', () => {
             binding = {
                 changed: false,
                 valid: true,
+                customErrorMessage: 'some message',
                 errorMessage: undefined,
                 required: false,
                 validating: false,
@@ -120,11 +121,13 @@ describe('TextField', () => {
 
         describe('reset', () => {
             it('should reset validation state', () => {
+                textField.errorMessage = 'something'
                 textField.reset('abcde')
                 expect(textField.value).to.equal('abcde')
                 expect(textField.showValidationResults).to.be.false
                 expect(textField.visited).to.be.false
                 expect(binding.setUnchanged).to.have.been.called
+                expect(binding.customErrorMessage).to.be.undefined
             })
         })
     })
