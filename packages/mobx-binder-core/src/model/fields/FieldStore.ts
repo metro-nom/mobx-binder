@@ -66,6 +66,9 @@ export interface FieldStore<ValueType> {
      */
     required: boolean
 
+    /**
+     * Optionally return an object with field state rendered into the Binding.state for debugging purposes.
+     */
     readonly debugState?: unknown
 
     /**
