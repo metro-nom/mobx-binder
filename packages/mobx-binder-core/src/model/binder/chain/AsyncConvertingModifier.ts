@@ -3,7 +3,7 @@ import { Data, Modifier, SyncValueValidationResult, ValidValueValidationResult }
 import { Context } from '../Context'
 import { AbstractModifier } from './AbstractModifier'
 import { AsyncConverter } from '../../../conversion/Converter'
-import { isValidationError } from '../../../conversion/ValidationError'
+import { isValidationError, ValidationError } from '../../../conversion/ValidationError'
 import { Validity } from '../../../validation/Validity'
 
 type AsyncConversionInfo<ViewType, ModelType, ValidationResult> =
@@ -154,7 +154,7 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
                         this.info = {
                             status: 'invalid',
                             validatedValue: value,
-                            lastValidationResult: err.validationResult,
+                            lastValidationResult: (err as ValidationError<ValidationResult>).validationResult,
                         }
                     }
                 })
