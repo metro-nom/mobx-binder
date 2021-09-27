@@ -54,9 +54,13 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         })
     }
 
-    get type() {
+    get name() {
         const name = this.converter.constructor?.name
-        return name ? `async conversion:${name}` : 'async conversion'
+        return name && name !== 'Function' ? name : undefined
+    }
+
+    get type() {
+        return 'async conversion'
     }
 
     get data(): Data<ModelType> {

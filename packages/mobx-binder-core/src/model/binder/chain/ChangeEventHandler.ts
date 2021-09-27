@@ -15,6 +15,11 @@ export class ChangeEventHandler<ValidationResult, ValueType> extends AbstractMod
         )
     }
 
+    get name() {
+        const name = this.callback.constructor?.name
+        return name && name !== 'Function' ? name : undefined
+    }
+
     get type() {
         return 'change event'
     }

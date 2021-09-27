@@ -11,6 +11,10 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
         this.field = view.field
     }
 
+    get name(): string | undefined {
+        return undefined
+    }
+
     get type() {
         return 'modification'
     }
@@ -68,11 +72,12 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
     }
 
     public get bindingState(): Array<ModifierState<ValidationResult>> {
-        const { type, data, required, validity } = this
+        const { name, type, data, required, validity } = this
         return [
             ...this.view.bindingState,
             {
-                type: type,
+                name,
+                type,
                 data,
                 required,
                 validity,

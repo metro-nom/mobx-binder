@@ -1411,6 +1411,7 @@ describe('Binder', () => {
 
             expect(binder.binding(myField).state).to.deep.equal([
                 {
+                    name: 'myField',
                     type: 'field<string>',
                     data: {
                         pending: false,
@@ -1421,6 +1422,7 @@ describe('Binder', () => {
                         result: undefined,
                         status: 'validated',
                     },
+                    more: undefined,
                 },
             ])
         })
@@ -1430,6 +1432,7 @@ describe('Binder', () => {
 
             expect(binder.binding(myField).state).to.deep.equal([
                 {
+                    name: 'myField',
                     type: 'field<string>',
                     data: {
                         pending: false,
@@ -1440,9 +1443,11 @@ describe('Binder', () => {
                         result: undefined,
                         status: 'validated',
                     },
+                    more: undefined,
                 },
                 {
-                    type: 'conversion:EmptyStringConverter',
+                    name: 'EmptyStringConverter',
+                    type: 'conversion',
                     data: {
                         pending: false,
                         value: undefined,
@@ -1464,6 +1469,7 @@ describe('Binder', () => {
 
             expect(binder.binding(myField).state).to.deep.equal([
                 {
+                    name: 'myField',
                     type: 'field<string>',
                     data: {
                         pending: false,
@@ -1474,6 +1480,7 @@ describe('Binder', () => {
                         result: undefined,
                         status: 'validated',
                     },
+                    more: undefined,
                 },
                 {
                     type: 'validation',

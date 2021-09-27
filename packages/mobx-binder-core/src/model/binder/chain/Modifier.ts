@@ -31,6 +31,7 @@ export interface InvalidValueValidationResult<ValidationResult> {
 }
 
 export interface Modifier<ValidationResult, ViewType, ModelType> {
+    name?: string
     type: string
     bindingState: Array<ModifierState<ValidationResult>>
     field: FieldStore<unknown>

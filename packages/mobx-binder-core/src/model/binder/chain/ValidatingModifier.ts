@@ -19,9 +19,13 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
         })
     }
 
-    get type() {
+    get name() {
         const name = this.validator.constructor?.name
-        return name && name !== 'Function' ? `validation:${name}` : 'validation'
+        return name && name !== 'Function' ? name : undefined
+    }
+
+    get type() {
+        return 'validation'
     }
 
     get data(): Data<ValueType> {

@@ -18,9 +18,13 @@ export class ConvertingModifier<ValidationResult, ViewType, ModelType> extends A
         })
     }
 
-    get type() {
+    get name() {
         const name = this.converter.constructor?.name
-        return name ? `conversion:${name}` : 'conversion'
+        return name && name !== 'Function' ? name : undefined
+    }
+
+    get type() {
+        return 'conversion'
     }
 
     get data(): Data<ModelType> {

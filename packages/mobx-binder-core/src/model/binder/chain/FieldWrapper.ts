@@ -33,10 +33,12 @@ export class FieldWrapper<ValidationResult, ValueType> implements Modifier<Valid
         const { type, data, required, validity } = this
         return [
             {
+                name: this.field.name,
                 type,
                 data,
                 required,
                 validity,
+                more: this.field.debugState,
             },
         ]
     }

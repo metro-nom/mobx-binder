@@ -66,6 +66,8 @@ export interface FieldStore<ValueType> {
      */
     required: boolean
 
+    readonly debugState?: unknown
+
     /**
      * This function must be used to update field values via the frontend.
      *
