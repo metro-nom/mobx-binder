@@ -15,6 +15,10 @@ export class ChangeEventHandler<ValidationResult, ValueType> extends AbstractMod
         )
     }
 
+    get type() {
+        return 'change event'
+    }
+
     private handleChange = (data?: KnownData<ValueType>) => {
         if (data) {
             this.callback(data.value)

@@ -15,6 +15,7 @@ import { isPromise } from '../../utils/isPromise'
 import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
 import { Validity } from '../../validation/Validity'
 import { wrapRequiredValidator } from '../../validation/WrappedValidator'
+import { ModifierState } from './chain/ModifierState'
 
 /**
  * API for single field binding
@@ -32,6 +33,8 @@ export interface Binding<FieldType, ValidationResult> {
      * The validation status of the current binding.
      */
     readonly validity: Validity<ValidationResult>
+
+    readonly state: Array<ModifierState<ValidationResult>>
 
     /**
      * Load the field value from the source object, treating it as "unchanged" value.
@@ -150,6 +153,10 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             return this.customErrorMessage
         }
         return this.validity.status === 'validated' && !this.context.valid(this.validity.result) ? this.context.translate(this.validity.result) : undefined
+    }
+
+    public get state() {
+        return this.chain.bindingState
     }
 
     public setUnchanged() {

@@ -2,9 +2,14 @@ import { KnownData, Modifier, ValidValueValidationResult } from './Modifier'
 import { Context } from '../Context'
 import { FieldStore } from '../../fields/FieldStore'
 import { Validity } from '../../../validation/Validity'
+import { ModifierState } from './ModifierState'
 
 export class FieldWrapper<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
     constructor(public field: FieldStore<ValueType>, private context: Context<ValidationResult>) {}
+
+    get type() {
+        return `field<${this.field.valueType}>`
+    }
 
     get data(): KnownData<ValueType> {
         return {
@@ -22,6 +27,18 @@ export class FieldWrapper<ValidationResult, ValueType> implements Modifier<Valid
             status: 'validated',
             result: this.context.validResult,
         }
+    }
+
+    public get bindingState(): Array<ModifierState<ValidationResult>> {
+        const { type, data, required, validity } = this
+        return [
+            {
+                type,
+                data,
+                required,
+                validity,
+            },
+        ]
     }
 
     public toView(modelValue: any) {

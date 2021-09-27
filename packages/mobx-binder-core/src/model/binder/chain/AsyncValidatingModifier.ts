@@ -43,6 +43,10 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
         })
     }
 
+    get type() {
+        return 'async validation'
+    }
+
     get data(): Data<ValueType> {
         const data = this.view.data
         if (

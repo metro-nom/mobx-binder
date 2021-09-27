@@ -2,12 +2,17 @@ import { Data, Modifier, ValidValueValidationResult, ValueValidationResult } fro
 import { Context } from '../Context'
 import { isPromise } from '../../../utils/isPromise'
 import { FieldStore, Validity } from '../../..'
+import { ModifierState } from './ModifierState'
 
 export class AbstractModifier<ValidationResult, ViewType, ModelType> implements Modifier<ValidationResult, ViewType, ModelType> {
     public field: FieldStore<unknown>
 
     constructor(protected view: Modifier<ValidationResult, any, ViewType>, protected context: Context<ValidationResult>) {
         this.field = view.field
+    }
+
+    get type() {
+        return 'modification'
     }
 
     get data() {
@@ -60,5 +65,18 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
 
     public isEqual(first: ModelType, second: ModelType): boolean {
         return this.view.isEqual((first as any) as ViewType, (second as any) as ViewType)
+    }
+
+    public get bindingState(): Array<ModifierState<ValidationResult>> {
+        const { type, data, required, validity } = this
+        return [
+            ...this.view.bindingState,
+            {
+                type: type,
+                data,
+                required,
+                validity,
+            },
+        ]
     }
 }

@@ -54,6 +54,11 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
         })
     }
 
+    get type() {
+        const name = this.converter.constructor?.name
+        return name ? `async conversion:${name}` : 'async conversion'
+    }
+
     get data(): Data<ModelType> {
         const upstreamData = this.view.data
         if (this.info.status === 'valid' && !upstreamData.pending && this.isAlreadyValidated(this.info, upstreamData.value)) {
