@@ -5,6 +5,7 @@ import moment from 'moment'
 // eslint-disable-next-line @typescript-eslint/camelcase
 import data_driven = require('data-driven')
 import sinon = require('sinon')
+import { isLabeled } from 'mobx-binder'
 
 describe('MomentValidators', () => {
     const sandbox = sinon.createSandbox()
@@ -45,6 +46,12 @@ describe('MomentValidators', () => {
                 const rule = (MomentValidators as any)[ctx.method](...ctx.args)
 
                 expect(rule(ctx.value)).to.deep.equal({})
+            })
+
+            it('should be labeled validator {method}', (ctx: any) => {
+                const rule = (MomentValidators as any)[ctx.method](...ctx.args)
+
+                expect(isLabeled(rule) && rule.label.substring(0, ctx.method.length)).to.equal(ctx.method)
             })
         },
     )

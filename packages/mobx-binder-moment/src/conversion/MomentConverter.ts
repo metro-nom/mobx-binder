@@ -1,8 +1,12 @@
 import moment from 'moment'
-import { BinderValidationResult, Converter, ValidationError } from 'mobx-binder'
+import { BinderValidationResult, Converter, ValidationError, createLabel } from 'mobx-binder'
 
 export class MomentConverter implements Converter<BinderValidationResult, string | undefined, moment.Moment | undefined> {
-    constructor(private format: string, private errorMessage = 'conversions.error.moment') {}
+    readonly label: string
+
+    constructor(private format: string, private errorMessage = 'conversions.error.moment') {
+        this.label = createLabel('MomentConverter', { format })
+    }
 
     public convertToModel(value?: string): moment.Moment | undefined {
         if (!!value) {

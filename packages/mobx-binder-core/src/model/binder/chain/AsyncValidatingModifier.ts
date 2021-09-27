@@ -4,6 +4,7 @@ import { Context } from '../Context'
 import { AsyncValidator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
 import { Validity } from '../../../validation/Validity'
+import { isLabeled } from '../../../validation/Labels'
 
 type AsyncValidationInfo<ValueType, ValidationResult> =
     | KnownValidationInfo<ValueType, ValidationResult>
@@ -44,7 +45,7 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
     }
 
     get name() {
-        const name = this.validator.constructor?.name
+        const name = isLabeled(this.validator) ? this.validator.label : this.validator.constructor?.name
         return name && name !== 'Function' ? name : undefined
     }
 

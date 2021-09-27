@@ -1,13 +1,17 @@
 import dayjs, { Dayjs } from 'dayjs'
-import { BinderValidationResult, Converter, ValidationError } from 'mobx-binder'
+import { BinderValidationResult, Converter, ValidationError, createLabel } from 'mobx-binder'
 
 export class DayjsConverter implements Converter<BinderValidationResult, string | undefined, Dayjs | undefined> {
+    readonly label: string
+
     constructor(
         private formats: string | string[],
         private locale: string | undefined = undefined,
         private strict = false,
         private errorMessage = 'conversions.error.dayjs',
-    ) {}
+    ) {
+        this.label = createLabel('MomentConverter', { formats: JSON.stringify(formats), locale, strict })
+    }
 
     private get primaryFormat() {
         const formats = this.formats

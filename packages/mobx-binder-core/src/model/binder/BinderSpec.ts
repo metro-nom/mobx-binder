@@ -1483,7 +1483,7 @@ describe('Binder', () => {
                     more: undefined,
                 },
                 {
-                    name: undefined,
+                    name: 'required(value=true)',
                     type: 'validation',
                     data: {
                         pending: true,

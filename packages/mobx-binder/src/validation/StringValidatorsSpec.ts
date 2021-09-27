@@ -3,6 +3,7 @@ import { expect } from 'chai'
 import data_driven = require('data-driven')
 
 import { StringValidators } from './StringValidators'
+import { isLabeled } from 'mobx-binder-core'
 
 describe('Validators', () => {
     data_driven(
@@ -26,6 +27,12 @@ describe('Validators', () => {
                 const rule = (StringValidators as any)[ctx.method](...ctx.args)
 
                 expect(rule(ctx.value)).to.deep.equal({})
+            })
+
+            it('should be labeled validator {method}', (ctx: any) => {
+                const rule = (StringValidators as any)[ctx.method](...ctx.args)
+
+                expect(isLabeled(rule) && rule.label.substring(0, ctx.method.length)).to.equal(ctx.method)
             })
         },
     )

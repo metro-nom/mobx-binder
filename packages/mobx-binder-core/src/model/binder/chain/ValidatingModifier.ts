@@ -5,6 +5,7 @@ import { AbstractModifier } from './AbstractModifier'
 import { Validity } from '../../../validation/Validity'
 import { isWrapper } from '../../../validation/WrappedValidator'
 import { computed, makeObservable, runInAction } from 'mobx'
+import { isLabeled } from '../../../validation/Labels'
 
 export class ValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     constructor(
@@ -20,7 +21,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     }
 
     get name() {
-        const name = this.validator.constructor?.name
+        const name = isLabeled(this.validator) ? this.validator.label : this.validator.constructor?.name
         return name && name !== 'Function' ? name : undefined
     }
 
