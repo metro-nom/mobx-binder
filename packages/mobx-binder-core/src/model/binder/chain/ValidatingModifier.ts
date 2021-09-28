@@ -44,7 +44,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     }
 
     get required() {
-        return isWrapper(this.validator) && this.validator.required ? this.validator.required() : this.view.required
+        return isWrapper(this.validator) ? this.validator.required() : this.view.required
     }
 
     get validity() {
@@ -52,7 +52,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     }
 
     private get isDisabled() {
-        return isWrapper(this.validator) && this.validator.required && !this.validator.required()
+        return isWrapper(this.validator) && !this.validator.required()
     }
 
     public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {

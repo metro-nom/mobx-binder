@@ -55,7 +55,7 @@ export class AsyncConvertingModifier<ValidationResult, ViewType, ModelType> exte
     }
 
     get name() {
-        const name = this.converter.label || this.converter.constructor?.name
+        const name = this.converter.label || this.converter.constructor.name
         return name && name !== 'Function' ? name : undefined
     }
 

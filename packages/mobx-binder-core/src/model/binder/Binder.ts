@@ -594,7 +594,7 @@ export class Binder<ValidationResult> {
                         if (onSuccess) {
                             const newPromise = onSuccess(result as TargetType)
 
-                            if (newPromise && newPromise.then) {
+                            if (newPromise?.then) {
                                 return newPromise.then(() => result)
                             }
                         }
