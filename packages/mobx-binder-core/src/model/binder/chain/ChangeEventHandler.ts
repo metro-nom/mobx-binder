@@ -16,12 +16,11 @@ export class ChangeEventHandler<ValidationResult, ValueType> extends AbstractMod
     }
 
     get name() {
-        const name = this.callback.constructor?.name
-        return name && name !== 'Function' ? name : undefined
+        return this.callback.name
     }
 
     get type() {
-        return 'change event'
+        return 'change event handler'
     }
 
     private handleChange = (data?: KnownData<ValueType>) => {

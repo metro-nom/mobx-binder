@@ -24,12 +24,52 @@ describe('AbstractModifier', () => {
                 result: undefined,
             },
             field,
+            bindingState: [
+                {
+                    upstream: 'state',
+                },
+            ],
             toView: sandbox.stub().returnsArg(0),
             validateValue: sandbox.stub(),
             applyConversionsToField: sandbox.stub(),
             isEqual: sandbox.stub(),
         }
         modifier = new AbstractModifier<ErrorMessage, string, string>(upstream, context)
+    })
+
+    describe('name', () => {
+        it('should provide no name by default', () => {
+            expect(modifier.name).to.be.undefined
+        })
+    })
+
+    describe('type', () => {
+        it('should provide a type', () => {
+            expect(modifier.type).to.equal('unknown modification')
+        })
+    })
+
+    describe('bindingState', () => {
+        it('should provide the state of it\'s on and all "upstream" modifiers', () => {
+            expect(modifier.bindingState).to.deep.equal([
+                {
+                    upstream: 'state',
+                },
+                {
+                    name: undefined,
+                    type: 'unknown modification',
+                    data: {
+                        pending: false,
+                        value: 'myValue',
+                    },
+                    required: undefined,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                },
+            ])
+        })
     })
 
     describe('data', () => {

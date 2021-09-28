@@ -45,8 +45,7 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
     }
 
     get name() {
-        const name = isLabeled(this.validator) ? this.validator.label : this.validator.constructor?.name
-        return name && name !== 'Function' ? name : undefined
+        return isLabeled(this.validator) ? this.validator.label : this.validator.name
     }
 
     get type() {

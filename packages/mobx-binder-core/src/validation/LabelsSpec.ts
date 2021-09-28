@@ -34,6 +34,12 @@ describe('LabeledValidator', () => {
         expect(isLabeled(wrapper) && wrapper.label).to.equal('async')
     })
 
+    it('should preserve other attributes of the function', () => {
+        const validator: any = (value: string) => (!value ? 'required' : undefined)
+        validator.someProp = 'test'
+        expect((withLabel('someLabel', validator) as any).someProp).to.equal('test')
+    })
+
     describe('labels with arguments', () => {
         it('should support adding arguments to the label', () => {
             const wrapper = withLabel('theLabel', { minAge: 12 }, validator)

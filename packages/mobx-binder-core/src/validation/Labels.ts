@@ -9,9 +9,6 @@ export function isLabeled<ValidationResult, T>(validator: Validator<ValidationRe
 }
 
 const createArgumentString = (data: Record<string, unknown>) => {
-    if (!data) {
-        return ''
-    }
     const parts = Object.keys(data)
         .reduce((parts: string[], key: string) => {
             const value = data[key]
@@ -40,9 +37,9 @@ export function withLabel<ValidationResult, T>(
     validator?: Validator<ValidationResult, T>,
 ): LabeledValidator<ValidationResult, T> {
     if (validator && typeof second === 'object') {
-        return Object.assign((value: T) => validator(value), { label: createLabel(label, second) })
+        return Object.assign((value: T) => validator(value), { ...validator, label: createLabel(label, second) })
     } else if (typeof second === 'function') {
-        return Object.assign((value: T) => second(value), { label })
+        return Object.assign((value: T) => second(value), { ...second, label })
     }
     throw new Error('Illegal arguments passed to "withLabel"')
 }

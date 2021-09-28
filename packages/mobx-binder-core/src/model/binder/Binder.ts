@@ -35,7 +35,7 @@ export interface Binding<FieldType, ValidationResult> {
     readonly validity: Validity<ValidationResult>
 
     /**
-     * The state of the field and all modifications for debugging purposes.
+     * The state of the field and all modifications that happen in the validation/conversion chain for debugging purposes.
      */
     readonly state: Array<ModifierState<ValidationResult>>
 

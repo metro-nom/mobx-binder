@@ -1,4 +1,4 @@
-import { TextField } from '../../..'
+import { TextField, withLabel } from '../../..'
 import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
 import { AsyncValidatingModifier } from './AsyncValidatingModifier'
@@ -43,6 +43,28 @@ describe('AsyncValidatingModifier', () => {
             return undefined
         })
         modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock, { onBlur: false })
+    })
+
+    describe('name', () => {
+        it('should provide a name of the converter', () => {
+            const myValidator = async (value: string) => (!!value ? 'required' : undefined)
+            modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, myValidator, { onBlur: false })
+
+            expect(modifier.name).to.equal('myValidator')
+        })
+
+        it('should support a label on the converter', () => {
+            const myValidator = async (value: string) => (!!value ? 'required' : undefined)
+            validatorMock = withLabel('some validator', myValidator)
+            modifier = new AsyncValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock, { onBlur: false })
+            expect(modifier.name).to.equal('some validator')
+        })
+    })
+
+    describe('type', () => {
+        it('should provide a type', () => {
+            expect(modifier.type).to.equal('async validation')
+        })
     })
 
     describe('data', () => {

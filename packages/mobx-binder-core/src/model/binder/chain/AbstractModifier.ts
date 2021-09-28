@@ -16,7 +16,7 @@ export class AbstractModifier<ValidationResult, ViewType, ModelType> implements 
     }
 
     get type() {
-        return 'modification'
+        return 'unknown modification'
     }
 
     get data() {

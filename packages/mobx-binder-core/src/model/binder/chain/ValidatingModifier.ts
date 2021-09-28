@@ -21,8 +21,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     }
 
     get name() {
-        const name = isLabeled(this.validator) ? this.validator.label : this.validator.constructor?.name
-        return name && name !== 'Function' ? name : undefined
+        return isLabeled(this.validator) ? this.validator.label : this.validator.name
     }
 
     get type() {
