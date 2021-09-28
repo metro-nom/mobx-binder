@@ -8,6 +8,7 @@ import sinon = require('sinon')
 describe('ChangeEventHandler', () => {
     const sandbox = sinon.createSandbox()
     const context = new SimpleContext()
+    let modifier: ChangeEventHandler<ErrorMessage, string>
     let field: TextField
     let upstream: any
     let callbackMock: any
@@ -27,7 +28,24 @@ describe('ChangeEventHandler', () => {
             toView: sandbox.spy((value: any) => value),
         }
         callbackMock = sandbox.stub()
-        new ChangeEventHandler<ErrorMessage, string>(upstream, context, callbackMock)
+        modifier = new ChangeEventHandler<ErrorMessage, string>(upstream, context, callbackMock)
+    })
+
+    describe('name', () => {
+        it('should provide a name of the converter', () => {
+            const myHandler = () => {
+                /* do something */
+            }
+            modifier = new ChangeEventHandler<ErrorMessage, string>(upstream, context, myHandler)
+
+            expect(modifier.name).to.equal('myHandler')
+        })
+    })
+
+    describe('type', () => {
+        it('should provide a type', () => {
+            expect(modifier.type).to.equal('change event handler')
+        })
     })
 
     describe('handle change', () => {

@@ -1,4 +1,4 @@
-import { TextField } from '../../..'
+import { TextField, withLabel } from '../../..'
 import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
 import { ValidatingModifier } from './ValidatingModifier'
@@ -38,6 +38,28 @@ describe('ValidatingModifier', () => {
         }
         validatorMock = sandbox.stub()
         modifier = new ValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock)
+    })
+
+    describe('name', () => {
+        it('should provide a name of the converter', () => {
+            const myValidator = (value: string) => (!!value ? 'required' : undefined)
+            modifier = new ValidatingModifier<ErrorMessage, string>(upstream, context, myValidator)
+
+            expect(modifier.name).to.equal('myValidator')
+        })
+
+        it('should support a label on the converter', () => {
+            const myValidator = (value: string) => (!!value ? 'required' : undefined)
+            validatorMock = withLabel('some validator', myValidator)
+            modifier = new ValidatingModifier<ErrorMessage, string>(upstream, context, validatorMock)
+            expect(modifier.name).to.equal('some validator')
+        })
+    })
+
+    describe('type', () => {
+        it('should provide a type', () => {
+            expect(modifier.type).to.equal('validation')
+        })
     })
 
     describe('data', () => {

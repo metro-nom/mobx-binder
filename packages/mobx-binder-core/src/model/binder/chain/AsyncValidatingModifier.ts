@@ -4,6 +4,7 @@ import { Context } from '../Context'
 import { AsyncValidator } from '../../../validation/Validator'
 import { AbstractModifier } from './AbstractModifier'
 import { Validity } from '../../../validation/Validity'
+import { isLabeled } from '../../../validation/Labels'
 
 type AsyncValidationInfo<ValueType, ValidationResult> =
     | KnownValidationInfo<ValueType, ValidationResult>
@@ -41,6 +42,14 @@ export class AsyncValidatingModifier<ValidationResult, ValueType> extends Abstra
             validity: computed,
             startNewValidation: action,
         })
+    }
+
+    get name() {
+        return isLabeled(this.validator) ? this.validator.label : this.validator.name
+    }
+
+    get type() {
+        return 'async validation'
     }
 
     get data(): Data<ValueType> {

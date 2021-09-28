@@ -1,5 +1,6 @@
 import { FieldStore } from '../../fields/FieldStore'
 import { Validity } from '../../../validation/Validity'
+import { ModifierState } from './ModifierState'
 
 export type Data<ValueType> = KnownData<ValueType> | UnknownData<ValueType>
 
@@ -30,6 +31,9 @@ export interface InvalidValueValidationResult<ValidationResult> {
 }
 
 export interface Modifier<ValidationResult, ViewType, ModelType> {
+    name?: string
+    type: string
+    bindingState: Array<ModifierState<ValidationResult>>
     field: FieldStore<unknown>
     data: Data<ModelType>
     validity: Validity<ValidationResult>

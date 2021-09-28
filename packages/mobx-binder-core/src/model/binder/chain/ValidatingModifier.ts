@@ -5,6 +5,7 @@ import { AbstractModifier } from './AbstractModifier'
 import { Validity } from '../../../validation/Validity'
 import { isWrapper } from '../../../validation/WrappedValidator'
 import { computed, makeObservable, runInAction } from 'mobx'
+import { isLabeled } from '../../../validation/Labels'
 
 export class ValidatingModifier<ValidationResult, ValueType> extends AbstractModifier<ValidationResult, ValueType, ValueType> {
     constructor(
@@ -17,6 +18,14 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
         makeObservable<ValidatingModifier<ValidationResult, ValueType>, 'isDisabled'>(this, {
             isDisabled: computed,
         })
+    }
+
+    get name() {
+        return isLabeled(this.validator) ? this.validator.label : this.validator.name
+    }
+
+    get type() {
+        return 'validation'
     }
 
     get data(): Data<ValueType> {
@@ -35,7 +44,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     }
 
     get required() {
-        return isWrapper(this.validator) && this.validator.required ? this.validator.required() : this.view.required
+        return isWrapper(this.validator) ? this.validator.required() : this.view.required
     }
 
     get validity() {
@@ -43,7 +52,7 @@ export class ValidatingModifier<ValidationResult, ValueType> extends AbstractMod
     }
 
     private get isDisabled() {
-        return isWrapper(this.validator) && this.validator.required && !this.validator.required()
+        return isWrapper(this.validator) && !this.validator.required()
     }
 
     public async validateAsync(blurEvent: boolean): Promise<Validity<ValidationResult>> {

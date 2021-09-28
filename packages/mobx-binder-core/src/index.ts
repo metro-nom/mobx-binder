@@ -13,6 +13,7 @@ export { TrimConverter } from './conversion/TrimConverter'
 
 export * from './validation/Validity'
 export * from './validation/Validator'
+export { createLabel, withLabel, isLabeled } from './validation/Labels'
 
 export { ValidationError } from './conversion/ValidationError'
 export { isPromise } from './utils/isPromise'

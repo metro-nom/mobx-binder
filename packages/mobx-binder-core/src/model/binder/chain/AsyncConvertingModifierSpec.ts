@@ -44,6 +44,23 @@ describe('AsyncConvertingModifier', () => {
         modifier = new AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>(upstream, context, createConverter(), { onBlur: false })
     })
 
+    describe('name', () => {
+        it('should provide a name of the converter', () => {
+            expect(modifier.name).to.equal('SimpleAsyncNumberConverter')
+        })
+
+        it('should support a label on the converter', () => {
+            ;(converter as any).label = 'Some converter'
+            expect(modifier.name).to.equal('Some converter')
+        })
+    })
+
+    describe('type', () => {
+        it('should provide a type', () => {
+            expect(modifier.type).to.equal('async conversion')
+        })
+    })
+
     describe('data', () => {
         it('should convert valid upstream data', async () => {
             await modifier.validateAsync(false)

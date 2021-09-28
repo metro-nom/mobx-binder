@@ -1404,4 +1404,97 @@ describe('Binder', () => {
             })
         })
     })
+
+    describe('debugging', () => {
+        it('should provide the current state of a binding chain as a list', () => {
+            const binder = new SimpleBinder().forField(myField).bind()
+
+            expect(binder.binding(myField).state).to.deep.equal([
+                {
+                    name: 'myField',
+                    type: 'field<string>',
+                    data: {
+                        pending: false,
+                        value: '',
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                    more: undefined,
+                },
+            ])
+        })
+
+        it('should provide one entry for each chained modification', () => {
+            const binder = new SimpleBinder().forStringField(myField).bind()
+
+            expect(binder.binding(myField).state).to.deep.equal([
+                {
+                    name: 'myField',
+                    type: 'field<string>',
+                    data: {
+                        pending: false,
+                        value: '',
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                    more: undefined,
+                },
+                {
+                    name: 'EmptyStringConverter',
+                    type: 'conversion',
+                    data: {
+                        pending: false,
+                        value: undefined,
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                },
+            ])
+        })
+
+        it('should provide one entry for each validator', () => {
+            const binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .bind()
+
+            expect(binder.binding(myField).state).to.deep.equal([
+                {
+                    name: 'myField',
+                    type: 'field<string>',
+                    data: {
+                        pending: false,
+                        value: '',
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                    more: undefined,
+                },
+                {
+                    name: 'required(value=true)',
+                    type: 'validation',
+                    data: {
+                        pending: true,
+                    },
+                    required: true,
+                    validity: {
+                        result: 'Please enter a value',
+                        status: 'validated',
+                    },
+                },
+            ])
+        })
+    })
 })

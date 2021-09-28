@@ -13,7 +13,7 @@ export class DefaultContext implements Context<BinderValidationResult> {
     public readonly validResult: ValidBinderValidationResult = {}
 
     constructor(private options: DefaultContextOptions) {
-        this.requiredValidator = options.requiredValidator || StringValidators.required
+        this.requiredValidator = options.requiredValidator ?? StringValidators.required
     }
 
     public translate(result: BinderValidationResult) {

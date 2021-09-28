@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { isWrapper, wrapRequiredValidator } from './WrappedValidator'
 import sinon from 'sinon'
+import { isLabeled } from './Labels'
 
 const validator = sinon
     .stub()
@@ -19,5 +20,10 @@ describe('WrappedValidator', () => {
 
         const wrapper2 = wrapRequiredValidator(validator, () => false)
         expect(isWrapper(wrapper2) && wrapper2.required()).to.be.false
+    })
+
+    it('should provide a label', () => {
+        const wrapper = wrapRequiredValidator(validator, () => true)
+        expect(isLabeled(wrapper) && wrapper.label).to.equal('required(value=true)')
     })
 })

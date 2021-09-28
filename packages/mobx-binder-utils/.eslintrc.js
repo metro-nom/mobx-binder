@@ -18,10 +18,22 @@ module.exports = {
         // e.g. "@typescript-eslint/explicit-function-return-type": "off",
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unnecessary-condition': 'error',
         'no-restricted-imports': ["error", {
             patterns: ['mobx-binder*/', '.*/mobx-binder']
-        }]
+        }],
+        'no-unused-expressions': 'off',
+        'object-shorthand': ['error', 'always'],
+
     },
+    "overrides": [
+        {
+            "files": ['*Spec.ts', 'src/test/**'],
+            "rules": {
+                '@typescript-eslint/no-unused-expressions': "off",
+            }
+        }
+    ],
     settings: {
         react: {
             version: 'detect',  // Tells eslint-plugin-react to automatically detect the version of React to use
