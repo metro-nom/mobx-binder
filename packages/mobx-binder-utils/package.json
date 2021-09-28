@@ -1,6 +1,6 @@
 {
   "name": "mobx-binder-utils",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Build and test support utility package",
   "scripts": {
