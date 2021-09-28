@@ -51,7 +51,7 @@ export interface FieldStore<ValueType> {
 
     /**
      * If `valid === false`, containing the validation message.
-     * This property is replaced by a getter/setter on bind.
+     * This property is bound to .
      */
     errorMessage?: string
 

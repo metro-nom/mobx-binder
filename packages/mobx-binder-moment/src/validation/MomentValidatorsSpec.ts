@@ -77,7 +77,7 @@ describe('MomentValidators', () => {
                     messageKey: `validations.${ctx.method}`,
                     args: {
                         value: ctx.value,
-                        ...(ctx.messageArgs || {}),
+                        ...(ctx.messageArgs ?? {}),
                     },
                 })
             })
@@ -89,7 +89,7 @@ describe('MomentValidators', () => {
                     messageKey: `custom.key`,
                     args: {
                         value: ctx.value,
-                        ...(ctx.messageArgs || {}),
+                        ...(ctx.messageArgs ?? {}),
                     },
                 })
             })
