@@ -114,11 +114,11 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             valid: computed,
             errorMessage: computed,
 
-            setUnchanged: action,
-            validateAsync: action,
-            load: action,
-            apply: action,
-            applyConversionsToField: action,
+            setUnchanged: action.bound,
+            validateAsync: action.bound,
+            load: action.bound,
+            apply: action.bound,
+            applyConversionsToField: action.bound,
         })
     }
 
@@ -406,10 +406,10 @@ export class Binder<ValidationResult> {
             removeBinding: action,
             load: action,
             apply: action,
-            setUnchanged: action,
-            submit: action,
-            showValidationResults: action,
-            validateAsync: action,
+            setUnchanged: action.bound,
+            submit: action.bound,
+            showValidationResults: action.bound,
+            validateAsync: action.bound,
             addBinding: action,
         })
         runInAction(() => {

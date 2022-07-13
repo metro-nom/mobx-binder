@@ -20,10 +20,10 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
             showValidationResults: observable,
             touched: observable,
             visited: observable,
-            updateValue: action,
-            handleFocus: action,
-            handleBlur: action,
-            reset: action,
+            updateValue: action.bound,
+            handleFocus: action.bound,
+            handleBlur: action.bound,
+            reset: action.bound,
         })
     }
 
