@@ -1,3 +1,5 @@
+import { Binding } from '../binder/Binder'
+
 export interface FieldStore<ValueType> {
     /**
      * The `name` is typically used for the `input` field name.
@@ -66,6 +68,11 @@ export interface FieldStore<ValueType> {
     readonly required: boolean
 
     /**
+     * Optionally return an object with field state rendered into the Binding.state for debugging purposes.
+     */
+    readonly debugState?: unknown
+
+    /**
      * This function must be used to update field values via the frontend.
      *
      * @param newValue
@@ -88,4 +95,10 @@ export interface FieldStore<ValueType> {
      * @param newValue
      */
     reset(newValue: ValueType): void
+
+    /**
+     * This is used internally to bind a field
+     * @param binding
+     */
+    bind(binding: Binding<unknown, unknown>): void
 }

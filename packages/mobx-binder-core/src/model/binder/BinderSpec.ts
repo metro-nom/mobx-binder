@@ -4,7 +4,7 @@ import { action, observable, reaction } from 'mobx'
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-import sleep from '../../test/sleep'
+import sleep from '../../utils/sleep'
 import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
 import { ComplexField } from '../../test/ComplexField'
 import { SimpleAsyncNumberConverter } from '../../test/SimpleAsyncNumberConverter'
@@ -538,7 +538,7 @@ describe('Binder', () => {
 
             myField.updateValue('12345')
             await myField.handleBlur()
-
+            await sleep(110)
             expect(myField.valid).to.be.false
             expect(myField.errorMessage).to.equal('my error')
             expect(validator).to.have.been.calledWith('12345')
@@ -819,7 +819,8 @@ describe('Binder', () => {
                 .bind()
 
             myField.updateValue('abcde')
-            await myField.handleBlur()
+            myField.handleBlur()
+            await sleep(110)
 
             expect(myField.valid).to.be.false
             expect(myField.errorMessage).to.equal('not a number')
@@ -1402,6 +1403,99 @@ describe('Binder', () => {
             it('should report success asynchronously', async () => {
                 expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
             })
+        })
+    })
+
+    describe('debugging', () => {
+        it('should provide the current state of a binding chain as a list', () => {
+            const binder = new SimpleBinder().forField(myField).bind()
+
+            expect(binder.binding(myField).state).to.deep.equal([
+                {
+                    name: 'myField',
+                    type: 'field<string>',
+                    data: {
+                        pending: false,
+                        value: '',
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                    more: undefined,
+                },
+            ])
+        })
+
+        it('should provide one entry for each chained modification', () => {
+            const binder = new SimpleBinder().forStringField(myField).bind()
+
+            expect(binder.binding(myField).state).to.deep.equal([
+                {
+                    name: 'myField',
+                    type: 'field<string>',
+                    data: {
+                        pending: false,
+                        value: '',
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                    more: undefined,
+                },
+                {
+                    name: 'EmptyStringConverter',
+                    type: 'conversion',
+                    data: {
+                        pending: false,
+                        value: undefined,
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                },
+            ])
+        })
+
+        it('should provide one entry for each validator', () => {
+            const binder = new SimpleBinder()
+                .forField(myField)
+                .isRequired()
+                .bind()
+
+            expect(binder.binding(myField).state).to.deep.equal([
+                {
+                    name: 'myField',
+                    type: 'field<string>',
+                    data: {
+                        pending: false,
+                        value: '',
+                    },
+                    required: false,
+                    validity: {
+                        result: undefined,
+                        status: 'validated',
+                    },
+                    more: undefined,
+                },
+                {
+                    name: 'required(value=true)',
+                    type: 'validation',
+                    data: {
+                        pending: true,
+                    },
+                    required: true,
+                    validity: {
+                        result: 'Please enter a value',
+                        status: 'validated',
+                    },
+                },
+            ])
         })
     })
 })

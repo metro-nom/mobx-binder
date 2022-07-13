@@ -4,6 +4,6 @@ export class ValidationError<ValidationResult> extends Error {
     }
 }
 
-export function isValidationError<ValidationResult = any>(err: Error): err is ValidationError<ValidationResult> {
-    return err.hasOwnProperty('validationResult')
+export function isValidationError<ValidationResult = any>(err: unknown): err is ValidationError<ValidationResult> {
+    return (err as Error).hasOwnProperty('validationResult')
 }

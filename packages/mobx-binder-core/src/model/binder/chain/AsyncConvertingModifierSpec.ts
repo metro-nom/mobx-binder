@@ -1,7 +1,7 @@
 import { TextField } from '../../..'
 import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
-import sleep from '../../../test/sleep'
+import sleep from '../../../utils/sleep'
 import { AsyncConvertingModifier } from './AsyncConvertingModifier'
 import { AsyncConverter } from '../../../conversion/Converter'
 import { SimpleAsyncNumberConverter } from '../../../test/SimpleAsyncNumberConverter'
@@ -42,6 +42,23 @@ describe('AsyncConvertingModifier', () => {
             validateAsync: sandbox.stub().resolves({ status: 'validated', result: undefined }),
         }
         modifier = new AsyncConvertingModifier<ErrorMessage, string | undefined, number | undefined>(upstream, context, createConverter(), { onBlur: false })
+    })
+
+    describe('name', () => {
+        it('should provide a name of the converter', () => {
+            expect(modifier.name).to.equal('SimpleAsyncNumberConverter')
+        })
+
+        it('should support a label on the converter', () => {
+            ;(converter as any).label = 'Some converter'
+            expect(modifier.name).to.equal('Some converter')
+        })
+    })
+
+    describe('type', () => {
+        it('should provide a type', () => {
+            expect(modifier.type).to.equal('async conversion')
+        })
     })
 
     describe('data', () => {

@@ -16,7 +16,7 @@ export const FormField = observer(({ field }: FormFieldProps) => {
     const showValidationResults = !field.validating && field.showValidationResults
     const valid = showValidationResults && field.valid === true
     const invalid = showValidationResults && field.valid === false
-    const errorMessage = showValidationResults ? field.errorMessage || null : null
+    const errorMessage = showValidationResults && field.errorMessage ? field.errorMessage : null
 
     const handleBlur = () => {
         field.handleBlur()

@@ -5,6 +5,7 @@ import { DayjsValidators } from './DayjsValidators'
 import data_driven = require('data-driven')
 import sinon = require('sinon')
 import dayjs = require('dayjs')
+import { isLabeled } from 'mobx-binder'
 
 describe('DayjsValidators', () => {
     const sandbox = sinon.createSandbox()
@@ -46,6 +47,12 @@ describe('DayjsValidators', () => {
 
                 expect(rule(ctx.value)).to.deep.equal({})
             })
+
+            it('should be labeled validator {method}', (ctx: any) => {
+                const rule = (DayjsValidators as any)[ctx.method](...ctx.args)
+
+                expect(isLabeled(rule) && rule.label.substring(0, ctx.method.length)).to.equal(ctx.method)
+            })
         },
     )
 
@@ -70,7 +77,7 @@ describe('DayjsValidators', () => {
                     messageKey: `validations.${ctx.method}`,
                     args: {
                         value: ctx.value,
-                        ...(ctx.messageArgs || {}),
+                        ...(ctx.messageArgs ?? {}),
                     },
                 })
             })
@@ -82,7 +89,7 @@ describe('DayjsValidators', () => {
                     messageKey: `custom.key`,
                     args: {
                         value: ctx.value,
-                        ...(ctx.messageArgs || {}),
+                        ...(ctx.messageArgs ?? {}),
                     },
                 })
             })

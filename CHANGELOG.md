@@ -1,5 +1,15 @@
 # Changelog (breaking changes)
 
+## [1.2.0] - 2021-09-28
+
+* Add some `state` property to the Bindings to dump the internal state of a field validator/converter chain for debugging.
+** Support named validators and converters for better readability
+* Add some more linting rules to find potential issues
+
+## [1.1.0] - 2021-01-08
+
+* Fix "cannot redefine property" issues with newest MobX 6 versions. This might break code that expects "unbound" fields to somehow work.
+
 ## [1.0.0] - 2021-01-08
 
 * Upgrade to MobX 6 and removal of internal decorator usage

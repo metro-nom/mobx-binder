@@ -15,18 +15,29 @@ import { isPromise } from '../../utils/isPromise'
 import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
 import { Validity } from '../../validation/Validity'
 import { wrapRequiredValidator } from '../../validation/WrappedValidator'
+import { ModifierState } from './chain/ModifierState'
 
 /**
  * API for single field binding
  */
 export interface Binding<FieldType, ValidationResult> {
-    changed: boolean
+    readonly changed: boolean
+    readonly required: boolean
+    readonly validating: boolean
+    readonly errorMessage?: string
+    readonly valid?: boolean
     readonly field: FieldStore<FieldType>
+    customErrorMessage?: string
 
     /**
      * The validation status of the current binding.
      */
     readonly validity: Validity<ValidationResult>
+
+    /**
+     * The state of the field and all modifications that happen in the validation/conversion chain for debugging purposes.
+     */
+    readonly state: Array<ModifierState<ValidationResult>>
 
     /**
      * Load the field value from the source object, treating it as "unchanged" value.
@@ -74,12 +85,17 @@ export interface Binding<FieldType, ValidationResult> {
      * Sets the current field value to be handled as not changed.
      */
     setUnchanged(): void
+
+    /**
+     * Called on blur before showing validation errors.
+     */
+    validateOnBlur(): Promise<void>
 }
 
 class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType, ValidationResult> {
-    private unchangedValue?: any
+    public customErrorMessage?: string
 
-    private customErrorMessage?: string
+    private unchangedValue?: any
 
     constructor(
         private readonly context: Context<ValidationResult>,
@@ -90,7 +106,6 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     ) {
         this.setUnchanged()
         this.observeField()
-        this.addOnBlurValidationInterceptor()
         makeObservable<StandardBinding<FieldType, ValidationResult>, 'unchangedValue' | 'customErrorMessage' | 'applyConversionsToField'>(this, {
             unchangedValue: observable.ref,
             customErrorMessage: observable,
@@ -103,11 +118,12 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             valid: computed,
             errorMessage: computed,
 
-            setUnchanged: action,
-            validateAsync: action,
-            load: action,
-            apply: action,
-            applyConversionsToField: action,
+            setUnchanged: action.bound,
+            validateAsync: action.bound,
+            load: action.bound,
+            apply: action.bound,
+            applyConversionsToField: action.bound,
+            validateOnBlur: action.bound,
         })
     }
 
@@ -145,6 +161,10 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             return this.customErrorMessage
         }
         return this.validity.status === 'validated' && !this.context.valid(this.validity.result) ? this.context.translate(this.validity.result) : undefined
+    }
+
+    public get state() {
+        return this.chain.bindingState
     }
 
     public setUnchanged() {
@@ -195,6 +215,11 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
         }
     }
 
+    public async validateOnBlur(): Promise<void> {
+        await this.validateAsync(true)
+        this.applyConversionsToField()
+    }
+
     private correctFieldValue() {
         if (this.valid && !this.chain.data.pending) {
             const fieldValue = this.chain.toView(this.chain.data.value)
@@ -206,30 +231,13 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
         return this.context.valid(validationResult) ? undefined : this.context.translate(validationResult)
     }
 
-    private addOnBlurValidationInterceptor() {
-        const previous = this.field.handleBlur
-
-        this.field.handleBlur = async () => {
-            await this.validateAsync(true)
-            this.applyConversionsToField()
-            previous.call(this.field)
-        }
-    }
-
     private applyConversionsToField() {
         this.chain.applyConversionsToField()
     }
 
     private observeField() {
         this.clearCustomErrorMessageOnValueChange()
-        Object.defineProperty(this.field, 'valid', { get: () => this.valid })
-        Object.defineProperty(this.field, 'required', { get: () => this.required })
-        Object.defineProperty(this.field, 'validating', { get: () => this.validating })
-        Object.defineProperty(this.field, 'errorMessage', {
-            get: () => this.errorMessage,
-            set: (customErrorMessage?: string) => (this.customErrorMessage = customErrorMessage),
-        })
-        Object.defineProperty(this.field, 'changed', { get: () => this.changed })
+        this.field.bind(this)
     }
 
     private clearCustomErrorMessageOnValueChange() {
@@ -398,10 +406,10 @@ export class Binder<ValidationResult> {
             removeBinding: action,
             load: action,
             apply: action,
-            setUnchanged: action,
-            submit: action,
-            showValidationResults: action,
-            validateAsync: action,
+            setUnchanged: action.bound,
+            submit: action.bound,
+            showValidationResults: action.bound,
+            validateAsync: action.bound,
             addBinding: action,
         })
         runInAction(() => {
@@ -586,7 +594,7 @@ export class Binder<ValidationResult> {
                         if (onSuccess) {
                             const newPromise = onSuccess(result as TargetType)
 
-                            if (newPromise && newPromise.then) {
+                            if (newPromise?.then) {
                                 return newPromise.then(() => result)
                             }
                         }

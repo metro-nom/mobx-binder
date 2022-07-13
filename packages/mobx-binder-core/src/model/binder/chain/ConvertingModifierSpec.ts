@@ -37,6 +37,23 @@ describe('ConvertingModifier', () => {
         modifier = new ConvertingModifier(upstream, context, converter)
     })
 
+    describe('name', () => {
+        it('should provide a name of the converter', () => {
+            expect(modifier.name).to.equal('SimpleNumberConverter')
+        })
+
+        it('should support a label on the converter', () => {
+            ;(converter as any).label = 'Some converter'
+            expect(modifier.name).to.equal('Some converter')
+        })
+    })
+
+    describe('type', () => {
+        it('should provide a type', () => {
+            expect(modifier.type).to.equal('conversion')
+        })
+    })
+
     describe('data', () => {
         it('should convert valid upstream data', () => {
             expect(modifier.data).to.deep.equal({
