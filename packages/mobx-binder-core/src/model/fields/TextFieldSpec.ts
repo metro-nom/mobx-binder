@@ -5,6 +5,7 @@ import * as mobx from 'mobx'
 import dataDriven from 'data-driven'
 import { FieldStore } from './FieldStore'
 import { Binding } from '../binder/Binder'
+import sleep from '../../utils/sleep'
 
 describe('TextField', () => {
     const sandbox = sinon.createSandbox()
@@ -54,9 +55,9 @@ describe('TextField', () => {
             expect(textField.showValidationResults).to.be.false
         })
 
-        it('should show validation results asynchronously on blur', () => {
-            sandbox.stub(mobx, 'autorun').yields() // make it sync for test
+        it('should show validation results asynchronously on blur', async () => {
             textField.handleBlur()
+            await sleep(110)
             expect(textField.showValidationResults).to.be.true
         })
 

@@ -4,7 +4,7 @@ import { action, observable, reaction } from 'mobx'
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-import sleep from '../../test/sleep'
+import sleep from '../../utils/sleep'
 import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
 import { ComplexField } from '../../test/ComplexField'
 import { SimpleAsyncNumberConverter } from '../../test/SimpleAsyncNumberConverter'
@@ -538,7 +538,7 @@ describe('Binder', () => {
 
             myField.updateValue('12345')
             await myField.handleBlur()
-
+            await sleep(110)
             expect(myField.valid).to.be.false
             expect(myField.errorMessage).to.equal('my error')
             expect(validator).to.have.been.calledWith('12345')
@@ -819,7 +819,8 @@ describe('Binder', () => {
                 .bind()
 
             myField.updateValue('abcde')
-            await myField.handleBlur()
+            myField.handleBlur()
+            await sleep(110)
 
             expect(myField.valid).to.be.false
             expect(myField.errorMessage).to.equal('not a number')

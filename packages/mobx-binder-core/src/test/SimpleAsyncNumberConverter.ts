@@ -1,6 +1,6 @@
 import { AsyncConverter } from '../conversion/Converter'
 import { ErrorMessage } from '../model/binder/SimpleBinder'
-import sleep from './sleep'
+import sleep from '../utils/sleep'
 import { ValidationError } from '..'
 
 export class SimpleAsyncNumberConverter implements AsyncConverter<ErrorMessage, string | undefined, number | undefined> {

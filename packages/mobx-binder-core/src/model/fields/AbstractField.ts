@@ -1,6 +1,7 @@
-import { action, autorun, makeObservable, observable, runInAction } from 'mobx'
+import { action, makeObservable, observable } from 'mobx'
 import { FieldStore } from './FieldStore'
 import { Binding } from '../binder/Binder'
+import sleep from '../../utils/sleep'
 
 export abstract class AbstractField<ValueType> implements FieldStore<ValueType> {
     public readOnly = false
@@ -71,12 +72,10 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
     }
 
     public handleBlur(): void {
-        autorun(
-            () =>
-                runInAction(() => {
-                    this.showValidationResults = true
-                }),
-            { name: 'handleBlur', delay: 100 },
+        void Promise.all([sleep(100), this.binding?.validateOnBlur()]).then(
+            action(() => {
+                this.showValidationResults = true
+            }),
         )
     }
 
