@@ -14,7 +14,7 @@ export class ToggleField extends AbstractField<boolean> {
 
         makeObservable(this, {
             value: observable,
-            toggle: action,
+            toggle: action.bound,
         })
     }
 

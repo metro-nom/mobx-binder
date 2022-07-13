@@ -1,7 +1,7 @@
 import { TextField } from '../../..'
 import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
-import sleep from '../../../test/sleep'
+import sleep from '../../../utils/sleep'
 import { AsyncConvertingModifier } from './AsyncConvertingModifier'
 import { AsyncConverter } from '../../../conversion/Converter'
 import { SimpleAsyncNumberConverter } from '../../../test/SimpleAsyncNumberConverter'

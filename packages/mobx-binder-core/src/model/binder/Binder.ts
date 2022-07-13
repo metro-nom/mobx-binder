@@ -85,6 +85,11 @@ export interface Binding<FieldType, ValidationResult> {
      * Sets the current field value to be handled as not changed.
      */
     setUnchanged(): void
+
+    /**
+     * Called on blur before showing validation errors.
+     */
+    validateOnBlur(): Promise<void>
 }
 
 class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType, ValidationResult> {
@@ -101,7 +106,6 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     ) {
         this.setUnchanged()
         this.observeField()
-        this.addOnBlurValidationInterceptor()
         makeObservable<StandardBinding<FieldType, ValidationResult>, 'unchangedValue' | 'customErrorMessage' | 'applyConversionsToField'>(this, {
             unchangedValue: observable.ref,
             customErrorMessage: observable,
@@ -114,11 +118,12 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             valid: computed,
             errorMessage: computed,
 
-            setUnchanged: action,
-            validateAsync: action,
-            load: action,
-            apply: action,
-            applyConversionsToField: action,
+            setUnchanged: action.bound,
+            validateAsync: action.bound,
+            load: action.bound,
+            apply: action.bound,
+            applyConversionsToField: action.bound,
+            validateOnBlur: action.bound,
         })
     }
 
@@ -210,6 +215,11 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
         }
     }
 
+    public async validateOnBlur(): Promise<void> {
+        await this.validateAsync(true)
+        this.applyConversionsToField()
+    }
+
     private correctFieldValue() {
         if (this.valid && !this.chain.data.pending) {
             const fieldValue = this.chain.toView(this.chain.data.value)
@@ -219,16 +229,6 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
 
     private toErrorMessage(validationResult: ValidationResult) {
         return this.context.valid(validationResult) ? undefined : this.context.translate(validationResult)
-    }
-
-    private addOnBlurValidationInterceptor() {
-        const previous = this.field.handleBlur
-
-        this.field.handleBlur = async () => {
-            await this.validateAsync(true)
-            this.applyConversionsToField()
-            previous.call(this.field)
-        }
     }
 
     private applyConversionsToField() {
@@ -406,10 +406,10 @@ export class Binder<ValidationResult> {
             removeBinding: action,
             load: action,
             apply: action,
-            setUnchanged: action,
-            submit: action,
-            showValidationResults: action,
-            validateAsync: action,
+            setUnchanged: action.bound,
+            submit: action.bound,
+            showValidationResults: action.bound,
+            validateAsync: action.bound,
             addBinding: action,
         })
         runInAction(() => {

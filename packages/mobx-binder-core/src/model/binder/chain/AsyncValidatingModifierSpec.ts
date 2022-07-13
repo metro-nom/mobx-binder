@@ -2,7 +2,7 @@ import { TextField, withLabel } from '../../..'
 import { ErrorMessage, SimpleContext } from '../SimpleBinder'
 import { expect } from 'chai'
 import { AsyncValidatingModifier } from './AsyncValidatingModifier'
-import sleep from '../../../test/sleep'
+import sleep from '../../../utils/sleep'
 import sinon = require('sinon')
 
 describe('AsyncValidatingModifier', () => {
