@@ -4,7 +4,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
     "all": "npm run reinitialize && npm run build && npm run lint && npm run test && npm run coverage",
-    "reinitialize": "npm run clean:all && npm install && npm run bootstrap",
+    "reinitialize": "npm run clean:all && npm audit && npm install && npm run bootstrap",
     "full-build": "npm run reinitialize && npm run build && npm run lint && npm run coverage",
     "build": "lerna run build",
     "lint": "lerna run lint",
