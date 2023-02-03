@@ -19,6 +19,9 @@ describe('DayjsConverter', () => {
         it('should convert empty string presentation to undefined', () => {
             expect(converter.convertToModel('')).to.be.undefined
         })
+        it('should convert empty date (no digits/chr) presentation to undefined', () => {
+            expect(converter.convertToModel('  .  .    ')).to.be.undefined
+        })
         it('should undefined presentation to undefined', () => {
             expect(converter.convertToModel(undefined)).to.be.undefined
         })
@@ -29,9 +32,36 @@ describe('DayjsConverter', () => {
                     .to.throw(Error)
                     .with.property('validationResult')
                     .deep.equals({
-                        messageKey: 'conversions.error.dayjs',
-                        args: { value: 'abcde' },
-                    })
+                    messageKey: 'conversions.error.dayjs',
+                    args: { value: 'abcde' },
+                })
+            })
+            it('should fail with standard message if conversion fails', () => {
+                expect(() => converter.convertToModel('#  .  .    '))
+                    .to.throw(Error)
+                    .with.property('validationResult')
+                    .deep.equals({
+                    messageKey: 'conversions.error.dayjs',
+                    args: { value: '#  .  .    ' },
+                })
+            })
+            it('should fail with standard message if conversion fails', () => {
+                expect(() => converter.convertToModel('# .  .    '))
+                    .to.throw(Error)
+                    .with.property('validationResult')
+                    .deep.equals({
+                    messageKey: 'conversions.error.dayjs',
+                    args: { value: '# .  .    ' },
+                })
+            })
+            it('should fail with standard message if conversion fails', () => {
+                expect(() => converter.convertToModel('10.  .    '))
+                    .to.throw(Error)
+                    .with.property('validationResult')
+                    .deep.equals({
+                    messageKey: 'conversions.error.dayjs',
+                    args: { value: '10.  .    ' },
+                })
             })
             it('should fail with configured message if conversion fails', () => {
                 converter = new DayjsConverter('DD.MM.YYYY', undefined, undefined, 'other.key')
@@ -40,9 +70,9 @@ describe('DayjsConverter', () => {
                     .to.throw(Error)
                     .with.property('validationResult')
                     .deep.equals({
-                        messageKey: 'other.key',
-                        args: { value: 'abcde' },
-                    })
+                    messageKey: 'other.key',
+                    args: { value: 'abcde' },
+                })
             })
         })
     })
