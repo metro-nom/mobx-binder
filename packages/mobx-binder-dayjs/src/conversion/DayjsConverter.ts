@@ -18,8 +18,13 @@ export class DayjsConverter implements Converter<BinderValidationResult, string 
         return typeof formats === 'string' ? formats : formats[0]
     }
 
+    private isNotEmpty(value: string) {
+        const valueWithoutSpace = value.replace(/ /g, '');
+        return valueWithoutSpace.length > 2
+    }
+
     public convertToModel(value?: string): Dayjs | undefined {
-        if (!!value) {
+        if (!!value && this.isNotEmpty(value)) {
             const result = this.locale ? dayjs(value, this.formats, this.locale, this.strict) : dayjs(value, this.formats, this.strict)
             if (!result.isValid()) {
                 throw new ValidationError({ messageKey: this.errorMessage, args: { value } })
