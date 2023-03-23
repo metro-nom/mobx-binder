@@ -95,7 +95,7 @@ export interface Binding<FieldType, ValidationResult> {
 class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType, ValidationResult> {
     public customErrorMessage?: string
 
-    private unchangedValue?: any
+    private unchangedFieldValue?: any
     private unchangedModelValue?: {
         value: any
     }
@@ -111,9 +111,9 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
         this.observeField()
         makeObservable<
             StandardBinding<FieldType, ValidationResult>,
-            'unchangedValue' | 'unchangedModelValue' | 'customErrorMessage' | 'applyConversionsToField'
+            'unchangedFieldValue' | 'unchangedModelValue' | 'customErrorMessage' | 'applyConversionsToField'
         >(this, {
-            unchangedValue: observable.ref,
+            unchangedFieldValue: observable.ref,
             unchangedModelValue: observable.ref,
             customErrorMessage: observable,
 
@@ -140,7 +140,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
             return !this.chain.isEqual(currentValue, this.unchangedModelValue.value)
         } else {
             const currentValue = toJS(this.field.value)
-            return !isEqual(currentValue, this.unchangedValue)
+            return !isEqual(currentValue, this.unchangedFieldValue)
         }
     }
 
@@ -180,7 +180,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
 
     public setUnchanged(unchangedModelValue?: { value: any }) {
         const fieldValue = this.field.value
-        this.unchangedValue = toJS(fieldValue)
+        this.unchangedFieldValue = toJS(fieldValue)
         if (unchangedModelValue) {
             this.unchangedModelValue = { value: toJS(unchangedModelValue.value) }
         } else {
