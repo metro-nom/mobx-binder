@@ -3,6 +3,7 @@ import { Context } from '../Context'
 import { FieldStore } from '../../fields/FieldStore'
 import { Validity } from '../../../validation/Validity'
 import { ModifierState } from './ModifierState'
+import isEqual from 'lodash.isequal'
 
 export class FieldWrapper<ValidationResult, ValueType> implements Modifier<ValidationResult, ValueType, ValueType> {
     constructor(public field: FieldStore<ValueType>, private context: Context<ValidationResult>) {}
@@ -63,6 +64,6 @@ export class FieldWrapper<ValidationResult, ValueType> implements Modifier<Valid
     }
 
     public isEqual(first: ValueType, second: ValueType): boolean {
-        return first === second
+        return isEqual(first, second)
     }
 }

@@ -137,7 +137,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     public get changed() {
         if (this.valid && this.unchangedModelValue) {
             const currentValue = toJS(this.model.value)
-            return !isEqual(currentValue, this.unchangedModelValue.value)
+            return !this.chain.isEqual(currentValue, this.unchangedModelValue.value)
         } else {
             const currentValue = toJS(this.field.value)
             return !isEqual(currentValue, this.unchangedValue)
