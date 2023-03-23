@@ -15,8 +15,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: NVM use
-      uses: dcodeIO/setup-node-nvm@master
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
 
     - name: Install dependencies
       run: npm run reinitialize
