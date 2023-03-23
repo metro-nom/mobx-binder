@@ -13,13 +13,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Cache node modules
-      uses: actions/cache@v2
-      with:
-        path: '**/node_modules'
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      uses: actions/checkout@v3
 
     - name: NVM use
       uses: dcodeIO/setup-node-nvm@master
