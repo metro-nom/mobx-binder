@@ -1,4 +1,4 @@
-import { ErrorMessage, FieldStore, SimpleBinder, TextField, ToggleField, Validator } from '../..'
+import { ErrorMessage, FieldStore, SimpleBinder, TextField, ToggleField, TrimConverter, Validator } from '../..'
 import { action, observable, reaction } from 'mobx'
 
 import { expect } from 'chai'
@@ -1058,12 +1058,20 @@ describe('Binder', () => {
 
     describe('value change', () => {
         let binder: SimpleBinder
+        const thirdField = new TextField('thirdField')
 
         beforeEach(() => {
             binder = new SimpleBinder()
-                .forField(myField)
+                .forStringField(myField)
                 .isRequired()
                 .withValidator(lengthValidator(5, 10))
+                .bind()
+                .forStringField(secondField)
+                .withConverter(new TrimConverter())
+                .bind()
+                .forStringField(thirdField)
+                .withConverter(new TrimConverter())
+                .withAsyncConverter(new SimpleAsyncNumberConverter())
                 .bind()
         })
 
@@ -1089,6 +1097,32 @@ describe('Binder', () => {
             myField.updateValue('other')
             myField.updateValue('value')
             expect(binder.changed).to.be.false
+        })
+
+        it('should be marked as unchanged after value is trimmed', () => {
+            binder.load({ secondField: 'value' })
+            secondField.updateValue('value      ')
+            expect(binder.changed).to.be.false
+        })
+
+        it('should be marked first as changed as long as value is not validated on async conversion', () => {
+            binder.load({ thirdField: 12345 })
+            thirdField.updateValue('12345   ')
+            expect(binder.changed).to.be.true
+        })
+
+        it('should be marked unchanged if similar value is validated on async conversion', async () => {
+            binder.load({ thirdField: 12345 })
+            thirdField.updateValue('12345   ')
+            // it is rejected because of myField
+            await binder.validateAsync().should.be.rejected
+            expect(thirdField.changed).to.be.false
+        })
+
+        it('should be marked unchanged if initial value is validated on async conversion', async () => {
+            binder.load({ thirdField: 12345 })
+            await binder.validateAsync().should.be.rejected
+            expect(thirdField.changed).to.be.false
         })
 
         it('should be marked as unchanged after change back to initial value even on complex values', () => {

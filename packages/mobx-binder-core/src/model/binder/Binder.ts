@@ -1,5 +1,5 @@
 import { Converter, AsyncConverter } from '../../conversion/Converter'
-import { action, computed, isObservable, makeObservable, observable, reaction, runInAction, toJS } from 'mobx'
+import { action, computed, makeObservable, observable, reaction, runInAction, toJS } from 'mobx'
 import { EmptyStringConverter } from '../../conversion/EmptyStringConverter'
 import { FieldStore } from '../fields/FieldStore'
 import { Modifier } from './chain/Modifier'
@@ -96,6 +96,9 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     public customErrorMessage?: string
 
     private unchangedValue?: any
+    private unchangedModelValue?: {
+        value: any
+    }
 
     constructor(
         private readonly context: Context<ValidationResult>,
@@ -106,8 +109,12 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     ) {
         this.setUnchanged()
         this.observeField()
-        makeObservable<StandardBinding<FieldType, ValidationResult>, 'unchangedValue' | 'customErrorMessage' | 'applyConversionsToField'>(this, {
+        makeObservable<
+            StandardBinding<FieldType, ValidationResult>,
+            'unchangedValue' | 'unchangedModelValue' | 'customErrorMessage' | 'applyConversionsToField'
+        >(this, {
             unchangedValue: observable.ref,
+            unchangedModelValue: observable.ref,
             customErrorMessage: observable,
 
             changed: computed,
@@ -128,9 +135,13 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     public get changed() {
-        const currentValue = isObservable(this.field.value) ? toJS(this.field.value) : this.field.value
-
-        return !isEqual(currentValue, this.unchangedValue)
+        if (this.valid && this.unchangedModelValue) {
+            const currentValue = toJS(this.model.value)
+            return !isEqual(currentValue, this.unchangedModelValue.value)
+        } else {
+            const currentValue = toJS(this.field.value)
+            return !isEqual(currentValue, this.unchangedValue)
+        }
     }
 
     get validating() {
@@ -167,9 +178,14 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
         return this.chain.bindingState
     }
 
-    public setUnchanged() {
+    public setUnchanged(unchangedModelValue?: { value: any }) {
         const fieldValue = this.field.value
-        this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
+        this.unchangedValue = toJS(fieldValue)
+        if (unchangedModelValue) {
+            this.unchangedModelValue = { value: toJS(unchangedModelValue.value) }
+        } else {
+            this.unchangedModelValue = this.valid && !this.model.pending ? { value: toJS(this.model.value) } : undefined
+        }
     }
 
     public validateValue(fieldValue: FieldType): string | undefined | Promise<string | undefined> {
@@ -192,9 +208,10 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     public load(source: any): void {
-        const fieldValue = this.getFieldValue(source)
+        const value = this.read(source)
+        const fieldValue = this.chain.toView(value)
         this.field.reset(fieldValue)
-        this.setUnchanged()
+        this.setUnchanged({ value })
     }
 
     public apply(source: any): void {

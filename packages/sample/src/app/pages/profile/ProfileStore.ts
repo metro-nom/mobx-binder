@@ -52,6 +52,7 @@ export default class ProfileStore {
 
             .forStringField(this.email)
             .isRequired()
+            .withConverter(trimConverter)
             .withAsyncValidator(
                 async (value?: string) => {
                     await sleep(1000)
