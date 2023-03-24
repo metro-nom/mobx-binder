@@ -14,7 +14,7 @@ export abstract class AbstractField<ValueType> implements FieldStore<ValueType> 
 
     public visited = false
 
-    private binding?: Binding<unknown, unknown> = undefined
+    protected binding?: Binding<unknown, unknown> = undefined
 
     protected constructor(public readonly valueType: string, public readonly name: string) {
         makeObservable(this, {
