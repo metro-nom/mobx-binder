@@ -15,14 +15,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Cache node modules
-      uses: actions/cache@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
       with:
-        path: '**/node_modules'
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
-
-    - name: NVM use
-      uses: dcodeIO/setup-node-nvm@master
+        node-version: '16.x'
+        cache: 'yarn'
 
     - name: Install dependencies
       run: yarn install --immutable
