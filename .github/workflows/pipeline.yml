@@ -25,16 +25,7 @@ jobs:
       uses: dcodeIO/setup-node-nvm@master
 
     - name: Install dependencies
-      run: yarn run reinitialize
+      run: yarn install --immutable
 
-    - name: Build
-      run: yarn run build
-
-    - name: Lint
-      run: yarn run lint
-
-    - name: Test
-      run: yarn run test
-
-    - name: Coverage
-      run: yarn run coverage
+    - name: CI
+      run: yarn ci

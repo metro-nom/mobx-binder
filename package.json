@@ -5,13 +5,12 @@
     "packages/*"
   ],
   "scripts": {
-    "bootstrap": "lerna bootstrap --hoist",
-    "all": "yarn run reinitialize && yarn run build && yarn run lint && yarn run test && yarn run coverage",
-    "reinitialize": "yarn run clean:all && yarn audit && yarn install && yarn run bootstrap",
-    "full-build": "yarn run reinitialize && yarn run build && yarn run lint && yarn run coverage",
+    "reinitialize": "yarn run clean:all && yarn audit && yarn install",
+    "full-build": "yarn run reinitialize && yarn ci",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "ci": "turbo run ci",
     "coverage": "turbo run coverage",
     "clean": "lerna run clean && lerna clean -y",
     "clean:all": "lerna run clean:all && lerna clean -y && rm -Rf node_modules",
