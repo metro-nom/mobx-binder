@@ -11,5 +11,7 @@ declare module 'i18n-harmony' {
 
     export function init(config: InternationalisationHarmonyConfig): void
 
-    export function t(key: string, args?: any, language?: string): string
+    export type TranslateFunction = (key: string, args?: any, language?: string) => string
+
+    export function t(key: ststatsring, args?: any, language?: string): string
 }

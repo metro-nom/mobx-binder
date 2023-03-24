@@ -452,7 +452,7 @@ describe('Binder', () => {
 
             expect(validator).to.not.have.been.calledOnce
             expect(binder.binding(myField).validity).to.deep.equal({
-                status: 'unknowns',
+                status: 'unknown',
             })
         })
 

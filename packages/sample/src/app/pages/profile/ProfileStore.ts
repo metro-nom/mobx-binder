@@ -1,10 +1,10 @@
 import { action, makeObservable, runInAction } from 'mobx'
 import { DefaultBinder, EmailValidator, TextField, ToggleField, TrimConverter } from 'mobx-binder'
 import { MomentConverter } from 'mobx-binder-moment'
+import { TranslateFunction } from 'i18n-harmony'
 
 // tslint:disable no-submodule-imports
 import PersonStore from '../../domain/PersonStore'
-import { TranslateFunction } from 'react-mobx-i18n'
 import { AsyncPhoneNumberConverter } from 'app/domain/AsyncPhoneNumberConverter'
 import sleep from 'app/domain/sleep'
 import { DayjsConverter } from 'mobx-binder-dayjs'

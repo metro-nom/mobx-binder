@@ -32,6 +32,8 @@
   },
   "devDependencies": {
     "improved-yarn-audit": "^3.0.0",
-    "lerna": "^5.5.4"
-  }
+    "lerna": "^5.5.4",
+    "turbo": "^1.8.5"
+  },
+  "packageManager": "yarn@3.5.0"
 }

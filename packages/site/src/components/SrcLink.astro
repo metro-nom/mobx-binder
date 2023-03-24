@@ -4,8 +4,8 @@ export interface Props {
 
 }
 
-import { REPOSITORY } from '../consts.ts';
+import { GITHUB_REPOSITORY } from '../consts.ts';
 const { to } = Astro.props;
 ---
 
-<a href={`${REPOSITORY}/tree/master/packages/${to}`} target="_blank"><slot /></a>
+<a href={`${GITHUB_REPOSITORY}/tree/master/packages/${to}`} target="_blank"><slot /></a>
