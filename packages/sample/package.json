@@ -6,7 +6,7 @@
     "main": "index.js",
     "scripts": {
         "lint": "eslint --max-warnings 0 'src/**/*.ts*'",
-        "lint:fix": "npm run lint -- --fix",
+        "lint:fix": "yarn run lint -- --fix",
         "start": "webpack-dev-server --mode development --hot --progress --colors --port 3000 --open",
         "build": "mkdir -p dist && webpack -p --progress --colors",
         "create-stats": "NODE_ENV=production webpack --profile --json > webpack-stats.json",

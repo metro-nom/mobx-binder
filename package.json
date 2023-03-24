@@ -1,11 +1,14 @@
 {
   "name": "root",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
-    "all": "npm run reinitialize && npm run build && npm run lint && npm run test && npm run coverage",
-    "reinitialize": "npm run clean:all && npm install && npm run bootstrap",
-    "full-build": "npm run reinitialize && npm audit && npm run build && npm run lint && npm run coverage",
+    "all": "yarn run reinitialize && yarn run build && yarn run lint && yarn run test && yarn run coverage",
+    "reinitialize": "yarn run clean:all && yarn audit && yarn install && yarn run bootstrap",
+    "full-build": "yarn run reinitialize && yarn run build && yarn run lint && yarn run coverage",
     "build": "lerna run build",
     "lint": "lerna run lint",
     "test": "lerna run test",
@@ -15,9 +18,20 @@
     "version": "lerna version",
     "publish": "lerna publish from-git",
     "ls": "lerna ls",
-    "sample": "lerna run start"
+    "sample:start": "lerna run start",
+    "core": "yarn workspace mobx-binder-core",
+    "main": "yarn workspace mobx-binder",
+    "dayjs": "yarn workspace mobx-binder-dayjs",
+    "moment": "yarn workspace mobx-binder-moment",
+    "site": "yarn workspace site",
+    "sample": "yarn workspace sample"
+  },
+  "resolutions": {
+    "got": "^11.8.5",
+    "parse-path": "^5.0.0"
   },
   "devDependencies": {
-    "lerna": "^3.22.1"
+    "improved-yarn-audit": "^3.0.0",
+    "lerna": "^5.1.8"
   }
 }

@@ -1,0 +1,11 @@
+---
+export interface Props {
+	to: string;
+
+}
+
+import { REPOSITORY } from '../consts.ts';
+const { to } = Astro.props;
+---
+
+<a href={`${REPOSITORY}/tree/master/packages/${to}`} target="_blank"><slot /></a>

@@ -25,16 +25,16 @@ jobs:
       uses: dcodeIO/setup-node-nvm@master
 
     - name: Install dependencies
-      run: npm run reinitialize
+      run: yarn run reinitialize
 
     - name: Build
-      run: npm run build
+      run: yarn run build
 
     - name: Lint
-      run: npm run lint
+      run: yarn run lint
 
     - name: Test
-      run: npm run test
+      run: yarn run test
 
     - name: Coverage
-      run: npm run coverage
+      run: yarn run coverage

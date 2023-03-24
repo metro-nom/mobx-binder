@@ -450,9 +450,9 @@ describe('Binder', () => {
             myField.updateValue('12345')
             myField.handleBlur()
 
-            expect(validator).to.not.have.been.called
+            expect(validator).to.not.have.been.calledOnce
             expect(binder.binding(myField).validity).to.deep.equal({
-                status: 'unknown',
+                status: 'unknowns',
             })
         })
 

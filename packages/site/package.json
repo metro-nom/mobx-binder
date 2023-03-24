@@ -1,31 +1,30 @@
 {
   "name": "site",
-  "version": "1.0.0",
-  "private": true,
-  "description": "mobx-binder",
-  "author": "Carsten Rohrbach",
-  "keywords": [
-    "gatsby"
-  ],
+  "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "develop": "gatsby develop",
-    "start": "gatsby develop",
-    "build": "gatsby build",
-    "deploy": "gh-pages -d public",
-    "serve": "gatsby serve",
-    "clean": "gatsby clean"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
-    "@mdx-js/mdx": "^1.6.22",
-    "@mdx-js/react": "^1.6.22",
-    "docz": "^2.3.1",
-    "eslint-loader": "^4.0.2",
-    "gatsby": "^2.26.1",
-    "gatsby-plugin-mdx": "^1.8.0",
-    "gatsby-source-filesystem": "^2.9.0",
-    "gatsby-theme-docz": "^2.3.1",
-    "gh-pages": "^3.1.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "@algolia/client-search": "^4.13.1",
+    "@astrojs/mdx": "^0.18.2",
+    "@astrojs/preact": "^2.1.0",
+    "@astrojs/react": "^2.1.0",
+    "@docsearch/css": "^3.1.0",
+    "@docsearch/react": "^3.1.0",
+    "@types/node": "^18.0.0",
+    "@types/react": "^17.0.45",
+    "@types/react-dom": "^18.0.0",
+    "astro": "^2.1.6",
+    "preact": "^10.7.3",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
+  },
+  "devDependencies": {
+    "html-escaper": "^3.0.3"
   }
 }

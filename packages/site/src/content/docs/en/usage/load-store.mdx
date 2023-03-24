@@ -1,0 +1,80 @@
+---
+title: Loading and storing field values
+---
+
+## … using bind()
+
+The `bind()` method binds the value of a form field to a property named like the field name. Only valid values are stored. If the field binding chain contains a conversion, the converted value is stored.
+
+``` typescript
+public fullName = new TextField('fullName')
+...
+binder.forField(fullName).bind()
+
+// loading from object
+binder.load({ fullName: 'Max Mustermann' }) // => fullName.value === 'Max Mustermann'
+
+// storing to object
+const values = binder.store() // values === { fullName: 'Max Mustermann' }
+
+// storing to existing object
+const values = { foo: 'bar' }
+binder.store(values) // =>  values == { foo: 'bar', fullName: 'Max Mustermann' }
+```
+
+## … using bind2()
+
+The `bind()` command is a shorthand for a call to `bind2`, which allows to bind field values using more complex read and write callbacks. It's possible to omit the write callback, in which case the field is handled as read-only.
+
+``` typescript
+public fullName = new TextField('fullName')
+...
+binder.forField(fullName).bind2(
+    source => source.businessRelation.person.fullName,
+    (target, newValue) => target.businessRelation.person.fullName = newValue)
+)
+
+const account = {
+    businessRelation: {
+        person: { fullName: 'Max Mustermann' }
+    }
+}
+
+// loading account data into fields
+binder.load(account) // => fullName.value === 'Max Mustermann'
+
+// updating account data
+binder.store(account) // =>  account.businessRelation.person.fullName === 'Max Mustermann'
+```
+
+## Handling changes
+
+When you load() data, all the field values get a new value, which is internally stored as "unchanged". Only if the field value is changing via an `updateValue()` operation, the `changed` property on field level gets true.
+
+You can get a backend object only filled with data that has been changed via the `Binder.changedData` getter.
+
+In combination with the Binders `apply()` method it’s possible to find changes between two sets of data:
+
+``` typescript
+public fullName = new TextField('fullName')
+public email = new TextField('email')
+...
+binder
+    .forStringField(fullName).bind()
+    .forStringField(email).bind()
+
+// loading from object
+binder.load({
+    fullName: 'Max Mustermann',
+    email: 'max.mustermann@codecentric.de'
+})
+
+// applying new set of data as field changes
+binder.apply({
+    fullName: 'Max Mustermann-Musterfrau',
+    email: 'max.mustermann@codecentric.de'
+})
+
+// binder.changedData returns { fullName: 'Max Mustermann-Musterfrau' }
+```
+

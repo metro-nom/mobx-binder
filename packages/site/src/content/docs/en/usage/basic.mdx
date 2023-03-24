@@ -1,0 +1,34 @@
+---
+title: Preparing a Binder
+---
+
+To instantiate a *DefaultBinder*, we need a `BinderContext` containing a translation function (see [Prerequisites](prerequisites)).
+
+``` typescript
+import { DefaultBinder } from 'mobx-binder'
+import { i18n } from './stores'
+
+...
+const binder = new DefaultBinder({ t: i18n.t })
+```
+
+To add fields to the binder, we just use the fluent API to "bind" fields:
+
+``` typescript
+import { DefaultBinder, TextField } from 'mobx-binder'
+...
+public fullName = new TextField('fullName')
+...
+binder.forField(fullName).bind()
+```
+
+After a `bind()` or `bind2()` call, more fields can be added:
+
+``` typescript
+public fullName = new TextField('fullName')
+public email = new TextField('email')
+...
+binder
+    .forField(fullName).bind()
+    .forField(email).bind()
+```
