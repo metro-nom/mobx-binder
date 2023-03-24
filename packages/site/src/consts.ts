@@ -1,6 +1,6 @@
 export const SITE = {
     title: 'mobx-binder',
-    description: 'Form validation framework using MobX',
+    description: 'Form validation framework based on MobX',
     defaultLanguage: 'en-us',
 } as const;
 
@@ -17,14 +17,15 @@ export const OPEN_GRAPH = {
 export const KNOWN_LANGUAGES = {
     English: 'en',
 } as const;
+
 export const KNOWN_LANGUAGE_CODES = Object.values(KNOWN_LANGUAGES);
 
-export const GITHUB_REPOSITORY = `https://github.com/metro-nom/mobx-binder`;
+export const GITHUB_REPOSITORY = 'https://github.com/metro-nom/mobx-binder';
 
-export const GITHUB_EDIT_URL = `https://github.com/withastro/astro/tree/main/examples/docs`;
+export const GITHUB_EDIT_URL = `${GITHUB_REPOSITORY}/tree/master/packages/site`;
 
 
-export const COMMUNITY_INVITE_URL = `https://astro.build/chat`;
+export const COMMUNITY_INVITE_URL = undefined // `https://astro.build/chat`;
 
 // See "Algolia" section of the README for more information.
 export const ALGOLIA = {
