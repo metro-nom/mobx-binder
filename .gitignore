@@ -1,6 +1,6 @@
 .idea
 .vscode
-.docz/
+.direnv
 .autoenv.zsh
 *.iml
 .nyc_output/
@@ -10,3 +10,4 @@ build/
 dist/
 lib/
 webpack-stats.json
+yarn-error.log
