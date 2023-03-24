@@ -2,7 +2,13 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": [
+        ".astro/**",
+        "lib/**",
+        "build/**",
+        "dist/**"
+      ]
     },
     "lint": {
       "dependsOn": []
@@ -10,11 +16,15 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    "coverage": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
     "ci": {
       "dependsOn": [
         "build",
         "lint",
-        "test"
+        "coverage"
       ]
     }
   }
