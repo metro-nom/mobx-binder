@@ -1069,10 +1069,14 @@ describe('Binder', () => {
                 .isRequired()
                 .withValidator(lengthValidator(5, 10))
                 .bind()
-                .forStringField(secondField)
+                .forStringField(secondField, {
+                    customChangeDetectionValueProvider: value => value.trim(),
+                })
                 .withConverter(new TrimConverter())
                 .bind()
-                .forStringField(thirdField)
+                .forStringField(thirdField, {
+                    customChangeDetectionValueProvider: value => value.trim(),
+                })
                 .withConverter(new TrimConverter())
                 .withAsyncConverter(new SimpleAsyncNumberConverter())
                 .bind()
@@ -1108,13 +1112,13 @@ describe('Binder', () => {
             expect(binder.changed).to.be.false
         })
 
-        it('should be marked first as changed as long as value is not validated on async conversion', () => {
+        it('should be considered unchanged as long as value is not validated on async conversion', () => {
             binder.load({ thirdField: 12345 })
             thirdField.updateValue('12345   ')
-            expect(binder.changed).to.be.true
+            expect(binder.changed).to.be.false
         })
 
-        it('should be marked unchanged if similar value is validated on async conversion', async () => {
+        it('should be considered unchanged if similar value is validated on async conversion', async () => {
             binder.load({ thirdField: 12345 })
             thirdField.updateValue('12345   ')
             // it is rejected because of myField

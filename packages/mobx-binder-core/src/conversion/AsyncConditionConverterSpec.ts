@@ -45,7 +45,6 @@ describe('AsyncConditionalConverter', () => {
             converter = new AsyncConditionalConverter(inner, undefined)
             expect(converter.convertToPresentation('bla')).to.equal('converted-to-presentation')
         })
-
         it('should not convert if the condition does not match', () => {
             conditionMock.matches.returns(false)
             expect(converter.convertToPresentation('bla')).to.equal('bla')
@@ -55,26 +54,26 @@ describe('AsyncConditionalConverter', () => {
     describe('isEqual', () => {
         it('should delegate to the given converter if the condition matches', () => {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.false
+            expect(converter.isEqual('a', 'a')).to.be.false
         })
 
         it('should delegate to the given converter if there is no condition object', () => {
             converter = new AsyncConditionalConverter(inner, undefined)
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.false
+            expect(converter.isEqual('a', 'a')).to.be.false
         })
 
         it('should not delegate but do a plain isEqual if the condition does not match', () => {
             conditionMock.matches.returns(false)
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.true
+            expect(converter.isEqual('a', 'a')).to.be.true
         })
 
         it('should not delegate but do a plain isEqual there is no isEqual on the inner converter', () => {
             delete inner.isEqual
             conditionMock.matches.returns(false)
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.true
+            expect(converter.isEqual('a', 'a')).to.be.true
         })
     })
 })

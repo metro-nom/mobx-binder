@@ -235,7 +235,7 @@ binder.store(account) // =>  account.businessRelation.person.fullName === 'Max M
 
 When you load() data, all the field values get a new value, which is internally stored as "unchanged". Only if the field value is changing via an `updateValue()` operation, the `changed` property on field level gets true.
 
-Since version 1.4, the backend representation is also checked for equality in case the current value is valid. Changes that lead to the same valid backend representation are treated as unchanged.
+For string fields, you can pass an additional `customChangeDetectionValueProvider` function for custom equality checks, in case you want different values to be considered the same, like phone numbers that can start with '+' or '00' or irrespective of leading or trailing spaces. Please note, that this does not affect the behaviour of <<Change events>> and `onChange` handlers.
 
 You can get a backend object only filled with data that has been changed via the `Binder.changedData` getter.
 
@@ -248,7 +248,9 @@ public email = new TextField('email')
 ...
 binder
     .forStringField(fullName).bind()
-    .forStringField(email).bind()
+    .forStringField(email, {
+        customChangeDetectionValueProvider: (value) => value.trim()
+    }).bind()
 
 // loading from object
 binder.load({
