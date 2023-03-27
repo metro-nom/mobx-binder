@@ -1,28 +1,28 @@
 import isEqual from 'lodash/isEqual.js'
 
-import type { AsyncConverter } from './Converter'
-import type { Condition } from '../condition/Condition'
+import type {AsyncConverter} from './Converter'
+import type {Condition} from '../condition/Condition'
 
-export class AsyncConditionalConverter<ValidationResult, ViewType, ModelType> implements AsyncConverter<ValidationResult, ViewType, ModelType | ViewType> {
-    constructor(private inner: AsyncConverter<ValidationResult, ViewType, ModelType>, private condition?: Condition) {}
+export class AsyncConditionalConverter<ValidationResult, ValueType> implements AsyncConverter<ValidationResult, ValueType, ValueType> {
+    constructor(private inner: AsyncConverter<ValidationResult, ValueType, ValueType>, private condition?: Condition) {}
 
-    public async convertToModel(value: ViewType): Promise<ModelType | ViewType> {
+    public async convertToModel(value: ValueType): Promise<ValueType> {
         if (!this.condition || this.condition.matches()) {
             return await this.inner.convertToModel(value)
         }
         return value
     }
 
-    public convertToPresentation(data: ModelType | ViewType): ViewType {
+    public convertToPresentation(data: ValueType): ValueType {
         if (!this.condition || this.condition.matches()) {
-            return this.inner.convertToPresentation(data as ModelType)
+            return this.inner.convertToPresentation(data)
         }
-        return data as ViewType
+        return data as ValueType
     }
 
-    public isEqual(first: ModelType | ViewType, second: ModelType | ViewType): boolean {
+    public isEqual(first: ValueType, second: ValueType): boolean {
         if (this.inner.isEqual && (!this.condition || this.condition.matches())) {
-            return this.inner.isEqual(first as ModelType, second as ModelType)
+            return this.inner.isEqual(first, second)
         }
         return isEqual(first, second)
     }

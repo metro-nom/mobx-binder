@@ -1,4 +1,4 @@
-import { Validator } from 'mobx-binder-core'
+import {Validator} from 'mobx-binder-core'
 
 export type BinderValidationResult = InvalidBinderValidationResult | ValidBinderValidationResult
 
@@ -7,6 +7,7 @@ export interface InvalidBinderValidationResult {
     args?: { [s: string]: any }
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type ValidBinderValidationResult = {}
 
 export type BinderValidator<T> = Validator<BinderValidationResult, T>

@@ -1,12 +1,13 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 import sinon from 'sinon'
 
-import { AsyncConditionalConverter } from './AsyncConditionalConverter'
+import {AsyncConditionalConverter} from './AsyncConditionalConverter'
+import {ErrorMessage} from '../model/binder/SimpleBinder'
 
 describe('AsyncConditionalConverter', () => {
     let conditionMock: any
     let inner: any
-    let converter: AsyncConditionalConverter<any, any, any>
+    let converter: AsyncConditionalConverter<ErrorMessage, string>
 
     beforeEach(() => {
         conditionMock = {

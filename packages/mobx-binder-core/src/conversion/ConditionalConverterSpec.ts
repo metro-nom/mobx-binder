@@ -1,12 +1,13 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 import sinon from 'sinon'
 
-import { ConditionalConverter } from './ConditionalConverter'
+import {ConditionalConverter} from './ConditionalConverter'
+import {ErrorMessage} from '../model/binder/SimpleBinder'
 
 describe('ConditionalConverter', () => {
     let conditionMock: any
     let inner: any
-    let converter: ConditionalConverter<any, any, any>
+    let converter: ConditionalConverter<ErrorMessage, string>
 
     beforeEach(() => {
         conditionMock = {
@@ -55,26 +56,26 @@ describe('ConditionalConverter', () => {
     describe('isEqual', () => {
         it('should delegate to the given converter if the condition matches', () => {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.false
+            expect(converter.isEqual('a', 'a')).to.be.false
         })
 
         it('should delegate to the given converter if there is no condition object', () => {
             converter = new ConditionalConverter(inner, undefined)
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.false
+            expect(converter.isEqual('a', 'a')).to.be.false
         })
 
         it('should not delegate but do a plain isEqual if the condition does not match', () => {
             conditionMock.matches.returns(false)
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.true
+            expect(converter.isEqual('a', 'a')).to.be.true
         })
 
         it('should not delegate but do a plain isEqual there is no isEqual on the inner converter', () => {
             delete inner.isEqual
             conditionMock.matches.returns(false)
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-            expect(converter.isEqual!('a', 'a')).to.be.true
+            expect(converter.isEqual('a', 'a')).to.be.true
         })
     })
 })

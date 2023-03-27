@@ -1,7 +1,12 @@
-import { Binder, BindingBuilder, Context, FieldStore } from 'mobx-binder-core'
-import { StringValidators } from '../validation/StringValidators'
-import { BinderValidationResult, BinderValidator, InvalidBinderValidationResult, ValidBinderValidationResult } from '../validation/Validation'
-import { TranslateFunction } from './Translation'
+import {Binder, BindingBuilder, Context, FieldStore} from 'mobx-binder-core'
+import {StringValidators} from '../validation/StringValidators'
+import {
+    BinderValidationResult,
+    BinderValidator,
+    InvalidBinderValidationResult,
+    ValidBinderValidationResult
+} from '../validation/Validation'
+import {TranslateFunction} from './Translation'
 
 export interface DefaultContextOptions {
     t: TranslateFunction
@@ -21,11 +26,11 @@ export class DefaultContext implements Context<BinderValidationResult> {
     }
 
     public valid(result: BinderValidationResult): result is ValidBinderValidationResult {
-        return !!result && !result.hasOwnProperty('messageKey')
+        return !result.hasOwnProperty('messageKey')
     }
 
     private invalid(result: BinderValidationResult): result is InvalidBinderValidationResult {
-        return !!result && !this.valid(result)
+        return !this.valid(result)
     }
 }
 

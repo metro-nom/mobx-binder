@@ -1,13 +1,13 @@
-import { action, makeObservable, runInAction } from 'mobx'
-import { DefaultBinder, EmailValidator, TextField, ToggleField, TrimConverter } from 'mobx-binder'
-import { MomentConverter } from 'mobx-binder-moment'
+import {action, makeObservable, runInAction} from 'mobx'
+import {DefaultBinder, EmailValidator, TextField, ToggleField, TrimConverter} from 'mobx-binder'
+import {MomentConverter} from 'mobx-binder-moment'
 
 // tslint:disable no-submodule-imports
 import PersonStore from '../../domain/PersonStore'
-import { TranslateFunction } from 'react-mobx-i18n'
-import { AsyncPhoneNumberConverter } from 'app/domain/AsyncPhoneNumberConverter'
+import {TranslateFunction} from 'react-mobx-i18n'
+import {AsyncPhoneNumberConverter} from 'app/domain/AsyncPhoneNumberConverter'
 import sleep from 'app/domain/sleep'
-import { DayjsConverter } from 'mobx-binder-dayjs'
+import {DayjsConverter} from 'mobx-binder-dayjs'
 
 const trimConverter = new TrimConverter()
 
@@ -56,7 +56,7 @@ export default class ProfileStore {
             .withAsyncValidator(
                 async (value?: string) => {
                     await sleep(1000)
-                    return EmailValidator.validate()(value)
+                    return EmailValidator.validate()(value ?? '')
                 },
                 { onBlur: true },
             )

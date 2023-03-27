@@ -1,16 +1,17 @@
-import { ErrorMessage, FieldStore, SimpleBinder, TextField, ToggleField, TrimConverter, Validator } from '../..'
-import { action, observable, reaction } from 'mobx'
+import {ErrorMessage, FieldStore, SimpleBinder, TextField, ToggleField, TrimConverter, Validator} from '../..'
+import {action, observable, reaction} from 'mobx'
 
-import { expect } from 'chai'
+import {expect} from 'chai'
 import sinon from 'sinon'
 
 import sleep from '../../utils/sleep'
-import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
-import { ComplexField } from '../../test/ComplexField'
-import { SimpleAsyncNumberConverter } from '../../test/SimpleAsyncNumberConverter'
-import { AsyncConditionalConverter } from '../../conversion/AsyncConditionalConverter'
-import { asyncConditionalValidator } from '../../validation/asyncConditionalValidator'
-import { conditionalValidator } from '../../validation/conditionalValidator'
+import {SimpleNumberConverter} from '../../test/SimpleNumberConverter'
+import {ComplexField} from '../../test/ComplexField'
+import {SimpleAsyncNumberConverter} from '../../test/SimpleAsyncNumberConverter'
+import {AsyncConditionalConverter} from '../../conversion/AsyncConditionalConverter'
+import {asyncConditionalValidator} from '../../validation/asyncConditionalValidator'
+import {conditionalValidator} from '../../validation/conditionalValidator'
+import {SimpleAsyncTrimConverter} from "../../test/SimpleAsyncTrimConverter";
 
 const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string | undefined> => (value?: string) =>
     !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
@@ -1483,28 +1484,31 @@ describe('Binder', () => {
                 beforeEach(() => {
                     binder = new SimpleBinder()
                         .forStringField(myField)
-                        .withAsyncConverter(new AsyncConditionalConverter(new SimpleAsyncNumberConverter(), { matches: () => myField.changed }))
+                        .withAsyncConverter(new AsyncConditionalConverter(new SimpleAsyncTrimConverter(), { matches: () => myField.changed }))
                         .bind()
                 })
 
                 it('should validate in case of a field change', async () => {
-                    myField.updateValue('abc')
+                    myField.updateValue('validation error')
                     await binder.validateAsync().should.be.rejected
                     expect(myField.valid).to.be.false
                 })
 
                 it('should not convert nor fail when condition does not match', async () => {
-                    binder.load({ myField: 'wrong' })
+                    binder.load({ myField: 'validation error' })
                     await binder.validateAsync()
                     expect(myField.valid).to.be.true
 
                     const target: any = {}
                     binder.binding(myField).store(target)
-                    expect(target.myField).to.equal('wrong')
+                    expect(target.myField).to.equal('validation error')
                 })
 
                 it('should report success asynchronously', async () => {
-                    expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+                    expect(await binder.binding(myField).validateValue('123456   ')).to.be.undefined
+                    expect(myField.valid).to.be.undefined
+                    await binder.validateAsync()
+                    expect(myField.valid).to.be.true
                 })
             })
         })
