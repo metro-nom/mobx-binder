@@ -1,4 +1,4 @@
-import {Binder, BindingBuilder, Context, FieldStore} from 'mobx-binder-core'
+import {Binder, BindingBuilder, Context, FieldOptions, FieldStore} from 'mobx-binder-core'
 import {StringValidators} from '../validation/StringValidators'
 import {
     BinderValidationResult,
@@ -39,7 +39,11 @@ export class DefaultBinder extends Binder<BinderValidationResult> {
         super(new DefaultContext(options))
     }
 
-    public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<BinderValidationResult, ValueType, DefaultBinder> {
-        return super.forField(field) as BindingBuilder<BinderValidationResult, ValueType, DefaultBinder>
+    public forField<ValueType>(field: FieldStore<ValueType>, options?: FieldOptions<ValueType>): BindingBuilder<BinderValidationResult, ValueType, DefaultBinder> {
+        return super.forField(field, options) as BindingBuilder<BinderValidationResult, ValueType, DefaultBinder>
+    }
+
+    public forStringField(field: FieldStore<string>, options?: FieldOptions<string>): BindingBuilder<BinderValidationResult, string | undefined, DefaultBinder> {
+        return super.forStringField(field, options) as BindingBuilder<BinderValidationResult, string | undefined, DefaultBinder>
     }
 }
