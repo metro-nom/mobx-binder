@@ -1,11 +1,10 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 
-import { MomentValidators } from './MomentValidators'
+import {MomentValidators} from './MomentValidators'
 import moment from 'moment'
-// eslint-disable-next-line @typescript-eslint/camelcase
-import data_driven = require('data-driven')
-import sinon = require('sinon')
-import { isLabeled } from 'mobx-binder'
+import {isLabeled} from 'mobx-binder'
+import data_driven = require('data-driven');
+import sinon = require('sinon');
 
 describe('MomentValidators', () => {
     const sandbox = sinon.createSandbox()

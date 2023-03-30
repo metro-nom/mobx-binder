@@ -8,6 +8,7 @@
     "full-build": "npm run reinitialize && npm run build && npm run lint && npm run coverage",
     "build": "lerna run build",
     "lint": "lerna run lint",
+    "lint:fix": "lerna run lint -- --fix",
     "test": "lerna run test",
     "coverage": "lerna run coverage",
     "clean": "lerna run clean && lerna clean -y",

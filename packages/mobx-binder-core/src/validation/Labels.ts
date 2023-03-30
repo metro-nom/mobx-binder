@@ -1,10 +1,18 @@
-import { Validator } from './Validator'
+import { AsyncValidator, Validator } from './Validator'
 
 export interface LabeledValidator<ValidationResult, T> extends Validator<ValidationResult, T> {
     label: string
 }
 
-export function isLabeled<ValidationResult, T>(validator: Validator<ValidationResult, T>): validator is LabeledValidator<ValidationResult, T> {
+export interface LabeledAsyncValidator<ValidationResult, T> extends AsyncValidator<ValidationResult, T> {
+    label: string
+}
+
+export function isLabeled<ValidationResult, T>(validator: Validator<ValidationResult, T>): validator is LabeledValidator<ValidationResult, T>
+export function isLabeled<ValidationResult, T>(validator: AsyncValidator<ValidationResult, T>): validator is LabeledAsyncValidator<ValidationResult, T>
+export function isLabeled<ValidationResult, T>(
+    validator: Validator<ValidationResult, T> | AsyncValidator<ValidationResult, T>,
+): validator is LabeledValidator<ValidationResult, T> | LabeledAsyncValidator<ValidationResult, T> {
     return (validator as object).hasOwnProperty('label')
 }
 
@@ -25,6 +33,7 @@ export const createLabel = (name: string, args: Record<string, unknown>) => {
     return `${name}${createArgumentString(args)}`
 }
 
+export function withLabel<ValidationResult, T>(label: string, validator: AsyncValidator<ValidationResult, T>): LabeledAsyncValidator<ValidationResult, T>
 export function withLabel<ValidationResult, T>(label: string, validator: Validator<ValidationResult, T>): LabeledValidator<ValidationResult, T>
 export function withLabel<ValidationResult, T>(
     label: string,

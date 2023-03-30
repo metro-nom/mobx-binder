@@ -1,5 +1,5 @@
-import { Converter, AsyncConverter } from '../../conversion/Converter'
-import { action, computed, isObservable, makeObservable, observable, reaction, runInAction, toJS } from 'mobx'
+import { AsyncConverter, Converter } from '../../conversion/Converter'
+import { action, computed, makeObservable, observable, reaction, runInAction, toJS } from 'mobx'
 import { EmptyStringConverter } from '../../conversion/EmptyStringConverter'
 import { FieldStore } from '../fields/FieldStore'
 import { Modifier } from './chain/Modifier'
@@ -16,6 +16,10 @@ import { AsyncConvertingModifier } from './chain/AsyncConvertingModifier'
 import { Validity } from '../../validation/Validity'
 import { wrapRequiredValidator } from '../../validation/WrappedValidator'
 import { ModifierState } from './chain/ModifierState'
+
+export interface FieldOptions<ValueType> {
+    customChangeDetectionValueProvider?: (value: ValueType) => ValueType
+}
 
 /**
  * API for single field binding
@@ -97,13 +101,18 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
 
     private unchangedValue?: any
 
+    private changeDetectionValueProvider: (value: FieldType) => FieldType
+
     constructor(
         private readonly context: Context<ValidationResult>,
         public readonly field: FieldStore<any>,
         private readonly chain: Modifier<ValidationResult, any, any>,
         private read: (source: any) => any,
         private write?: (target: any, value: any) => void,
+        options?: FieldOptions<FieldType>,
     ) {
+        this.changeDetectionValueProvider = options?.customChangeDetectionValueProvider ?? ((value: FieldType) => value)
+
         this.setUnchanged()
         this.observeField()
         makeObservable<StandardBinding<FieldType, ValidationResult>, 'unchangedValue' | 'customErrorMessage' | 'applyConversionsToField'>(this, {
@@ -128,8 +137,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     public get changed() {
-        const currentValue = isObservable(this.field.value) ? toJS(this.field.value) : this.field.value
-
+        const currentValue = this.changeDetectionValueProvider(toJS(this.field.value))
         return !isEqual(currentValue, this.unchangedValue)
     }
 
@@ -168,8 +176,7 @@ class StandardBinding<FieldType, ValidationResult> implements Binding<FieldType,
     }
 
     public setUnchanged() {
-        const fieldValue = this.field.value
-        this.unchangedValue = isObservable(fieldValue) ? toJS(fieldValue) : fieldValue
+        this.unchangedValue = this.changeDetectionValueProvider(toJS(this.field.value))
     }
 
     public validateValue(fieldValue: FieldType): string | undefined | Promise<string | undefined> {
@@ -258,6 +265,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
         private readonly binder: BinderType,
         private readonly addBinding: (binding: StandardBinding<any, ValidationResult>) => void,
         private readonly field: FieldStore<ValueType>,
+        private readonly options?: FieldOptions<ValueType>,
     ) {
         this.last = new FieldWrapper(field, binder.context)
 
@@ -376,7 +384,7 @@ export class BindingBuilder<ValidationResult, ValueType, BinderType extends Bind
     public bind2<T>(read: (source: T) => ValueType | undefined, write?: (target: T, value?: ValueType) => void): BinderType {
         this.field.readOnly = this.readOnly || !write
 
-        this.addBinding(new StandardBinding(this.binder.context, this.field, this.last, read, this.readOnly ? undefined : write))
+        this.addBinding(new StandardBinding(this.binder.context, this.field, this.last, read, this.readOnly ? undefined : write, this.options))
         return this.binder
     }
 
@@ -464,18 +472,26 @@ export class Binder<ValidationResult> {
      * `BindingBuilder` creation for adding a new field binding.
      *
      * @param field
+     * @param options
      */
-    public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<ValidationResult, ValueType, Binder<ValidationResult>> {
-        return new BindingBuilder(this, this.addBinding.bind(this), field)
+    public forField<ValueType>(
+        field: FieldStore<ValueType>,
+        options?: FieldOptions<ValueType>,
+    ): BindingBuilder<ValidationResult, ValueType, Binder<ValidationResult>> {
+        return new BindingBuilder(this, this.addBinding.bind(this), field, options)
     }
 
     /**
      * Shortcut for `forField(someField).withStringOrUndefined()`
      *
      * @param field
+     * @param options
      */
-    public forStringField(field: FieldStore<string>): BindingBuilder<ValidationResult, string | undefined, Binder<ValidationResult>> {
-        return this.forField(field).withStringOrUndefined()
+    public forStringField(
+        field: FieldStore<string>,
+        options?: FieldOptions<string>,
+    ): BindingBuilder<ValidationResult, string | undefined, Binder<ValidationResult>> {
+        return this.forField(field, options).withStringOrUndefined()
     }
 
     /**

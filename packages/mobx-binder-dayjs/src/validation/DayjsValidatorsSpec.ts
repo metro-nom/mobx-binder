@@ -1,11 +1,10 @@
-import { expect } from 'chai'
+import {expect} from 'chai'
 
-import { DayjsValidators } from './DayjsValidators'
-// eslint-disable-next-line @typescript-eslint/camelcase
-import data_driven = require('data-driven')
-import sinon = require('sinon')
-import dayjs = require('dayjs')
-import { isLabeled } from 'mobx-binder'
+import {DayjsValidators} from './DayjsValidators'
+import {isLabeled} from 'mobx-binder'
+import data_driven = require('data-driven');
+import sinon = require('sinon');
+import dayjs = require('dayjs');
 
 describe('DayjsValidators', () => {
     const sandbox = sinon.createSandbox()
