@@ -1,20 +1,14 @@
 {
-  "version": "1.3.1",
+  "version": "1.4.0",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "command": {
     "publish": {
-      "ignoreChanges": [
-        "*.adoc"
-      ]
+      "ignoreChanges": ["*.adoc"]
     },
     "bootstrap": {
-      "npmClientArgs": [
-        "--no-package-lock"
-      ]
+      "npmClientArgs": ["--no-package-lock"]
     }
   },
-  "packages": [
-    "packages/*"
-  ]
+  "packages": ["packages/*"]
 }

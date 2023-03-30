@@ -1,13 +1,17 @@
-import { ErrorMessage, FieldStore, SimpleBinder, TextField, ToggleField, Validator } from '../..'
-import { action, observable, reaction } from 'mobx'
+import {ErrorMessage, FieldStore, SimpleBinder, TextField, ToggleField, TrimConverter, Validator} from '../..'
+import {action, observable, reaction} from 'mobx'
 
-import { expect } from 'chai'
+import {expect} from 'chai'
 import sinon from 'sinon'
 
 import sleep from '../../utils/sleep'
-import { SimpleNumberConverter } from '../../test/SimpleNumberConverter'
-import { ComplexField } from '../../test/ComplexField'
-import { SimpleAsyncNumberConverter } from '../../test/SimpleAsyncNumberConverter'
+import {SimpleNumberConverter} from '../../test/SimpleNumberConverter'
+import {ComplexField} from '../../test/ComplexField'
+import {SimpleAsyncNumberConverter} from '../../test/SimpleAsyncNumberConverter'
+import {AsyncConditionalConverter} from '../../conversion/AsyncConditionalConverter'
+import {asyncConditionalValidator} from '../../validation/asyncConditionalValidator'
+import {conditionalValidator} from '../../validation/conditionalValidator'
+import {SimpleAsyncTrimConverter} from "../../test/SimpleAsyncTrimConverter";
 
 const lengthValidator = (min: number, max: number): Validator<ErrorMessage, string | undefined> => (value?: string) =>
     !!value && (value.length < min || value.length > max) ? 'Wrong length' : undefined
@@ -1058,12 +1062,24 @@ describe('Binder', () => {
 
     describe('value change', () => {
         let binder: SimpleBinder
+        const thirdField = new TextField('thirdField')
 
         beforeEach(() => {
             binder = new SimpleBinder()
-                .forField(myField)
+                .forStringField(myField)
                 .isRequired()
                 .withValidator(lengthValidator(5, 10))
+                .bind()
+                .forStringField(secondField, {
+                    customChangeDetectionValueProvider: value => value.trim(),
+                })
+                .withConverter(new TrimConverter())
+                .bind()
+                .forStringField(thirdField, {
+                    customChangeDetectionValueProvider: value => value.trim(),
+                })
+                .withConverter(new TrimConverter())
+                .withAsyncConverter(new SimpleAsyncNumberConverter())
                 .bind()
         })
 
@@ -1089,6 +1105,38 @@ describe('Binder', () => {
             myField.updateValue('other')
             myField.updateValue('value')
             expect(binder.changed).to.be.false
+        })
+
+        it('should be marked as unchanged after value is trimmed', () => {
+            binder.load({ secondField: 'value' })
+            secondField.updateValue('value      ')
+            expect(binder.changed).to.be.false
+        })
+
+        it('should also respect the customChangeDetectionValueProvider when returning changed data ', () => {
+            binder.load({ secondField: 'value' })
+            secondField.updateValue('value      ')
+            expect(binder.changedData).to.deep.equal({})
+        })
+
+        it('should be considered unchanged as long as value is not validated on async conversion', () => {
+            binder.load({ thirdField: 12345 })
+            thirdField.updateValue('12345   ')
+            expect(binder.changed).to.be.false
+        })
+
+        it('should be considered unchanged if similar value is validated on async conversion', async () => {
+            binder.load({ thirdField: 12345 })
+            thirdField.updateValue('12345   ')
+            // it is rejected because of myField
+            await binder.validateAsync().should.be.rejected
+            expect(thirdField.changed).to.be.false
+        })
+
+        it('should be marked unchanged if initial value is validated on async conversion', async () => {
+            binder.load({ thirdField: 12345 })
+            await binder.validateAsync().should.be.rejected
+            expect(thirdField.changed).to.be.false
         })
 
         it('should be marked as unchanged after change back to initial value even on complex values', () => {
@@ -1350,6 +1398,30 @@ describe('Binder', () => {
             it('should report success synchronously', () => {
                 expect(binder.binding(myField).validateValue('123456')).to.be.undefined
             })
+
+            describe('with changed condition', () => {
+                beforeEach(() => {
+                    binder = new SimpleBinder()
+                        .forStringField(myField)
+                        .withValidator(conditionalValidator(lengthValidator(5, 10), { matches: () => myField.changed }, undefined))
+                        .bind()
+                })
+
+                it('should validate in case of a field change', async () => {
+                    myField.updateValue('abc')
+                    expect(myField.valid).to.be.false
+                })
+
+                it('should not convert nor fail when condition does not match', async () => {
+                    binder.load({ myField: 'abc' })
+                    expect(myField.valid).to.be.true
+                })
+
+                it('should report success asynchronously', async () => {
+                    myField.updateValue('abcde')
+                    expect(myField.valid).to.be.true
+                })
+            })
         })
 
         describe('with async validator', () => {
@@ -1366,6 +1438,37 @@ describe('Binder', () => {
             it('should report success asynchronously', async () => {
                 expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
             })
+
+            describe('with changed condition', () => {
+                beforeEach(() => {
+                    binder = new SimpleBinder()
+                        .forStringField(myField)
+                        .withAsyncValidator(
+                            asyncConditionalValidator(
+                                value => sleep(10).then(() => lengthValidator(5, 10)(value)),
+                                { matches: () => myField.changed },
+                                undefined,
+                            ),
+                        )
+                        .bind()
+                })
+
+                it('should validate in case of a field change', async () => {
+                    myField.updateValue('abc')
+                    await binder.validateAsync().should.be.rejected
+                    expect(myField.valid).to.be.false
+                })
+
+                it('should not convert nor fail when condition does not match', async () => {
+                    binder.load({ myField: 'abc' })
+                    await binder.validateAsync()
+                    expect(myField.valid).to.be.true
+                })
+
+                it('should report success asynchronously', async () => {
+                    expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+                })
+            })
         })
 
         describe('with async converter', () => {
@@ -1381,6 +1484,38 @@ describe('Binder', () => {
             })
             it('should report success asynchronously', async () => {
                 expect(await binder.binding(myField).validateValue('123456')).to.be.undefined
+            })
+
+            describe('with changed condition', () => {
+                beforeEach(() => {
+                    binder = new SimpleBinder()
+                        .forStringField(myField)
+                        .withAsyncConverter(new AsyncConditionalConverter(new SimpleAsyncTrimConverter(), { matches: () => myField.changed }))
+                        .bind()
+                })
+
+                it('should validate in case of a field change', async () => {
+                    myField.updateValue('validation error')
+                    await binder.validateAsync().should.be.rejected
+                    expect(myField.valid).to.be.false
+                })
+
+                it('should not convert nor fail when condition does not match', async () => {
+                    binder.load({ myField: 'validation error' })
+                    await binder.validateAsync()
+                    expect(myField.valid).to.be.true
+
+                    const target: any = {}
+                    binder.binding(myField).store(target)
+                    expect(target.myField).to.equal('validation error')
+                })
+
+                it('should report success asynchronously', async () => {
+                    expect(await binder.binding(myField).validateValue('123456   ')).to.be.undefined
+                    expect(myField.valid).to.be.undefined
+                    await binder.validateAsync()
+                    expect(myField.valid).to.be.true
+                })
             })
         })
 

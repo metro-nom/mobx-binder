@@ -1,7 +1,12 @@
-import { Binder, BindingBuilder, Context, FieldStore } from 'mobx-binder-core'
-import { StringValidators } from '../validation/StringValidators'
-import { BinderValidationResult, BinderValidator, InvalidBinderValidationResult, ValidBinderValidationResult } from '../validation/Validation'
-import { TranslateFunction } from './Translation'
+import {Binder, BindingBuilder, Context, FieldOptions, FieldStore} from 'mobx-binder-core'
+import {StringValidators} from '../validation/StringValidators'
+import {
+    BinderValidationResult,
+    BinderValidator,
+    InvalidBinderValidationResult,
+    ValidBinderValidationResult
+} from '../validation/Validation'
+import {TranslateFunction} from './Translation'
 
 export interface DefaultContextOptions {
     t: TranslateFunction
@@ -21,11 +26,11 @@ export class DefaultContext implements Context<BinderValidationResult> {
     }
 
     public valid(result: BinderValidationResult): result is ValidBinderValidationResult {
-        return !!result && !result.hasOwnProperty('messageKey')
+        return !result.hasOwnProperty('messageKey')
     }
 
     private invalid(result: BinderValidationResult): result is InvalidBinderValidationResult {
-        return !!result && !this.valid(result)
+        return !this.valid(result)
     }
 }
 
@@ -34,7 +39,11 @@ export class DefaultBinder extends Binder<BinderValidationResult> {
         super(new DefaultContext(options))
     }
 
-    public forField<ValueType>(field: FieldStore<ValueType>): BindingBuilder<BinderValidationResult, ValueType, DefaultBinder> {
-        return super.forField(field) as BindingBuilder<BinderValidationResult, ValueType, DefaultBinder>
+    public forField<ValueType>(field: FieldStore<ValueType>, options?: FieldOptions<ValueType>): BindingBuilder<BinderValidationResult, ValueType, DefaultBinder> {
+        return super.forField(field, options) as BindingBuilder<BinderValidationResult, ValueType, DefaultBinder>
+    }
+
+    public forStringField(field: FieldStore<string>, options?: FieldOptions<string>): BindingBuilder<BinderValidationResult, string | undefined, DefaultBinder> {
+        return super.forStringField(field, options) as BindingBuilder<BinderValidationResult, string | undefined, DefaultBinder>
     }
 }

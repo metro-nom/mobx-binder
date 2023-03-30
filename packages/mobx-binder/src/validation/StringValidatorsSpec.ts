@@ -1,9 +1,8 @@
-import { expect } from 'chai'
-// eslint-disable-next-line @typescript-eslint/camelcase
-import data_driven = require('data-driven')
+import {expect} from 'chai'
 
-import { StringValidators } from './StringValidators'
-import { isLabeled } from 'mobx-binder-core'
+import {StringValidators} from './StringValidators'
+import {isLabeled} from 'mobx-binder-core'
+import data_driven = require('data-driven');
 
 describe('Validators', () => {
     data_driven(

@@ -12,7 +12,7 @@
     "noImplicitReturns": false,
     "noUnusedLocals": true,
     "removeComments": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "outDir": "build",
     "lib": [
       "es2018", "esnext", "dom"
