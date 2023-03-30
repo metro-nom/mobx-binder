@@ -1113,6 +1113,12 @@ describe('Binder', () => {
             expect(binder.changed).to.be.false
         })
 
+        it('should also respect the customChangeDetectionValueProvider when returning changed data ', () => {
+            binder.load({ secondField: 'value' })
+            secondField.updateValue('value      ')
+            expect(binder.changedData).to.deep.equal({})
+        })
+
         it('should be considered unchanged as long as value is not validated on async conversion', () => {
             binder.load({ thirdField: 12345 })
             thirdField.updateValue('12345   ')
