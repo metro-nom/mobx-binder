@@ -5,11 +5,15 @@
     "packages/*"
   ],
   "scripts": {
+    "prepare": "husky install",
+    "audit": "yarn npm audit --all --recursive",
     "reinitialize": "yarn run clean:all && yarn audit && yarn install",
     "full-build": "yarn run reinitialize && yarn ci",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
     "test": "turbo run test",
+    "prepush": "turbo run ci",
     "ci": "turbo run ci",
     "coverage": "turbo run coverage",
     "clean": "lerna run clean && lerna clean -y",
@@ -17,7 +21,8 @@
     "version": "lerna version",
     "publish": "lerna publish from-git",
     "ls": "lerna ls",
-    "sample:start": "lerna run start",
+    "site:start": "turbo run start --filter=site",
+    "sample:start": "turbo run start --filter=sample",
     "core": "yarn workspace mobx-binder-core",
     "main": "yarn workspace mobx-binder",
     "dayjs": "yarn workspace mobx-binder-dayjs",
@@ -30,9 +35,30 @@
     "parse-path": "^5.0.0"
   },
   "devDependencies": {
-    "improved-yarn-audit": "^3.0.0",
+    "husky": "^8.0.3",
     "lerna": "^5.5.4",
-    "turbo": "^1.8.5"
+    "syncpack": "^9.8.4",
+    "turbo": "^1.8.8"
   },
-  "packageManager": "yarn@3.5.0"
+  "packageManager": "yarn@3.5.0",
+  "syncpack": {
+    "versionGroups": [
+      {
+        "dependencies": [
+          "**"
+        ],
+        "packages": [
+          "site"
+        ]
+      },
+      {
+        "dependencies": [
+          "**"
+        ],
+        "packages": [
+          "sample"
+        ]
+      }
+    ]
+  }
 }

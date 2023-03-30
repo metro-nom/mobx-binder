@@ -11,7 +11,10 @@
       ]
     },
     "lint": {
-      "dependsOn": []
+      "dependsOn": ["^build"]
+    },
+    "lint:fix": {
+      "dependsOn": ["^build"]
     },
     "test": {
       "dependsOn": ["^build"]
@@ -19,6 +22,11 @@
     "coverage": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false
     },
     "ci": {
       "dependsOn": [
