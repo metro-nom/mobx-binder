@@ -47,6 +47,7 @@ export const SIDEBAR: Sidebar = {
             {text: '- Prerequisites', link: 'en/usage/prerequisites'},
             {text: '- Preparing a Binder', link: 'en/usage/basic#preparing-a-binder'},
             {text: '- Loading and storing field values', link: 'en/usage/load-store'},
+            {text: '- Handling Changes', link: 'en/usage/handling-changes'},
             {text: '- Validation', link: 'en/usage/validation'},
             {text: '- Conversion', link: 'en/usage/conversion'},
             {text: '- Conditional Visibility', link: 'en/usage/visibility'},
