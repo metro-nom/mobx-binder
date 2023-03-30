@@ -31,7 +31,7 @@ const i18n = new I18nStore('en', {
     },
 })
 const personStore = new PersonStore()
-const profileStore = new ProfileStore(personStore, i18n.translate)
+const profileStore = new ProfileStore(personStore, i18n.t)
 
 export const stores = { i18n, personStore, profileStore }
 

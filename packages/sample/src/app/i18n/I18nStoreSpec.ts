@@ -17,12 +17,12 @@ describe('I18nStore', () => {
 
     describe('translate', () => {
         it('should provide translation function for the configured locale', () => {
-            expect(store.translate('prefix.validations.email')).to.equal('Please enter a valid e-mail address.')
+            expect(store.t('prefix.validations.email')).to.equal('Please enter a valid e-mail address.')
         })
 
         it('should translate differently after locale change', () => {
             store.locale = 'abc'
-            expect(store.translate('validations.email')).to.equal('abc: validations.email')
+            expect(store.t('validations.email')).to.equal('abc: validations.email')
         })
     })
 })

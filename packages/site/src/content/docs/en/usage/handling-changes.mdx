@@ -1,0 +1,46 @@
+---
+title: Handling changes
+---
+
+When you load() data, all the field values get a new value, which is internally stored as "unchanged". Only if the field value is changing via an `updateValue()` operation, the `changed` property on field level gets true.
+
+In the FieldOptions, you can pass an additional `customChangeDetectionValueProvider` function for custom equality checks, in case you want different values to be considered the same, like phone numbers that can start with '+' or '00' or irrespective of any spaces.
+Please note, that this does not affect anything else than the `changed` property of the field and must not throw errors.
+It's especially useful in case of validations that should only happen when a field value actually changed, like for uniqueness checks.
+
+``` typescript
+binder
+    .forStringField(phoneNumber, {
+        customChangeDetectionValueProvider:
+            (value: string) => value.replaceAll(' ', '').replace(/^00/, '+')
+    })
+    .bind()
+```
+
+You can get a backend object only filled with data that has been changed via the `Binder.changedData` getter.
+
+In combination with the Binders `apply()` method it’s possible to find changes between two sets of data:
+
+``` typescript
+public fullName = new TextField('fullName')
+public email = new TextField('email')
+...
+binder
+    .forStringField(fullName).bind()
+    .forStringField(email).bind()
+
+// loading from object
+binder.load({
+    fullName: 'Max Mustermann',
+    email: 'max.mustermann@codecentric.de'
+})
+
+// applying new set of data as field changes
+binder.apply({
+    fullName: 'Max Mustermann-Musterfrau',
+    email: 'max.mustermann@codecentric.de'
+})
+
+// binder.changedData returns { fullName: 'Max Mustermann-Musterfrau' }
+```
+

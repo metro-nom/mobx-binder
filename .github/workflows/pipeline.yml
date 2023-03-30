@@ -2,7 +2,6 @@ name: Pipeline
 
 on:
   push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -15,21 +14,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - uses: actions/setup-node@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
       with:
         node-version: 16
+        cache: 'yarn'
 
     - name: Install dependencies
-      run: npm run reinitialize
+      run: yarn install --immutable
 
-    - name: Build
-      run: npm run build
-
-    - name: Lint
-      run: npm run lint
-
-    - name: Test
-      run: npm run test
-
-    - name: Coverage
-      run: npm run coverage
+    - name: CI
+      run: yarn ci

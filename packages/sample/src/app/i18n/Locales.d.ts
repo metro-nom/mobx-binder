@@ -1,4 +1,4 @@
-interface Translations {
+export interface Translations {
     [translationKey: string]: string
 }
 

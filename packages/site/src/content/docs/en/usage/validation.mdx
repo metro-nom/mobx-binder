@@ -1,0 +1,88 @@
+---
+title: Validation
+---
+
+## Synchronous validation
+
+For every field, we can specify validations to be done:
+
+``` typescript
+// for SimpleBinder
+const minLength = (min: number) => (value?: string) =>
+    !!value && value.length < min ? `Please enter at least ${min} characters` : undefined
+
+// or for DefaultBinder
+const minLength = (min: number) => (value?: string) =>
+    !!value && value.length < min ? { messageKey: `validation.minLength', args: { value, min } } : {}
+
+binder.forField(fullName).isRequired().withValidator(minLength(5)).bind()
+```
+
+Validations are processed in order of method calls - so in this example, it is first checked if the `required` validation fails, and if it does, no further validation will happen.
+
+To see the list of already supported validations, take a look into the `mobx-binder/src/validation/` folder. You can also easily define your own custom validator, as long as it implements the `Validator` type.
+
+The `isRequired()` validation has the special side effect that the `required` property is set on the field, so that the rendering component can highlight it. Also, the `isRequired()` validation can be active or inactive based on a condition that can be passed as an optional argument.
+
+Only valid field values are written to an object via `binder.store()`.
+
+## Asynchronous validation
+
+If validation incurs expensive calculations or a backend request, it’s possible to do it asynchronously:
+
+``` typescript
+// for SimpleBinder
+const uniqueTaxNumber = (value?: string) => request.get(`/check/taxnumber/${value}`)
+    .then(response => response.body.conflict ? 'Your company is aready registered' : undefined)
+
+// or for DefaultBinder
+const uniqueTaxNumber = (value?: string) => request.get(`/check/taxnumber/${value}`)
+    .then(response => response.body.conflict ? { messageKey: `validation.taxNumber.conflict', args: { value } } : {})
+
+binder
+    .forStringField(taxNumber)
+    .withAsyncValidator(uniqueTaxNumber)
+    .bind()
+```
+
+In contrast to synchronous validation, the async validation expects to get back a `Promise` of the validation result. As this is a more expensive validation, it does not happen on every change of the field value, but only on submission. If you want an additional check on blur, you can configure this like so:
+
+``` typescript
+.withAsyncValidator(uniqueTaxNumber, { onBlur: true })
+```
+
+Only field values where asynchronous validation has been successfully finished are written to an object via `binder.store()`.
+
+## Conditional validation
+
+Sometimes, the validation of one field depends on the value of another field. Given the data used to evaluate the condition is observable, there is not much to do:
+
+``` typescript
+public salutation = new TextField('salutation')
+public fullName = new TextField('fullName')
+
+binder
+    .forStringField(salutation)
+    .bind()
+    .forField(fullName)
+        .withValidator(someValidatorDependingOnValueOf(salutation))
+    .bind()
+```
+
+In this example, changes to the value of the `salutation` field will automatically trigger a re-evaluation of the validity of the `fullName`.
+
+## Conditional "required" validation
+
+The *required* validation is a special case, as it also affects the `required` property at field level, which you most probably want to use to mark fields as optional or required in their labels. For this case, the `isRequired()` method supports an additional callback:
+
+``` typescript
+public salutation = new TextField('salutation')
+public fullName = new TextField('fullName')
+
+binder
+    .forStringField(salutation)
+    .bind()
+    .forField(fullName)
+    .isRequired(undefined /* use default i18n error key */, () => !salutation.value)
+    .bind()
+```

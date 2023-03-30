@@ -1,0 +1,48 @@
+---
+title: Development
+---
+
+The project is using [lerna](https://github.com/lerna/lerna) for multipackage repository support.
+
+## Initial setup
+
+```
+npm install
+yarn run bootstrap
+```
+
+## Full Build
+
+```
+yarn run build
+```
+
+## Start sample application
+
+```
+cd packages/sample
+npm start
+```
+
+## Clean Release (without pull request)
+
+**First merge master into the branch and check that the branch is running fine**
+
+```
+git merge master
+yarn run full-build
+```
+
+**Merge the branch back into develop**
+
+```
+git checkout master
+git merge <branchName>
+```
+
+**and perform the release**
+
+```
+yarn run version
+yarn run publish
+```

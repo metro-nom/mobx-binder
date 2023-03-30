@@ -1,0 +1,39 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        ".astro/**",
+        "lib/**",
+        "build/**",
+        "dist/**"
+      ]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "lint:fix": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "coverage": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false
+    },
+    "ci": {
+      "dependsOn": [
+        "build",
+        "lint",
+        "coverage"
+      ]
+    }
+  }
+}

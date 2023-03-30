@@ -43,7 +43,7 @@ const StoredPersonProperties = observer(() => {
 
 export const ProfilePage = observer(() => {
     const {
-        i18n: { translate: t },
+        i18n: { t },
         profileStore: { binder, dateOfBirth, anotherDate, email, fullName, onEnter, onSubmit, phoneNumber, toggle },
     } = useStores()
     const { changed, validating, valid, submitting } = binder

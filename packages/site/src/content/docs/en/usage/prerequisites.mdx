@@ -1,0 +1,74 @@
+---
+title: Prerequisites
+---
+
+# ...for *DefaultBinder*
+
+## I18n infrastructure
+
+To make use of the *DefaultBinder*, we need a way to translate validation and conversion errors into localized messages.
+
+For this, you need a *translate* method, that takes a translation key and arguments and returns the translated message, like
+
+``` typescript
+t('validations.minLength', { min: 5 }) // returns: 'Please enter at least 5 characters.'
+```
+
+### Example using i18n-harmony
+
+[i18n-harmony](https://github.com/DarkoKukovec/I18n-harmony) is an i18n library that's using a simplified ES2015 template string syntax.
+
+
+``` typescript
+
+import { action, makeObservable, observable } from 'mobx'
+import i18n from 'i18n-harmony'
+import { Locales } from './Locales'
+import { TranslateFunction } from 'mobx-binder'
+
+export default class I18nStore {
+    public locale = 'en'
+
+    constructor(defaultLocale: string, translations: Locales) {
+        i18n.init({ translations })
+
+        this.locale = defaultLocale
+
+        makeObservable(this, {
+            locale: observable,
+            select: action,
+        })
+    }
+
+    public t: TranslateFunction = (translationKey, args) => i18n.t(translationKey, args, this.locale)
+
+    public select = (newLocale: string) => {
+        this.locale = newLocale
+    }
+}
+```
+
+To use it, just create a singleton I18nStore and use it's `t` method in the Binder:
+
+``` typescript
+
+const i18n = new I18nStore('en', {
+    en: {
+        'form.fields.fullName': 'Full name',
+        'form.fields.dateOfBirth': 'Date of birth',
+        'form.fields.anotherDate': 'Another date',
+        'form.fields.phoneNumber': 'Phone number',
+        'form.fields.email': 'E-mail',
+        'form.fields.toggle': 'Please toggle',
+        'profilePage.saveButton.label': 'Save',
+        'validations.fullName.submissionError': 'The full name seems to be wrong due to server side validation.',
+        'validations.required': 'Please enter something.',
+        'validations.email': 'Please enter a valid email address.',
+        'validations.minLength': 'Please enter at least ${min} characters.',
+        'conversions.error.moment': 'Please enter a valid date.',
+        ...
+    },
+})
+
+const binder = new DefaultBinder({ t: i18n.t })
+```

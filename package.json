@@ -1,24 +1,64 @@
 {
   "name": "root",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "bootstrap": "lerna bootstrap --hoist",
-    "all": "npm run reinitialize && npm run build && npm run lint && npm run test && npm run coverage",
-    "reinitialize": "npm run clean:all && npm audit && npm install && npm run bootstrap",
-    "full-build": "npm run reinitialize && npm run build && npm run lint && npm run coverage",
-    "build": "lerna run build",
-    "lint": "lerna run lint",
-    "lint:fix": "lerna run lint -- --fix",
-    "test": "lerna run test",
-    "coverage": "lerna run coverage",
+    "prepare": "husky install",
+    "audit": "yarn npm audit --all --recursive",
+    "reinitialize": "yarn run clean:all && yarn audit && yarn install",
+    "full-build": "yarn run reinitialize && yarn ci",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "test": "turbo run test",
+    "prepush": "turbo run ci",
+    "ci": "turbo run ci",
+    "coverage": "turbo run coverage",
     "clean": "lerna run clean && lerna clean -y",
     "clean:all": "lerna run clean:all && lerna clean -y && rm -Rf node_modules",
     "version": "lerna version",
     "publish": "lerna publish from-git",
     "ls": "lerna ls",
-    "sample": "lerna run start"
+    "site:start": "turbo run start --filter=site",
+    "sample:start": "turbo run start --filter=sample",
+    "core": "yarn workspace mobx-binder-core",
+    "main": "yarn workspace mobx-binder",
+    "dayjs": "yarn workspace mobx-binder-dayjs",
+    "moment": "yarn workspace mobx-binder-moment",
+    "site": "yarn workspace site",
+    "sample": "yarn workspace sample"
+  },
+  "resolutions": {
+    "got": "^11.8.5",
+    "parse-path": "^5.0.0"
   },
   "devDependencies": {
-    "lerna": "^5.5.4"
+    "husky": "^8.0.3",
+    "lerna": "^5.5.4",
+    "syncpack": "^9.8.4",
+    "turbo": "^1.8.8"
+  },
+  "packageManager": "yarn@3.5.0",
+  "syncpack": {
+    "versionGroups": [
+      {
+        "dependencies": [
+          "**"
+        ],
+        "packages": [
+          "site"
+        ]
+      },
+      {
+        "dependencies": [
+          "**"
+        ],
+        "packages": [
+          "sample"
+        ]
+      }
+    ]
   }
 }

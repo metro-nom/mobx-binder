@@ -10,7 +10,7 @@ export interface FormFieldProps {
 
 export const FormField = observer(({ field }: FormFieldProps) => {
     const {
-        i18n: { translate: t },
+        i18n: { t },
     } = useStores()
 
     const showValidationResults = !field.validating && field.showValidationResults

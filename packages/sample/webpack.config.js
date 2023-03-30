@@ -1,20 +1,20 @@
-const webpack = require('webpack')
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path')
 
 // variables
-const isProduction = process.argv.indexOf('-p') >= 0
+const isProduction = process.env.NODE_ENV === 'production'
 const sourcePath = path.join(__dirname, './src')
 const outPath = path.join(__dirname, './dist')
 
 // plugins
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
 
 module.exports = {
     context: sourcePath,
     entry: {
         main: './main.tsx',
     },
+    mode: process.env.NODE_ENV,
     output: {
         path: outPath,
         filename: 'bundle.js',
@@ -56,48 +56,19 @@ module.exports = {
             { test: /\.jpg$/, use: 'file-loader' },
         ],
     },
-    optimization: {
-        splitChunks: {
-            name: true,
-            cacheGroups: {
-                commons: {
-                    chunks: 'initial',
-                    minChunks: 2,
-                },
-                vendors: {
-                    test: /[\\/]node_modules[\\/]/,
-                    chunks: 'all',
-                    priority: -10,
-                },
-            },
-        },
-        runtimeChunk: true,
-    },
     plugins: [
-        new WebpackCleanupPlugin({
-            quiet: true,
-        }),
         new HtmlWebpackPlugin({
             template: 'assets/index.html',
         }),
     ],
     performance: {
-        hints: false
+        hints: false,
     },
     devServer: {
-        contentBase: sourcePath,
         hot: true,
-        inline: true,
         historyApiFallback: {
             disableDotRule: true,
         },
-        stats: 'minimal',
     },
-    devtool: 'cheap-module-eval-source-map',
-    node: {
-        // workaround for webpack-dev-server issue
-        // https://github.com/webpack/webpack-dev-server/issues/60#issuecomment-103411179
-        fs: 'empty',
-        net: 'empty',
-    },
+    devtool: 'cheap-module-source-map',
 }
